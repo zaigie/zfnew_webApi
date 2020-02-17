@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 import requests
+import json
 from urllib import parse
 
 
@@ -15,6 +16,11 @@ class Xuanke(object):
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         }
         self.cookies = cookies
+        with open('config.json',mode='r',encoding='utf-8') as f:
+            config = json.loads(f.read())
+        self.proxies = {
+            'http':config["proxy"]
+        }
         self.nowyear = str(int(time.strftime("%Y", time.localtime())) - 1)
         self.nowterm = "12" #这里记得修改
     
@@ -32,6 +38,7 @@ class Xuanke(object):
                 'courseNumber':len(jres), #已选课程数
                 'items':[{
                     'courseTitle':i["kcmc"],
+                    'courseCategory':i["kklxmc"],
                     'teacher':(re.findall(r"/(.*?)/",i["jsxx"]))[0],
                     'teacher_id':(re.findall(r"(.*?\d+)/",i["jsxx"]))[0],
                     'classId':i["jxb_id"],
@@ -39,7 +46,7 @@ class Xuanke(object):
                     'classPeople':int(i["yxzrs"]),
                     'courseRoom':(i["jxdd"].split('<br/>'))[0] if '<br/>' in i["jxdd"] else i["jxdd"],
                     'courseId':i["kch"],
-                    'courseTime':(i["sksj"].split('<br/>'))[0][0:-7] + '、' + (i["sksj"].split('<br/>'))[1] if '<br/>' in i["sksj"] else i["sksj"],
+                    'courseTime':(i["sksj"].split('<br/>'))[0] + '、' + (i["sksj"].split('<br/>'))[1] if '<br/>' in i["sksj"] else i["sksj"],
                     'credit':float(i["xf"]),
                     } for i in jres]
             }
@@ -166,7 +173,7 @@ class Xuanke(object):
                     'classPeople':int(j["yxzrs"]),
                     'courseRoom':(j["jxdd"].split('<br/>'))[0] if '<br/>' in j["jxdd"] else j["jxdd"],
                     'courseId':j["kch_id"],
-                    'courseTime':(j["sksj"].split('<br/>'))[0][0:-7] + '、' + (j["sksj"].split('<br/>'))[1] if '<br/>' in j["sksj"] else j["sksj"],
+                    'courseTime':(j["sksj"].split('<br/>'))[0] + '、' + (j["sksj"].split('<br/>'))[1] if '<br/>' in j["sksj"] else j["sksj"],
                     'credit':float(j["xf"]),
                     }for j in list1]
             }

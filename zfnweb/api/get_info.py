@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 import requests
+import json
 from urllib import parse
 
 
@@ -15,16 +16,18 @@ class GetInfo(object):
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         }
         self.cookies = cookies
+        with open('config.json',mode='r',encoding='utf-8') as f:
+            config = json.loads(f.read())
         self.proxies = {
-            "http": "http://10.10.1.10:3128",
-            "https": "http://10.10.1.10:1080",
-            }
+            'http':config["proxy"]
+        }
 
     def get_pinfo(self):
         """获取个人信息"""
         url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
-        res = requests.get(url, headers=self.headers, cookies=self.cookies)
+        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies)
         jres = res.json()
+        #print(jres)
         res_dict = {
             'name': jres['xm'],
             'studentId': jres['xh'],
@@ -82,7 +85,7 @@ class GetInfo(object):
         url_main = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
         url_info = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
 
-        mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies)
+        mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies, proxies=self.proxies)
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -108,24 +111,24 @@ class GetInfo(object):
         if xh[0:2] != '19': #本校特色，19级因更改了培养方案导致id非体系
             match = '20' + xh[0:6]
             for i in idList:
-                if re.fullmatch(match + '--tsjy',i):
-                    tsid = i
-                elif re.fullmatch(match + '--tzjy',i):
-                    tzid = i
-                elif re.fullmatch(match + '--zyjy',i):
-                    zyid = i
-                elif re.fullmatch('qtkcxfyq',i):
+                if re.findall(r"tsjy",i):
+                    tsid = i[0:14]
+                elif re.findall(r"tzjy",i):
+                    tzid = i[0:14]
+                elif re.findall(r"zyjy",i):
+                    zyid = i[0:14]
+                elif re.findall(r"qtkcxfyq",i):
                     qtid = i
         else:
             tsid = idList[0]
-            tzid = idList[1]
-            zyid = idList[2]
+            tzid = idList[2]
+            zyid = idList[1]
             qtid = idList[3]
 
-        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies)
-        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies)
-        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies)
-        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies)
+        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies, proxies=self.proxies)
+        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies, proxies=self.proxies)
+        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies, proxies=self.proxies)
+        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies, proxies=self.proxies)
 
         ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",str(soup))
         ts_point_list = list(list({}.fromkeys(ts_point_find).keys())[0])    #先得到元组再拆开转换成列表
@@ -269,7 +272,7 @@ class GetInfo(object):
             'queryModel.sortOrder': 'desc',  # 时间倒序, asc正序
             'time': '0'
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies)
+        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
         jres = res.json()
         res_list = [{'message': i['xxnr'], 'ctime': i['cjsj']} for i in jres['items']]
         return res_list
@@ -305,7 +308,7 @@ class GetInfo(object):
             'queryModel.sortOrder': 'asc',
             'time': '0'  # 查询次数
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies)
+        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -346,7 +349,7 @@ class GetInfo(object):
             'xnm': year,
             'xqm': term
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies)
+        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
         jres = res.json()
         res_dict = {
             'name': jres['xsxx']['XM'],
