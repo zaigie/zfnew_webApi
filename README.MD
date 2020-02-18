@@ -13,6 +13,7 @@
  - CentOs自带的sqlite3版本较低，Django2.1.8以上不兼容
      - 解决办法一：通过requirements.txt安装模块，在requirements.txt中的Django版本已经更改为为2.1.8
      - 解决办法二：升级自带的sqlite3版本，并重新链接（移步百度
+ - 部署的时候代码中Server酱部分麻烦换成自己的🙏
 
 ### POST地址&Data
 
