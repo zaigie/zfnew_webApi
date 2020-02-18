@@ -11,9 +11,9 @@ class Students(models.Model):
     JSESSIONID = models.CharField(max_length=60)
     route = models.CharField(max_length=80)
     refreshTimes = models.IntegerField(default=0)
-    updateTime = models.DateTimeField(auto_now=True)
+    updateTime = models.CharField(max_length=40)
     @classmethod
-    def create(cls,studentId,name,collegeName,majorName,className,phoneNumber,birthDay,JSESSIONID,route):
-        return cls(studentId=studentId, name=name, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, JSESSIONID=JSESSIONID, route=route)
+    def create(cls,studentId,name,collegeName,majorName,className,phoneNumber,birthDay,JSESSIONID,route,updateTime):
+        return cls(studentId=studentId, name=name, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, JSESSIONID=JSESSIONID, route=route, updateTime=updateTime)
     class Meta:
         db_table = "students"

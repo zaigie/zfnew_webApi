@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from info.models import Students
 from api import GetInfo, Login
 import requests,json
+import time,datetime,os
 
 with open('config.json',mode='r',encoding='utf-8') as f:
     config = json.loads(f.read())
@@ -10,6 +11,15 @@ base_url = config["base_url"]
 
 def index(request):
     return HttpResponse('info_index here')
+
+def writeLog(content):
+    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    filename = 'mylogs/' + date + '.log'
+    if not os.path.exists(filename):
+        with open(filename,mode='w',encoding='utf-8') as n:
+            n.write('【%s】的日志记录' % date)
+    with open(filename,mode='a',encoding='utf-8') as l:
+        l.write('\n%s' % content)
 
 def update_cookies(request):
     if request.method == 'POST':
@@ -22,6 +32,9 @@ def update_cookies(request):
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
+        startTime = time.time()
+        content = ('【%s】[%s]请求更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+        writeLog(content)
         print('原cookies：')
         print('{JSESSIONID:%s,route:%s}' % (stu.JSESSIONID,stu.route))
         lgn = Login(base_url=base_url)
@@ -31,13 +44,24 @@ def update_cookies(request):
             person = GetInfo(base_url=base_url, cookies=cookies)
             NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
             nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-            Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+            updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
+            endTime = time.time()
+            spendTime = endTime - startTime
+            if spendTime>30:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             print('新cookies:')
+            content = ('【%s】更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            writeLog(content)
             print(requests.utils.dict_from_cookiejar(cookies))
             return HttpResponse('ok')
         elif lgn.runcode == 2:
+            content = ('【%s】[%s]请求更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('用户名或密码错误！')
         else:
+            content = ('【%s】[%s]请求更新cookies时网络或其他错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('网络或其它错误！')
 
 def get_pinfo(request):
@@ -48,6 +72,7 @@ def get_pinfo(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
+            startTime = time.time()
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -56,18 +81,32 @@ def get_pinfo(request):
                 pinfo = person.get_pinfo()
                 JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                 route = requests.utils.dict_from_cookiejar(cookies)["route"]
-                newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], pinfo["collegeName"], pinfo["majorName"], pinfo["className"], pinfo["phoneNumber"], pinfo["birthDay"], JSESSIONID, route)
+                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], pinfo["collegeName"], pinfo["majorName"], pinfo["className"], pinfo["phoneNumber"], pinfo["birthDay"], JSESSIONID, route, updateTime)
                 newstu.save()
+                endTime = time.time()
+                spendTime = endTime - startTime
+                if spendTime>30:
+                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('【%s】第一次登录' % pinfo["name"])
+                content = ('【%s】[%s]第一次登录' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),pinfo["name"]))
+                writeLog(content)
                 return HttpResponse(json.dumps(pinfo,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
+                content = ('【%s】[%s]在获取个人信息时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('用户名或密码错误！')
             else:
+                content = ('【%s】[%s]在获取个人信息时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('网络或其它错误！')
         elif Students.objects.get(studentId=int(xh)):
             stu = Students.objects.get(studentId=int(xh))
             try:
+                startTime2 = time.time()
                 print('【%s】查看了个人信息' % stu.name)
+                content = ('【%s】[%s]访问了个人信息' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
                 JSESSIONID = str(stu.JSESSIONID)
                 route = str(stu.route)
                 cookies_dict = {
@@ -77,24 +116,40 @@ def get_pinfo(request):
                 cookies = requests.utils.cookiejar_from_dict(cookies_dict)
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 pinfo = person.get_pinfo()
+                endTime2 = time.time()
+                spendTime2 = endTime2 - startTime2
+                if spendTime2>30:
+                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 return HttpResponse(json.dumps(pinfo,ensure_ascii=False),content_type="application/json,charset=utf-8")
             except Exception as e:
                 print(e)
+                content = ('【%s】[%s]访问个人信息出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
                 lgn = Login(base_url=base_url)
                 lgn.login(xh, pswd)
                 if lgn.runcode == 1:
                     print('更新cookies...')
+                    content = ('【%s】[%s]访问个人信息被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                    writeLog(content)
                     cookies = lgn.cookies
                     person = GetInfo(base_url=base_url, cookies=cookies)
                     NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                     nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                    Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+                    updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                     print('更新cookies成功')
+                    content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                    writeLog(content)
                     pinfo = person.get_pinfo()
                     return HttpResponse(json.dumps(pinfo,ensure_ascii=False),content_type="application/json,charset=utf-8")
                 elif lgn.runcode == 2:
+                    content = ('【%s】[%s]访问个人信息被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                    writeLog(content)
                     return HttpResponse('用户名或密码错误！')
                 else:
+                    content = ('【%s】[%s]访问个人信息被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                    writeLog(content)
                     return HttpResponse('网络或其它错误！')
         else:
             return HttpResponse('未知错误')
@@ -109,11 +164,16 @@ def get_message(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录访问消息' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
+            startTime = time.time()
             print('【%s】查看了消息' % stu.name)
+            content = ('【%s】[%s]访问了消息' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -123,24 +183,40 @@ def get_message(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             message = person.get_message()
+            endTime = time.time()
+            spendTime = endTime - startTime
+            if spendTime>30:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             return HttpResponse(json.dumps(message,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
+            content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                content = ('【%s】[%s]访问消息被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
                 cookies = lgn.cookies
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
+                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                writeLog(content)
                 message = person.get_message()
                 return HttpResponse(json.dumps(message,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
+                content = ('【%s】[%s]访问消息被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('用户名或密码错误！')
             else:
+                content = ('【%s】[%s]访问消息被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('网络或其它错误！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
@@ -153,11 +229,16 @@ def get_study(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录访问学业情况' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
+            startTime = time.time()
             print('【%s】查看了学业情况' % stu.name)
+            content = ('【%s】[%s]访问了学业情况' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -167,24 +248,40 @@ def get_study(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
+            endTime = time.time()
+            spendTime = endTime - startTime
+            if spendTime>30:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             return HttpResponse(json.dumps(study,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
+            content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                content = ('【%s】[%s]访问学业情况被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
                 cookies = lgn.cookies
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
+                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                writeLog(content)
                 study = person.get_study(xh)
                 return HttpResponse(json.dumps(study,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
+                content = ('【%s】[%s]访问学业情况被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('用户名或密码错误！')
             else:
+                content = ('【%s】[%s]访问学业情况被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('网络或其它错误！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
@@ -199,11 +296,16 @@ def get_grade(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
+            startTime = time.time()
             print('【%s】查看了%s-%s的成绩' % (stu.name,year,term))
+            content = ('【%s】[%s]访问了%s-%s的成绩' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name,year,term))
+            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -213,24 +315,40 @@ def get_grade(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             grade = person.get_grade(year,term)
+            endTime = time.time()
+            spendTime = endTime - startTime
+            if spendTime>30:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
+            content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                content = ('【%s】[%s]访问成绩被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
                 cookies = lgn.cookies
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
+                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                writeLog(content)
                 grade = person.get_grade(year,term)
                 return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
+                content = ('【%s】[%s]访问成绩被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('用户名或密码错误！')
             else:
+                content = ('【%s】[%s]访问成绩被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('网络或其它错误！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
@@ -245,11 +363,16 @@ def get_schedule(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录访问课程' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            writeLog(content)
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
+            startTime = time.time()
             print('【%s】查看了%s-%s的课程' % (stu.name,year,term))
+            content = ('【%s】[%s]访问了%s-%s的课程' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name,year,term))
+            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -259,23 +382,40 @@ def get_schedule(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             schedule = person.get_schedule(year,term)
+            endTime = time.time()
+            spendTime = endTime - startTime
+            if spendTime>30:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
+            print(e)
+            content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            writeLog(content)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                content = ('【%s】[%s]访问课表被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                writeLog(content)
                 cookies = lgn.cookies
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
+                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
+                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                writeLog(content)
                 schedule = person.get_schedule(year,term)
                 return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
+                content = ('【%s】[%s]访问课程被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('用户名或密码错误！')
             else:
+                content = ('【%s】[%s]访问课程被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                writeLog(content)
                 return HttpResponse('网络或其它错误！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
