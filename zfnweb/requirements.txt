@@ -24,7 +24,7 @@ onboard==1.4.1
 openpyxl==2.6.4
 pandas==0.25.3
 pexpect==4.2.1
-Pillow==4.0.0
+Pillow==6.2.0
 ptyprocess==0.5.1
 py2exe==0.9.2.2
 pyasn1==0.1.9
