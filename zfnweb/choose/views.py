@@ -4,7 +4,9 @@ from info.models import Students
 from api import Xuanke, Login
 import requests,json
 
-base_url = 'https://jwxt.xcc.edu.cn'
+with open('config.json',mode='r',encoding='utf-8') as f:
+    config = json.loads(f.read())
+base_url = config["base_url"]
 
 def index():
     return HttpResponse('choose_index here')
@@ -21,7 +23,7 @@ def get_choosed(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了已选' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -29,7 +31,6 @@ def get_choosed(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = Xuanke(base_url=base_url, cookies=cookies)
             choosed = person.get_choosed()
             return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -66,7 +67,7 @@ def get_bkk_list(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了板块课' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -74,7 +75,6 @@ def get_bkk_list(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = Xuanke(base_url=base_url, cookies=cookies)
             bkk_list = person.get_bkk_list(bkk)
             return HttpResponse(json.dumps(bkk_list,ensure_ascii=False),content_type="application/json,charset=utf-8")

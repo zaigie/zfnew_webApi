@@ -358,10 +358,13 @@ class GetInfo(object):
             'schoolTerm': jres['xsxx']['XQMMC'],
             'normalCourse': [{
                 'courseTitle': i['kcmc'],
+                'courseTitleShort':i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
                 'teacher': '无' if i.get('xm')== None else i.get('xm'),
                 'courseId': i['kch_id'],
+                'courseWeekday':i['xqj'],
                 'courseSection': i['jc'],
                 'courseWeek': i['zcd'],
+                'exam':i['khfsmc'],
                 'campus': i['xqmc'],
                 'courseRoom': i['cdmc'],
                 'className': i['jxbmc'],

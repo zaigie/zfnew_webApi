@@ -48,6 +48,8 @@ class Xuanke(object):
                     'courseId':i["kch"],
                     'courseTime':(i["sksj"].split('<br/>'))[0] + '、' + (i["sksj"].split('<br/>'))[1] if '<br/>' in i["sksj"] else i["sksj"],
                     'credit':float(i["xf"]),
+                    'chooseSelf':int(i["zixf"]),
+                    'waiting':i["sxbj"]
                     } for i in jres]
             }
             return res_dict

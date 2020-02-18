@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'info',
     'choose',
+    'recruit',
+    'one',
     'werkzeug_debugger_runserver',
     'django_extensions',
 ]

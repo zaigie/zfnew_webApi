@@ -4,7 +4,9 @@ from info.models import Students
 from api import GetInfo, Login
 import requests,json
 
-base_url = 'https://jwxt.xcc.edu.cn'
+with open('config.json',mode='r',encoding='utf-8') as f:
+    config = json.loads(f.read())
+base_url = config["base_url"]
 
 def index(request):
     return HttpResponse('info_index here')
@@ -30,7 +32,7 @@ def update_cookies(request):
             NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
             nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
             Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute)
-            print('更新cookies成功')
+            print('新cookies:')
             print(requests.utils.dict_from_cookiejar(cookies))
             return HttpResponse('ok')
         elif lgn.runcode == 2:
@@ -49,7 +51,6 @@ def get_pinfo(request):
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
-                print('没有该学生，添加学生...')
                 cookies = lgn.cookies
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 pinfo = person.get_pinfo()
@@ -57,7 +58,7 @@ def get_pinfo(request):
                 route = requests.utils.dict_from_cookiejar(cookies)["route"]
                 newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], pinfo["collegeName"], pinfo["majorName"], pinfo["className"], pinfo["phoneNumber"], pinfo["birthDay"], JSESSIONID, route)
                 newstu.save()
-                print('添加【%s】成功！' % pinfo["name"])
+                print('【%s】第一次登录' % pinfo["name"])
                 return HttpResponse(json.dumps(pinfo,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
                 return HttpResponse('用户名或密码错误！')
@@ -66,7 +67,7 @@ def get_pinfo(request):
         elif Students.objects.get(studentId=int(xh)):
             stu = Students.objects.get(studentId=int(xh))
             try:
-                print('已有该学生【%s】，获取cookies中...' % stu.name)
+                print('【%s】查看了个人信息' % stu.name)
                 JSESSIONID = str(stu.JSESSIONID)
                 route = str(stu.route)
                 cookies_dict = {
@@ -74,7 +75,6 @@ def get_pinfo(request):
                     'route':route
                 }
                 cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-                print(cookies)
                 person = GetInfo(base_url=base_url, cookies=cookies)
                 pinfo = person.get_pinfo()
                 return HttpResponse(json.dumps(pinfo,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -83,7 +83,7 @@ def get_pinfo(request):
                 lgn = Login(base_url=base_url)
                 lgn.login(xh, pswd)
                 if lgn.runcode == 1:
-                    print('可能是cookies失效，更新cookies...')
+                    print('更新cookies...')
                     cookies = lgn.cookies
                     person = GetInfo(base_url=base_url, cookies=cookies)
                     NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
@@ -113,7 +113,7 @@ def get_message(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了消息' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -121,11 +121,11 @@ def get_message(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = GetInfo(base_url=base_url, cookies=cookies)
             message = person.get_message()
             return HttpResponse(json.dumps(message,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
+            print(e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -157,7 +157,7 @@ def get_study(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了学业情况' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -165,11 +165,11 @@ def get_study(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
             return HttpResponse(json.dumps(study,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
+            print(e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -203,7 +203,7 @@ def get_grade(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了%s-%s的成绩' % (stu.name,year,term))
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -211,11 +211,11 @@ def get_grade(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = GetInfo(base_url=base_url, cookies=cookies)
             grade = person.get_grade(year,term)
             return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
+            print(e)
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -249,7 +249,7 @@ def get_schedule(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
-            print('获取【%s】的cookies中...' % stu.name)
+            print('【%s】查看了%s-%s的课程' % (stu.name,year,term))
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -257,7 +257,6 @@ def get_schedule(request):
                 'route':route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            print(cookies)
             person = GetInfo(base_url=base_url, cookies=cookies)
             schedule = person.get_schedule(year,term)
             return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")

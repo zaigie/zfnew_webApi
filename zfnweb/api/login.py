@@ -27,23 +27,23 @@ class Login(object):
         """登陆"""
         try:
             req = self.sess.get(self.login_url, headers=self.headers)
-            print('加载登录页面...')
+            #print('加载登录页面...')
             soup = BeautifulSoup(req.text, 'lxml')
             tokens = soup.find(id='csrftoken').get("value")
-            print('获取token...')
+            #print('获取token...')
             res = self.sess.get(self.key_url, headers=self.headers).json()
-            print('获取公钥...')
+            #print('获取公钥...')
             n = res['modulus']
             e = res['exponent']
             hmm = self.get_rsa(password, n, e)
-            print('解密编码...')
+            #print('解密编码...')
 
             login_data = {'csrftoken': tokens,
                         'yhm': sid,
                         'mm': hmm,
                         'mm': hmm}
             self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data)
-            print('登录请求...')
+            #print('登录请求...')
             ppot = r'用户名或密码不正确'
             if re.findall(ppot, self.req.text):
                 self.runcode = 2
