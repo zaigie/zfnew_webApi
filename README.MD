@@ -305,6 +305,3 @@ $ python manage.py runserver 0.0.0.0:8000
         }]
 }
 ```
-
-  [1]: https://github.com/NeroAsmarr/zfnew
-  [2]: 
