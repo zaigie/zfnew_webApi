@@ -11,7 +11,7 @@
 
 ### JSON数据键值参照
 
- - 点击[JSON.MD](#JSON键值)访问返回的JSON数据键值名称参照
+ - 点击[JSON](#JSON键值)访问返回的JSON数据键值名称参照
 
 ### Tips
 
@@ -19,6 +19,7 @@
  - 请求其它内容时，cookies失效后将重新执行登录，并更新数据库中的两个cookies字段和updateTime字段以及增加refreshTimes次数字段（请求内容失败可能并不完全是因为cookies失效，但目前暂未遇到其它错误，且更新cookies也是一个较为通用的解决办法）
  - config.json中的proxy为**http代理**
  - 选课API可能**并不通用**，这里仅提供思路，具体请参照自己学校情况
+ - 代码中有关于开发者本校的录取查询(recruitApp)，不通用，请自行编写替换或删除
  - 鉴于实现方式和并发量，并**不推荐**将本项目部署到产品项目中
  - CentOs自带的sqlite3版本较低，Django2.1.8以上不兼容
      - 解决办法一：通过requirements.txt安装模块，在requirements.txt中的Django版本**已经更改为为2.1.8**
@@ -28,37 +29,46 @@
 ### POST地址&Data
 #### 请求信息
 ```
-个人信息(必须，用以登录)：http://xxx:8000/info/pinfo
+个人信息(必须，用以登录)：xxx:8000/info/pinfo
 ※信息FromData={xh:'学号',pswd:'密码'}
 
-停补换课消息：http://xxx:8000/info/message
+停补换课消息：xxx:8000/info/message
 ※消息FromData={xh:'学号',pswd:'密码'}
 
-课程修读情况(学业详情)：http://xxx:8000/info/study
+课程修读情况(学业详情)：xxx:8000/info/study
 ※学业FromData={xh:'学号',pswd:'密码'}
 
-请求成绩: http://xxx:8000/info/grade
+请求成绩: xxx:8000/info/grade
 ※成绩FromData={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期'}
 
-请求课表：http://xxx:8000/info/schedule
+请求课表：xxx:8000/info/schedule
 ※课表FromData={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期'}
 
-手动更新cookies：http://xxx:8000/info/update
+手动更新cookies：xxx:8000/info/update
 ※更新FromData={xh:'学号',pswd:'密码'}
 ```
 #### 选课请求
 ```
-请求已选课程：http://xxx:8000/choose/choosed
+请求已选课程：xxx:8000/choose/choosed
 ※已选FromData={xh:'学号',pswd:'密码'}
 
-板块课：http://xxx:8000/choose/bkk
+板块课：xxx:8000/choose/bkk
 板块课FromData={xh:'学号',pswd:'密码',bkk:'1 or 2'}
 
-(Todo)选择某课：http://xxx:8000/choose/confirm
+(Todo)选择某课：xxx:8000/choose/confirm
 ※选课FromData={xh:'学号',pswd:'密码',id:'教学班ID'}
 
-(Todo)退掉某课：http://xxx:8000/choose/cancel
+(Todo)退掉某课：xxx:8000/choose/cancel
 ※退课FromData={xh:'学号',pswd:'密码',id:'教学班ID'}
+```
+
+### 额外请求
+```
+one·一个 每日文字：xxx:8000/one
+※GET请求
+
+录取查询（通过开发者所在学校招生网获取数据，不通用）：xxx:8000/recruit/ksh(idcard)
+※录取FromData={ksh:'考生号'(idcard:'身份证号')}
 ```
 
 ## 使用部署
