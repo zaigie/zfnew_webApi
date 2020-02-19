@@ -29,7 +29,7 @@ def get_choosed(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
-            content = ('【%s】[%s]未登录访问已选课程' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            content = ('【%s】[%s]未登录访问已选课程' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
             writeLog(content)
             return HttpResponse('还未登录！')
         else:
@@ -37,8 +37,6 @@ def get_choosed(request):
         try:
             startTime = time.time()
             print('【%s】查看了已选' % stu.name)
-            content = ('【%s】[%s]访问了已选课程' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
-            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -52,17 +50,19 @@ def get_choosed(request):
             spendTime = endTime - startTime
             if spendTime>30:
                 requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            content = ('【%s】[%s]访问了已选课程，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
+            writeLog(content)
             return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
-            content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
-                content = ('【%s】[%s]访问已选课程被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                content = ('【%s】[%s]访问已选课程被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
                 writeLog(content)
                 cookies = lgn.cookies
                 person = Xuanke(base_url=base_url, cookies=cookies)
@@ -71,18 +71,18 @@ def get_choosed(request):
                 updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
-                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime))
                 writeLog(content)
                 choosed = person.get_choosed()
                 return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
-                content = ('【%s】[%s]访问已选课程被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                content = ('【%s】[%s]访问已选课程被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                return HttpResponse('用户名或密码错误！')
+                return HttpResponse('学号或者密码错误！')
             else:
-                content = ('【%s】[%s]访问已选课程被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                content = ('【%s】[%s]访问已选课程被动更新cookies时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                return HttpResponse('网络或其它错误！')
+                return HttpResponse('网络或token问题！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
 
@@ -95,7 +95,7 @@ def get_bkk_list(request):
         else:
             return HttpResponse('请提交正确的post数据！')
         if not Students.objects.filter(studentId=int(xh)):
-            content = ('【%s】[%s]未登录访问板块课' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+            content = ('【%s】[%s]未登录访问板块课' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
             writeLog(content)
             return HttpResponse('还未登录！')
         else:
@@ -103,8 +103,6 @@ def get_bkk_list(request):
         try:
             startTime = time.time()
             print('【%s】查看了板块课' % stu.name)
-            content = ('【%s】[%s]访问了板块课' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
-            writeLog(content)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
             cookies_dict = {
@@ -118,17 +116,19 @@ def get_bkk_list(request):
             spendTime = endTime - startTime
             if spendTime>30:
                 requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            content = ('【%s】[%s]访问了板块课，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
+            writeLog(content)
             return HttpResponse(json.dumps(bkk_list,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
-            content = ('【%s】[%s]访问板块课出错' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+            content = ('【%s】[%s]访问板块课出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + e)
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
-                content = ('【%s】[%s]访问板块课被动更新cookies' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),stu.name))
+                content = ('【%s】[%s]访问板块课被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
                 writeLog(content)
                 cookies = lgn.cookies
                 person = Xuanke(base_url=base_url, cookies=cookies)
@@ -137,17 +137,17 @@ def get_bkk_list(request):
                 updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 print('更新cookies成功')
-                content = ('【%s】被动更新cookies成功' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime))
                 writeLog(content)
                 bkk_list = person.get_bkk_list(bkk)
                 return HttpResponse(json.dumps(bkk_list,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
-                content = ('【%s】[%s]访问板块课被动更新cookies时用户名或密码错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                content = ('【%s】[%s]访问板块课被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                return HttpResponse('用户名或密码错误！')
+                return HttpResponse('学号或者密码错误！')
             else:
-                content = ('【%s】[%s]访问板块课被动更新cookies时网络或其它错误' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),xh))
+                content = ('【%s】[%s]访问板块课被动更新cookies时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                return HttpResponse('网络或其它错误！')
+                return HttpResponse('网络或token问题！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
