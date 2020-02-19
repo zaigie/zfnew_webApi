@@ -11,7 +11,7 @@
 
 ### JSON数据键值参照
 
- - 点击[JSON](#JSON键值)访问返回的JSON数据键值名称参照
+ - 点击[JSON键值](#JSON键值)访问返回的JSON数据键值名称参照
 
 ### Tips
 
@@ -19,10 +19,10 @@
  - 请求其它内容时，cookies失效后将重新执行登录，并更新数据库中的两个cookies字段和updateTime字段以及增加refreshTimes次数字段（请求内容失败可能并不完全是因为cookies失效，但目前暂未遇到其它错误，且更新cookies也是一个较为通用的解决办法）
  - config.json中的proxy为**http代理**
  - 选课API可能**并不通用**，这里仅提供思路，具体请参照自己学校情况
- - 代码中有关于开发者本校的录取查询(recruitApp)，不通用，请自行编写替换或删除
+ - 代码中有关于开发者本校的**录取查询(recruitApp)**，**不通用**，请自行编写替换或删除
  - 鉴于实现方式和并发量，并**不推荐**将本项目部署到产品项目中
- - CentOs自带的sqlite3版本较低，Django2.1.8以上不兼容
-     - 解决办法一：通过requirements.txt安装模块，在requirements.txt中的Django版本**已经更改为为2.1.8**
+ - CentOs自带的sqlite3版本较低，**Django2.1.8**以上不兼容
+     - 解决办法一：通过requirements.txt安装模块，将requirements.txt中的Django版本**更改为2.1.8**
      - 解决办法二：升级自带的sqlite3版本，并重新链接（移步百度
  - **部署的时候代码中Server酱部分麻烦换成自己的**🙏
 
