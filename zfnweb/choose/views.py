@@ -62,6 +62,7 @@ def get_choosed(request):
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                startTime2 = time.time()
                 content = ('【%s】[%s]访问已选课程被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
                 writeLog(content)
                 cookies = lgn.cookies
@@ -70,8 +71,12 @@ def get_choosed(request):
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
                 updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
+                endTime2 = time.time()
+                spendTime2 = endTime2 - startTime2
+                if spendTime2 > 30:
+                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
-                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime))
+                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
                 choosed = person.get_choosed()
                 return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -128,6 +133,7 @@ def get_bkk_list(request):
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
                 print('更新cookies...')
+                startTime2 = time.time()
                 content = ('【%s】[%s]访问板块课被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
                 writeLog(content)
                 cookies = lgn.cookies
@@ -136,8 +142,12 @@ def get_bkk_list(request):
                 nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
                 updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
+                endTime2 = time.time()
+                spendTime2 = endTime2 - startTime2
+                if spendTime2 > 30:
+                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
-                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime))
+                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
                 bkk_list = person.get_bkk_list(bkk)
                 return HttpResponse(json.dumps(bkk_list,ensure_ascii=False),content_type="application/json,charset=utf-8")

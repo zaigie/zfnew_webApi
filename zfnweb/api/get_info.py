@@ -320,7 +320,7 @@ class GetInfo(object):
                     'courseTitle': i['kcmc'],
                     'teacher': i['jsxm'],
                     'courseId': i['kch_id'],
-                    'className': i['jxbmc'],
+                    'className': '无'if i.get('jxbmc')== None else i.get('jxbmc'),
                     'courseNature': '无'if i.get('kcxzmc')== None else i.get('kcxzmc'),
                     'credit': i['xf'],
                     'grade': i['cj'],
