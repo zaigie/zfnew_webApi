@@ -32,7 +32,7 @@ class Xuanke(object):
                 'xkxnm': self.nowyear,
                 'xkxqm': self.nowterm
             }
-            res = requests.post(choosed_url, data = data, headers = self.headers, cookies=self.cookies)
+            res = requests.post(choosed_url, data = data, headers = self.headers, cookies=self.cookies, proxies=self.proxies)
             jres = res.json()
             res_dict = {
                 'courseNumber':len(jres), #已选课程数
@@ -62,7 +62,7 @@ class Xuanke(object):
             """获取head_data"""
             sessions = requests.Session()
             url_data1 = parse.urljoin(self.base_url,'/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default')
-            data1 = sessions.get(url_data1, headers = self.headers, cookies=self.cookies)
+            data1 = sessions.get(url_data1, headers = self.headers, cookies=self.cookies, proxies=self.proxies)
             data1.encoding = data1.apparent_encoding
             soup = BeautifulSoup(data1.text,'html.parser')
 
@@ -98,7 +98,7 @@ class Xuanke(object):
                 'xszxzt': '1',
                 'kspage': '0'
             }
-            data2 = sessions.post(url_data2, headers=self.headers, data = data2_data, cookies=self.cookies)
+            data2 = sessions.post(url_data2, headers=self.headers, data = data2_data, cookies=self.cookies, proxies=self.proxies)
             data2.encoding = data2.apparent_encoding
             soup2 = BeautifulSoup(data2.text,'html.parser')
             data2_list = []
@@ -132,7 +132,7 @@ class Xuanke(object):
                 'kspage': '1',
                 'jspage': '10'
             }
-            kch_res = sessions.post(url_kch, headers=self.headers, data = kch_data, cookies=self.cookies)
+            kch_res = sessions.post(url_kch, headers=self.headers, data = kch_data, cookies=self.cookies, proxies=self.proxies)
             jkch_res = kch_res.json()
             bkk_data = {
                 'bklx_id': head_data["bklx_id"],
@@ -153,7 +153,7 @@ class Xuanke(object):
                 'rwlx': head_data["rwlx"],
                 'zyh_id': head_data["zyh_id"]
             }
-            bkk_res = sessions.post(url_bkk, headers=self.headers, data = bkk_data, cookies=self.cookies)
+            bkk_res = sessions.post(url_bkk, headers=self.headers, data = bkk_data, cookies=self.cookies, proxies=self.proxies)
             jbkk_res = bkk_res.json()
             if bkk != '3' and (len(jkch_res["tmpList"]) != len(jbkk_res)):
                 res_dict = {'error':'ErrorLength'}

@@ -19,14 +19,14 @@ def get_one(request):
                 return HttpResponse(content)
             else:
                 with open('one.txt', mode='a',encoding='utf-8') as n:
-                    print('第一个访问了one!')
+                    #print('第一个访问了one!')
                     url = "http://wufazhuce.com/"
                     r = requests.get(url)
                     r.encoding = r.apparent_encoding
                     soup = BeautifulSoup(r.text, 'html.parser')
                     oneall = soup.find('div',class_ = re.compile('fp-one-cita'))
                     one = oneall.a.string
-                    if int(datetime.datetime.now().strftime('%H')) > 9: #每天九点后one肯定更新了
+                    if int(datetime.datetime.now().strftime('%H')) > 8: #每天九点后one肯定更新了
                         n.write('\n【%s】%s' % (datetime.datetime.now().strftime('%Y-%m-%d'),one))
                     return HttpResponse(one)
         else:

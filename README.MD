@@ -259,7 +259,9 @@ $ python manage.py runserver 0.0.0.0:8000
         "courseId": "课程号",
         "courseWeekday":"星期几",
         "courseSection": "课程节数",
+        "courseTime":"课程时间",    #根据config.json里面的TimesUp和TimesDown
         "courseWeek": "课程周数",
+        "inNowWeek":"是否当前周课程",   #根据config.json里面的nowWeekI判断
         "exam":"考试性质",
         "campus": "上课校区",
         "courseRoom": "上课地点",

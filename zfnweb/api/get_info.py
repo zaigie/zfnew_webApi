@@ -7,6 +7,8 @@ import requests
 import json
 from urllib import parse
 
+with open('config.json',mode='r',encoding='utf-8') as f:
+    config = json.loads(f.read())
 
 class GetInfo(object):
     def __init__(self, base_url, cookies):
@@ -16,8 +18,6 @@ class GetInfo(object):
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         }
         self.cookies = cookies
-        with open('config.json',mode='r',encoding='utf-8') as f:
-            config = json.loads(f.read())
         self.proxies = {
             'http':config["proxy"]
         }
@@ -334,6 +334,45 @@ class GetInfo(object):
             return res_dict
         else:
             return {}
+    def calWeeks(self,args):
+        if len(args) == 1:
+            num = int(args[0])
+            firstlist = []
+            firstlist.append(num)
+            return firstlist
+        elif len(args) == 2:
+            k1 = int(args[0])
+            k2 = int(args[1])
+            r = []
+            for n in range(k1,k2+1):
+                r.append(n)
+            return r
+        elif len(args) == 3:
+            k12 = int(args[0])
+            k22 = int(args[1])
+            r2 = []
+            for n2 in range(k12,k22+1):
+                r2.append(n2)
+            r2.append(int(args[2]))
+            return r2
+        elif len(args) == 4:
+            num1 = int(args[0])
+            num2 = int(args[1])
+            num3 = int(args[2])
+            num4 = int(args[3])
+            clist = []
+            for i in range(num1,num2+1):
+                clist.append(i)
+            for j in range(num3,num4+1):
+                clist.append(j)
+            return clist
+    def calTime(self,args):
+        num1 = str(args[0])
+        num2 = str(args[1])
+        k1 = config["TimesUp"][num1]
+        k2 = config["TimesDown"][num2]
+        r = k1 + '~' + k2
+        return r
 
     def get_schedule(self, year, term):
         """获取课程表信息"""
@@ -363,7 +402,9 @@ class GetInfo(object):
                 'courseId': i['kch_id'],
                 'courseWeekday':i['xqj'],
                 'courseSection': i['jc'],
+                'courseTime': self.calTime(re.findall(r"(\d+)",i['jc'])),
                 'courseWeek': i['zcd'],
+                'inNowWeek':1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)",i['zcd'])) else 0,
                 'exam':i['khfsmc'],
                 'campus': i['xqmc'],
                 'courseRoom': i['cdmc'],
