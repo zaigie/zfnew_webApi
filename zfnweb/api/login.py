@@ -4,12 +4,25 @@ import rsa
 import base64
 import requests
 import re
-import time
+import time,datetime
+import json,os
 from bs4 import BeautifulSoup
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, PKCS1_v1_5
 from urllib import parse
+from requests import exceptions
 
+with open('config.json',mode='r',encoding='utf-8') as f:
+    config = json.loads(f.read())
+
+def writeLog(content):
+    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    filename = 'mylogs/' + date + '.log'
+    if not os.path.exists(filename):
+        with open(filename,mode='w',encoding='utf-8') as n:
+            n.write('【%s】的日志记录' % date)
+    with open(filename,mode='a',encoding='utf-8') as l:
+        l.write('\n%s' % content)
 
 class Login(object):
     def __init__(self, base_url):
@@ -22,16 +35,19 @@ class Login(object):
         self.sess = requests.Session()
         self.cookies = ''
         self.cookies_str = ''
+        self.proxies = {
+            'http':config["proxy"]
+        }
 
     def login(self, sid, password):
         """登陆"""
         try:
-            req = self.sess.get(self.login_url, headers=self.headers)
+            req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=(5,10))
             #print('加载登录页面...')
             soup = BeautifulSoup(req.text, 'lxml')
             tokens = soup.find(id='csrftoken').get("value")
             #print('获取token...')
-            res = self.sess.get(self.key_url, headers=self.headers).json()
+            res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=(5,10)).json()
             #print('获取公钥...')
             n = res['modulus']
             e = res['exponent']
@@ -42,7 +58,7 @@ class Login(object):
                         'yhm': sid,
                         'mm': hmm,
                         'mm': hmm}
-            self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data)
+            self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data, proxies=self.proxies, timeout=(5,10))
             #print('登录请求...')
             ppot = r'用户名或密码不正确'
             if re.findall(ppot, self.req.text):
@@ -51,9 +67,12 @@ class Login(object):
             self.cookies = self.sess.cookies
             self.cookies_str = '; '.join([item.name + '=' + item.value for item in self.cookies])
             self.runcode = 1
-        except Exception as e:
-            print(e)
+        except exceptions.Timeout as e:
+            #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录超时&desp=' + str(e))
+            content = ('【%s】[%s]登录超时！' % (datetime.datetime.now().strftime('%H:%M:%S'),sid))
+            writeLog(content)
             self.runcode = 3
+            return {'err':'Connect Timeout'}
 
     @classmethod
     def encrypt_sqf(cls, pkey, str_in):

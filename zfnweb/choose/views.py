@@ -50,44 +50,45 @@ def get_choosed(request):
             spendTime = endTime - startTime
             if spendTime>30:
                 requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
-            content = ('【%s】[%s]访问了已选课程，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
-            writeLog(content)
-            return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
+            if choosed == None:
+                content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
+                writeLog(content)
+                lgn = Login(base_url=base_url)
+                lgn.login(xh, pswd)
+                if lgn.runcode == 1:
+                    print('更新cookies...')
+                    startTime2 = time.time()
+                    content = ('【%s】[%s]访问已选课程被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
+                    writeLog(content)
+                    cookies = lgn.cookies
+                    person = Xuanke(base_url=base_url, cookies=cookies)
+                    NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
+                    nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
+                    updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
+                    endTime2 = time.time()
+                    spendTime2 = endTime2 - startTime2
+                    if spendTime2 > 30:
+                        requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                    print('更新cookies成功')
+                    content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
+                    writeLog(content)
+                    choosed = person.get_choosed()
+                    return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
+                elif lgn.runcode == 2:
+                    content = ('【%s】[%s]访问已选课程被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
+                    writeLog(content)
+                    return HttpResponse('学号或者密码错误！')
+                else:
+                    content = ('【%s】[%s]访问已选课程被动更新cookies时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
+                    writeLog(content)
+                    return HttpResponse('网络或token问题！')
+            else:
+                content = ('【%s】[%s]访问了已选课程，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
+                writeLog(content)
+                return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
-            content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
-            writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
-            lgn = Login(base_url=base_url)
-            lgn.login(xh, pswd)
-            if lgn.runcode == 1:
-                print('更新cookies...')
-                startTime2 = time.time()
-                content = ('【%s】[%s]访问已选课程被动更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
-                writeLog(content)
-                cookies = lgn.cookies
-                person = Xuanke(base_url=base_url, cookies=cookies)
-                NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
-                nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-                updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
-                endTime2 = time.time()
-                spendTime2 = endTime2 - startTime2
-                if spendTime2 > 30:
-                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
-                print('更新cookies成功')
-                content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
-                writeLog(content)
-                choosed = person.get_choosed()
-                return HttpResponse(json.dumps(choosed,ensure_ascii=False),content_type="application/json,charset=utf-8")
-            elif lgn.runcode == 2:
-                content = ('【%s】[%s]访问已选课程被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
-                writeLog(content)
-                return HttpResponse('学号或者密码错误！')
-            else:
-                content = ('【%s】[%s]访问已选课程被动更新cookies时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
-                writeLog(content)
-                return HttpResponse('网络或token问题！')
     else:
         return HttpResponse('请使用post并提交正确数据！')
 

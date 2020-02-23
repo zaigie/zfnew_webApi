@@ -48,8 +48,8 @@ def update_cookies(request):
             Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
             endTime = time.time()
             spendTime = endTime - startTime
-            if spendTime>30:
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            #if spendTime>30:
+                #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             print('新cookies:')
             content = ('【%s】更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime))
             writeLog(content)
@@ -89,8 +89,8 @@ def get_pinfo(request):
                     Students.objects.filter(studentId=int(xh)).update(JSESSIONID=JSESSIONID, route=route, refreshTimes=refreshTimes, updateTime=updateTime)
                     endTime = time.time()
                     spendTime = endTime - startTime
-                    if spendTime>30:
-                        requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                    #if spendTime>30:
+                        #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                     print('【%s】登录了' % pinfo["name"])
                     content = ('【%s】[%s]第%d次登录了，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),pinfo["name"],refreshTimes,spendTime))
                     writeLog(content)
@@ -107,7 +107,7 @@ def get_pinfo(request):
                 print(e)
                 content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(e))
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
                 return HttpResponse('unknowError')
         else:
             try:    
@@ -125,8 +125,8 @@ def get_pinfo(request):
                     newstu.save()
                     endTime = time.time()
                     spendTime = endTime - startTime
-                    if spendTime>30:
-                        requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                    #if spendTime>30:
+                        #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                     print('【%s】第一次登录' % pinfo["name"])
                     content = ('【%s】[%s]第一次登录，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),pinfo["name"],spendTime))
                     writeLog(content)
@@ -143,7 +143,7 @@ def get_pinfo(request):
                 print(e)
                 content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
                 writeLog(content)
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(e))
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
                 return HttpResponse('unknowError')
     else:
         return HttpResponse('请使用post并提交正确数据！')
@@ -175,8 +175,8 @@ def get_message(request):
             message = person.get_message()
             endTime = time.time()
             spendTime = endTime - startTime
-            if spendTime>30:
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            #if spendTime>30:
+                #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了消息，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
             writeLog(content)
             return HttpResponse(json.dumps(message,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -184,7 +184,9 @@ def get_message(request):
             print(e)
             content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
+            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=消息错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return {'err':'Unknow Error'}
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -200,8 +202,8 @@ def get_message(request):
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 endTime2 = time.time()
                 spendTime2 = endTime2 - startTime2
-                if spendTime2 > 30:
-                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                #if spendTime2 > 30:
+                    #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
@@ -245,8 +247,8 @@ def get_study(request):
             study = person.get_study(xh)
             endTime = time.time()
             spendTime = endTime - startTime
-            if spendTime>30:
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            #if spendTime>30:
+                #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,spendTime))
             writeLog(content)
             return HttpResponse(json.dumps(study,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -254,7 +256,9 @@ def get_study(request):
             print(e)
             content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
+            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return {'err':'Unknow Error'}
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -270,8 +274,8 @@ def get_study(request):
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 endTime2 = time.time()
                 spendTime2 = endTime2 - startTime2
-                if spendTime2 > 30:
-                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                #if spendTime2 > 30:
+                    #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
@@ -317,8 +321,8 @@ def get_grade(request):
             grade = person.get_grade(year,term)
             endTime = time.time()
             spendTime = endTime - startTime
-            if spendTime>30:
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            #if spendTime>30:
+                #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,year,term,spendTime))
             writeLog(content)
             return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -326,7 +330,9 @@ def get_grade(request):
             print(e)
             content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
+            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return {'err':'Unknow Error'}
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -342,8 +348,8 @@ def get_grade(request):
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 endTime2 = time.time()
                 spendTime2 = endTime2 - startTime2
-                if spendTime2 > 30:
-                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                #if spendTime2 > 30:
+                    #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
@@ -389,8 +395,8 @@ def get_schedule(request):
             schedule = person.get_schedule(year,term)
             endTime = time.time()
             spendTime = endTime - startTime
-            if spendTime>30:
-                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+            #if spendTime>30:
+                #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了%s-%s的课程，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,year,term,spendTime))
             writeLog(content)
             return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")
@@ -398,7 +404,9 @@ def get_schedule(request):
             print(e)
             content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=可能是cookies失效&desp=' + str(e))
+            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课程错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return {'err':'Unknow Error'}
             lgn = Login(base_url=base_url)
             lgn.login(xh, pswd)
             if lgn.runcode == 1:
@@ -414,8 +422,8 @@ def get_schedule(request):
                 Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute, updateTime=updateTime)
                 endTime2 = time.time()
                 spendTime2 = endTime2 - startTime2
-                if spendTime2 > 30:
-                    requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
+                #if spendTime2 > 30:
+                    #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
                 print('更新cookies成功')
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)

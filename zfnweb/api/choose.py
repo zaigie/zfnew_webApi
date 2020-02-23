@@ -6,6 +6,7 @@ import time
 import requests
 import json
 from urllib import parse
+from requests import exceptions
 
 
 class Xuanke(object):
@@ -32,7 +33,11 @@ class Xuanke(object):
                 'xkxnm': self.nowyear,
                 'xkxqm': self.nowterm
             }
-            res = requests.post(choosed_url, data = data, headers = self.headers, cookies=self.cookies, proxies=self.proxies)
+            try:
+                res = requests.post(choosed_url, data = data, headers = self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            except exceptions.Timeout as e:
+                requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=已选超时&desp=' + str(e))
+                return {'err':'Connect Timeout'}
             jres = res.json()
             res_dict = {
                 'courseNumber':len(jres), #已选课程数
@@ -62,7 +67,7 @@ class Xuanke(object):
             """获取head_data"""
             sessions = requests.Session()
             url_data1 = parse.urljoin(self.base_url,'/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default')
-            data1 = sessions.get(url_data1, headers = self.headers, cookies=self.cookies, proxies=self.proxies)
+            data1 = sessions.get(url_data1, headers = self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
             data1.encoding = data1.apparent_encoding
             soup = BeautifulSoup(data1.text,'html.parser')
 
@@ -98,7 +103,7 @@ class Xuanke(object):
                 'xszxzt': '1',
                 'kspage': '0'
             }
-            data2 = sessions.post(url_data2, headers=self.headers, data = data2_data, cookies=self.cookies, proxies=self.proxies)
+            data2 = sessions.post(url_data2, headers=self.headers, data = data2_data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
             data2.encoding = data2.apparent_encoding
             soup2 = BeautifulSoup(data2.text,'html.parser')
             data2_list = []
@@ -132,7 +137,7 @@ class Xuanke(object):
                 'kspage': '1',
                 'jspage': '10'
             }
-            kch_res = sessions.post(url_kch, headers=self.headers, data = kch_data, cookies=self.cookies, proxies=self.proxies)
+            kch_res = sessions.post(url_kch, headers=self.headers, data = kch_data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
             jkch_res = kch_res.json()
             bkk_data = {
                 'bklx_id': head_data["bklx_id"],
@@ -153,7 +158,7 @@ class Xuanke(object):
                 'rwlx': head_data["rwlx"],
                 'zyh_id': head_data["zyh_id"]
             }
-            bkk_res = sessions.post(url_bkk, headers=self.headers, data = bkk_data, cookies=self.cookies, proxies=self.proxies)
+            bkk_res = sessions.post(url_bkk, headers=self.headers, data = bkk_data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
             jbkk_res = bkk_res.json()
             if bkk != '3' and (len(jkch_res["tmpList"]) != len(jbkk_res)):
                 res_dict = {'error':'ErrorLength'}

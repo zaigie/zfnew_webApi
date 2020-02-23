@@ -6,6 +6,7 @@ import time
 import requests
 import json
 from urllib import parse
+from requests import exceptions
 
 with open('config.json',mode='r',encoding='utf-8') as f:
     config = json.loads(f.read())
@@ -25,7 +26,11 @@ class GetInfo(object):
     def get_pinfo(self):
         """获取个人信息"""
         url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
-        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies)
+        try:
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        except exceptions.Timeout as e:
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=个人信息超时&desp=' + str(e))
+            return {'err':'Connect Timeout'}
         jres = res.json()
         #print(jres)
         res_dict = {
@@ -84,8 +89,11 @@ class GetInfo(object):
 
         url_main = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
         url_info = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
-
-        mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies, proxies=self.proxies)
+        try:
+            mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        except exceptions.Timeout as e:
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业超时&desp=' + str(e))
+            return {'err':'Connect Timeout'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -125,10 +133,10 @@ class GetInfo(object):
             zyid = idList[1]
             qtid = idList[3]
 
-        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies, proxies=self.proxies)
-        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies, proxies=self.proxies)
-        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies, proxies=self.proxies)
-        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies, proxies=self.proxies)
+        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
 
         ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",str(soup))
         ts_point_list = list(list({}.fromkeys(ts_point_find).keys())[0])    #先得到元组再拆开转换成列表
@@ -272,7 +280,11 @@ class GetInfo(object):
             'queryModel.sortOrder': 'desc',  # 时间倒序, asc正序
             'time': '0'
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
+        try:
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        except exceptions.Timeout as e:
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=消息超时&desp=' + str(e))
+            return {'err':'Connect Timeout'}
         jres = res.json()
         res_list = [{'message': i['xxnr'], 'ctime': i['cjsj']} for i in jres['items']]
         return res_list
@@ -308,7 +320,11 @@ class GetInfo(object):
             'queryModel.sortOrder': 'asc',
             'time': '0'  # 查询次数
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
+        try:
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        except exceptions.Timeout as e:
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩超时&desp=' + str(e))
+            return {'err':'Connect Timeout'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -366,6 +382,8 @@ class GetInfo(object):
             for j in range(num3,num4+1):
                 clist.append(j)
             return clist
+        else:
+            return [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
     def calTime(self,args):
         num1 = str(args[0])
         num2 = str(args[1])
@@ -388,7 +406,11 @@ class GetInfo(object):
             'xnm': year,
             'xqm': term
         }
-        res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies)
+        try:
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        except exceptions.Timeout as e:
+            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课表超时&desp=' + str(e))
+            return {'err':'Connect Timeout'}
         jres = res.json()
         res_dict = {
             'name': jres['xsxx']['XM'],
