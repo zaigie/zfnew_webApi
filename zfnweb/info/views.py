@@ -256,7 +256,7 @@ def get_study(request):
             print(e)
             content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name))
             writeLog(content)
-            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+            if str(e) != 'list index out of range':
                 requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业错误&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
                 return {'err':'Unknow Error'}
             lgn = Login(base_url=base_url)
