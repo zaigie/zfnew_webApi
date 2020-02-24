@@ -12,6 +12,26 @@ base_url = config["base_url"]
 def index(request):
     return HttpResponse('info_index here')
 
+def cacheData(xh,filename):
+    docurl = 'data/' + str(xh)[0:2] + '/' + str(xh) + '/'
+    fileurl = docurl + str(filename) + '.json'
+    if not os.path.exists(docurl):
+        os.makedirs(docurl)
+    else:
+        if not os.path.exists(fileurl):
+            return
+        else:
+            with open(fileurl,mode='r',encoding='utf-8') as o:
+                result = json.loads(o.read())
+                return result
+
+def newData(xh,filename,content):
+    docurl = 'data/' + str(xh)[0:2] + '/' + str(xh) + '/'
+    fileurl = docurl + str(filename) + '.json'
+    if not os.path.exists(fileurl):
+        with open(fileurl,mode='w',encoding='utf-8') as n:
+            n.write(content)
+
 def writeLog(content):
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     filename = 'mylogs/' + date + '.log'
@@ -307,6 +327,15 @@ def get_grade(request):
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
+        newest = config["gradesTime"]
+        if (str(year) + str(term)) != newest:
+            filename = ('Grades-%s%s' % (str(year),str(term)))
+            cache = cacheData(xh,filename)
+            if cache != None:
+                print('cache')
+                return HttpResponse(json.dumps(cache,ensure_ascii=False),content_type="application/json,charset=utf-8")
+            else:
+                pass
         try:
             startTime = time.time()
             print('【%s】查看了%s-%s的成绩' % (stu.name,year,term))
@@ -325,6 +354,10 @@ def get_grade(request):
                 #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,year,term,spendTime))
             writeLog(content)
+            if (str(year) + str(term)) != newest:
+                filename = ('Grades-%s%s' % (str(year),str(term)))
+                newData(xh,filename,json.dumps(grade,ensure_ascii=False))
+                print('write')
             return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
@@ -354,6 +387,9 @@ def get_grade(request):
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
                 grade = person.get_grade(year,term)
+                if (str(year) + str(term)) != newest:
+                    filename = ('Grades-%s%s' % (str(year),str(term)))
+                    newData(xh,filename,json.dumps(grade,ensure_ascii=False))
                 return HttpResponse(json.dumps(grade,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
                 content = ('【%s】[%s]访问成绩被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
@@ -381,6 +417,15 @@ def get_schedule(request):
             return HttpResponse('还未登录！')
         else:
             stu = Students.objects.get(studentId=int(xh))
+        newest = config["schedulesTime"]
+        if (str(year) + str(term)) != newest:
+            filename = ('Schedules-%s%s' % (str(year),str(term)))
+            cache = cacheData(xh,filename)
+            if cache != None:
+                print('cache')
+                return HttpResponse(json.dumps(cache,ensure_ascii=False),content_type="application/json,charset=utf-8")
+            else:
+                pass
         try:
             startTime = time.time()
             print('【%s】查看了%s-%s的课程' % (stu.name,year,term))
@@ -399,6 +444,10 @@ def get_schedule(request):
                 #requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=访问超时了')
             content = ('【%s】[%s]访问了%s-%s的课程，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),stu.name,year,term,spendTime))
             writeLog(content)
+            if (str(year) + str(term)) != newest:
+                filename = ('Schedules-%s%s' % (str(year),str(term)))
+                newData(xh,filename,json.dumps(schedule,ensure_ascii=False))
+                print('write')
             return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
@@ -428,6 +477,9 @@ def get_schedule(request):
                 content = ('【%s】被动更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'),spendTime2))
                 writeLog(content)
                 schedule = person.get_schedule(year,term)
+                if (str(year) + str(term)) != newest:
+                    filename = ('Schedules-%s%s' % (str(year),str(term)))
+                    newData(xh,filename,json.dumps(schedule,ensure_ascii=False))
                 return HttpResponse(json.dumps(schedule,ensure_ascii=False),content_type="application/json,charset=utf-8")
             elif lgn.runcode == 2:
                 content = ('【%s】[%s]访问课程被动更新cookies时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'),xh))
