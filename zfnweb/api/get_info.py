@@ -93,7 +93,7 @@ class GetInfo(object):
             mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
         except exceptions.Timeout as e:
             requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业超时&desp=' + str(e))
-            return {'err':'Connect Timeout'}
+            return {'err':'bad'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -169,6 +169,7 @@ class GetInfo(object):
             'ipi':ipi,  #计划内在读课程数
             'opp':opp,  #计划外已过课程数
             'opf':opf,  #计划外未过课程数
+            'err':'ok',
             'tsData':{
                 'tsPoint':ts_point, #通识教育学分情况
                 'tsItems':[{
@@ -324,7 +325,7 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
         except exceptions.Timeout as e:
             requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩超时&desp=' + str(e))
-            return {'err':'Connect Timeout'}
+            return {'err':'bad'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -332,6 +333,7 @@ class GetInfo(object):
                 'studentId': jres['items'][0]['xh'],
                 'schoolYear': jres['items'][0]['xnm'],
                 'schoolTerm': jres['items'][0]['xqmmc'],
+                'err':'ok',
                 'course': [{
                     'courseTitle': i['kcmc'],
                     'teacher': i['jsxm'],

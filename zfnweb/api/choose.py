@@ -51,6 +51,7 @@ class Xuanke(object):
                     'classPeople':int(i["yxzrs"]),
                     'courseRoom':(i["jxdd"].split('<br/>'))[0] if '<br/>' in i["jxdd"] else i["jxdd"],
                     'courseId':i["kch"],
+                    'doId':i["do_jxb_id"],
                     'courseTime':(i["sksj"].split('<br/>'))[0] + '、' + (i["sksj"].split('<br/>'))[1] if '<br/>' in i["sksj"] else i["sksj"],
                     'credit':float(i["xf"]),
                     'chooseSelf':int(i["zixf"]),
@@ -176,6 +177,7 @@ class Xuanke(object):
                     'teacher_id':(re.findall(r"(.*?\d+)/",j["jsxx"]))[0],
                     'classId':j["jxb_id"],
                     'doId':j["do_jxb_id"],
+                    'kklxdm': head_data["bkk" + bkk + "_kklxdm"],
                     'classVolume':int(j["jxbrl"]),
                     'classPeople':int(j["yxzrs"]),
                     'courseRoom':(j["jxdd"].split('<br/>'))[0] if '<br/>' in j["jxdd"] else j["jxdd"],
@@ -188,7 +190,40 @@ class Xuanke(object):
 
         except Exception as e:
             print(e)
-
-    #def choose(self,bkk,classId):
-    #    list_data = self.get_bkk_list(bkk)
-    #    url_choose = parse.urljoin(self.base_url)
+    def choose(self,doId,kcId,gradeId,majorId,kklxdm):
+        url_choose = parse.urljoin(self.base_url,'/xsxk/zzxkyzb_xkBcZyZzxkYzb.html?gnmkdm=N253512')
+        sess = requests.Session()
+        choose_data = {
+            'jxb_ids': str(doId),
+            'kch_id': str(kcId),
+            #'rwlx': '3',
+            #'rlkz': '0',
+            #'rlzlkz': '1',
+            #'sxbj': '1',
+            #'xxkbj': '0',
+            #'cxbj': '0',
+            'qz': '0',
+            #'xkkz_id': '9B247F4EFD6291B9E055000000000001',
+            'xkxnm': self.nowyear,
+            'xkxqm': self.nowterm,
+            'njdm_id': str(gradeId),
+            'zyh_id': str(majorId),
+            'kklxdm': str(kklxdm),
+            #'xklc': '1',
+        }
+        isOk = sess.post(url_choose, headers = self.headers,data=choose_data, cookies=self.cookies, proxies=self.proxies, timeout=(5,15))
+        result = isOk.json()
+        return result
+    
+    def cancel(self,doId,kcId):
+        url_cancel = parse.urljoin(self.base_url,'/xsxk/zzxkyzb_tuikBcZzxkYzb.html?gnmkdm=N253512')
+        sess = requests.Session()
+        cancel_data = {
+            'jxb_ids': str(doId),
+            'kch_id': str(kcId),
+            'xkxnm': self.nowyear,
+            'xkxqm': self.nowterm,
+        }
+        isOk = sess.post(url_cancel, headers = self.headers,data=cancel_data, cookies=self.cookies, proxies=self.proxies, timeout=(5,15))
+        result = re.findall(r"(\d+)",isOk.text)[0]
+        return result

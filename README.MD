@@ -1,9 +1,9 @@
 
 基于Django的新正方教务管理系统的爬虫webApi，请求**返回JSON数据**
 
-部分本地API基于[NeroAsmarr/zfnew](https://github.com/NeroAsmarr/zfnew)【2020.2.16】
+**登录、消息及成绩和课程**API基于[NeroAsmarr/zfnew](https://github.com/NeroAsmarr/zfnew)【2020.2.16】
 
-目前项目部署在“西院助手”微信小程序中作为API测试（临时，后将重构为云开发nodejs爬虫）
+目前项目部署在“西院助手”微信/QQ小程序中作为API测试
 
 求⭐⭐⭐⭐⭐（跪
 
@@ -15,12 +15,13 @@
 
 ### Tips
 
+ - **config.json**中包含了小程序所需加载的配置项
  - 通过pinfo新增学生，并将cookies存入数据库
  - 请求其它内容时，cookies失效后将重新执行登录，并更新数据库中的两个cookies字段和updateTime字段以及增加refreshTimes次数字段（请求内容失败可能并不完全是因为cookies失效，但目前暂未遇到其它错误，且更新cookies也是一个较为通用的解决办法）
  - config.json中的proxy为**http代理**
  - 选课API可能**并不通用**，这里仅提供思路，具体请参照自己学校情况
  - 代码中有关于开发者本校的**录取查询(recruitApp)**，**不通用**，请自行编写替换或删除
- - 鉴于实现方式和并发量，并**不推荐**将本项目部署到产品项目中
+ - 鉴于实现方式和并发量，并**不推荐**将本项目部署到产品项目中，若须经过自己的服务器，推荐**混合开发**
  - CentOs自带的sqlite3版本较低，**Django2.1.8**以上不兼容
      - 解决办法一：通过requirements.txt安装模块，将requirements.txt中的Django版本**更改为2.1.8**
      - 解决办法二：升级自带的sqlite3版本，并重新链接（移步百度
@@ -55,11 +56,11 @@
 板块课：xxx:8000/choose/bkk
 板块课FromData={xh:'学号',pswd:'密码',bkk:'1 or 2'}
 
-(Todo)选择某课：xxx:8000/choose/confirm
-※选课FromData={xh:'学号',pswd:'密码',id:'教学班ID'}
+选择某课：xxx:8000/choose/choose
+※选课FromData={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号',kklxdm:'板块课1/2特有ID'}
 
-(Todo)退掉某课：xxx:8000/choose/cancel
-※退课FromData={xh:'学号',pswd:'密码',id:'教学班ID'}
+退掉某课：xxx:8000/choose/cancel
+※退课FromData={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号'}
 ```
 
 ### 额外请求
@@ -289,6 +290,7 @@ $ python manage.py runserver 0.0.0.0:8000
         "classPeople":"教学班已选人数",
         "courseRoom":"上课地点",
         "courseId":"课程号",
+        "doId":"执行ID",
         "courseTime":"上课时间",
         "credit":"课程学分",
         "chooseSelf":"是否自选",
@@ -308,6 +310,7 @@ $ python manage.py runserver 0.0.0.0:8000
         "teacher_id":"老师ID",
         "classId":"教学班ID",
         "doId":"执行ID",
+        "kklxdm":"板块课1/2的特有ID",
         "classVolume":"教学班容量",
         "classPeople":"教学班已选人数",
         "courseRoom":"上课地点",
