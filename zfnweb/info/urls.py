@@ -8,5 +8,5 @@ urlpatterns = [
     path('study',views.get_study),
     path('grade',views.get_grade),
     path('schedule',views.get_schedule),
-    path('update',views.update_cookies)
+    #path('update',views.update_cookies)
 ]
