@@ -393,6 +393,17 @@ class GetInfo(object):
         k2 = config["TimesDown"][num2]
         r = k1 + '~' + k2
         return r
+    def upTime(self,args):
+        num1 = str(args[0])
+        k1 = config["TimesUp"][num1]
+        return k1
+    def listTime(self,args):
+        num1 = int(args[0])
+        num2 = int(args[1])
+        itemList = []
+        for i in range(num1,num2):
+            itemList.append(i)
+        return itemList
 
     def get_schedule(self, year, term):
         """获取课程表信息"""
@@ -414,6 +425,35 @@ class GetInfo(object):
             requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课表超时&desp=' + str(e))
             return {'err':'Connect Timeout'}
         jres = res.json()
+        
+        res_dict2 = {
+            'name': jres['xsxx']['XM'],
+            'studentId': jres['xsxx']['XH'],
+            'schoolYear': jres['xsxx']['XNM'],
+            'schoolTerm': jres['xsxx']['XQMMC'],
+            'normalCourse': [{
+                'courseTitle': i['kcmc'],
+                'courseTitleShort':i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
+                'teacher': '无' if i.get('xm')== None else i.get('xm'),
+                'courseId': i['kch_id'],
+                'courseWeekday':i['xqj'],
+                'courseSection': i['jc'],
+                'upTime':self.upTime(re.findall(r"(\d+)",i['jc'])),
+                'courseTime': self.calTime(re.findall(r"(\d+)",i['jc'])),
+                'includeSection':self.listTime(re.findall(r"(\d+)",i['jc'])),
+                'courseWeek': i['zcd'],
+                'includeWeeks':self.calWeeks(re.findall(r"(\d+)",i['zcd'])),
+                'inNowWeek':1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)",i['zcd'])) else 0,
+                'exam':i['khfsmc'],
+                'campus': i['xqmc'],
+                'courseRoom': i['cdmc'],
+                'className': i['jxbmc'],
+                'hoursComposition': i['kcxszc'],
+                'weeklyHours': i['zhxs'],
+                'totalHours': i['zxs'],
+                'credit': i['xf']
+            } for i in jres['kbList']],
+        }
         res_dict = {
             'name': jres['xsxx']['XM'],
             'studentId': jres['xsxx']['XH'],
@@ -440,7 +480,7 @@ class GetInfo(object):
             } for i in jres['kbList']],
             #'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
             }
-        return res_dict
+        return res_dict2
 
     # def get_classroom(self):
     #     """获取空教室信息"""
