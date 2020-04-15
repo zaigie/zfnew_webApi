@@ -5,4 +5,7 @@
 # IntelliJ project files
 .idea
 mylogs
+
+# python
 */__pycache__
+*.py[cod]
