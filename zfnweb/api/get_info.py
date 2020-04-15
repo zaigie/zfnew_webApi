@@ -8,8 +8,9 @@ import json
 from urllib import parse
 from requests import exceptions
 
-with open('config.json',mode='r',encoding='utf-8') as f:
+with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
+
 
 class GetInfo(object):
     def __init__(self, base_url, cookies):
@@ -20,19 +21,21 @@ class GetInfo(object):
         }
         self.cookies = cookies
         self.proxies = {
-            'http':config["proxy"]
+            'http': config["proxy"]
         }
 
     def get_pinfo(self):
         """获取个人信息"""
         url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
         try:
-            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
         except exceptions.Timeout as e:
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=个人信息超时&desp=' + str(e))
-            return {'err':'Connect Timeout'}
+            requests.get(
+                'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=个人信息超时&desp=' + str(
+                    e))
+            return {'err': 'Connect Timeout'}
         jres = res.json()
-        #print(jres)
+        # print(jres)
         res_dict = {
             'name': jres['xm'],
             'studentId': jres['xh'],
@@ -41,14 +44,14 @@ class GetInfo(object):
             'candidateNumber': jres['ksh'],
             'status': jres['xjztdm'],
             'collegeName': jres['zsjg_id'],
-            'majorName': jres['zyh_id'] if jres.get('zszyh_id')== None else jres.get('zszyh_id'),
-            'className': jres['xjztdm'] if jres.get('bh_id')== None else jres.get('bh_id'),
+            'majorName': jres['zyh_id'] if jres.get('zszyh_id') is None else jres.get('zszyh_id'),
+            'className': jres['xjztdm'] if jres.get('bh_id') is None else jres.get('bh_id'),
             'entryDate': jres['rxrq'],
             'graduationSchool': jres['byzx'],
             'domicile': jres['jg'],
-            'phoneNumber':'无' if jres.get('sjhm')== None else jres.get('sjhm'),
-            'parentsNumber':'无' if jres.get('gddh')== None else jres.get('gddh'),
-            'email':'无' if jres.get('dzyx')== None else jres.get('dzyx'),
+            'phoneNumber': '无' if jres.get('sjhm') is None else jres.get('sjhm'),
+            'parentsNumber': '无' if jres.get('gddh') is None else jres.get('gddh'),
+            'email': '无' if jres.get('dzyx') is None else jres.get('dzyx'),
             'politicalStatus': jres['zzmmm'],
             'national': jres['mzm'],
             'education': jres['pyccdm'],
@@ -56,76 +59,85 @@ class GetInfo(object):
             'grade': int(jres['xh'][0:2])
         }
         return res_dict
-    def term_cn(self,xh,year,term):
+
+    @staticmethod
+    def term_cn(xh, year, term):
+        grade = "None"
         nj = int(xh[0:2])
         xnm = int(year[2:4])
         xqm = int(term)
-        global grade
         if xnm == nj:
             if xqm == 1:
                 grade = '大一上'
             elif xqm == 2:
                 grade = '大一下'
-        elif xnm == nj+1:
+        elif xnm == nj + 1:
             if xqm == 1:
                 grade = '大二上'
             elif xqm == 2:
                 grade = '大二下'
-        elif xnm == nj+2:
+        elif xnm == nj + 2:
             if xqm == 1:
                 grade = '大三上'
             elif xqm == 2:
                 grade = '大三下'
-        elif xnm == nj+3:
+        elif xnm == nj + 3:
             if xqm == 1:
                 grade = '大四上'
             elif xqm == 2:
                 grade = '大四下'
         return grade
 
-    def get_study(self,xh):
+    def get_study(self, xh):
         """获取学业情况"""
         sessions = requests.Session()
 
-        url_main = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
-        url_info = parse.urljoin(self.base_url,'/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
+        url_main = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
+        url_info = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
         try:
-            mainr = sessions.get(url_main,headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            mainr = sessions.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
+                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业超时&desp=' + str(e))
-            return {'err':'bad'}
+            requests.get(
+                'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业超时&desp=' + str(
+                    e))
+            return {'err': 'bad'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
         allc_str = []
-        for allc in soup.find_all('font',size = re.compile('2px')):
+        for allc in soup.find_all('font', size=re.compile('2px')):
             allc_str.append(allc.get_text())
         gpa = float(allc_str[2])
-        allc_num = re.findall(r"\d+",allc_str[3])
-        allc_num2 = re.findall(r"\d+",allc_str[5])
+        allc_num = re.findall(r"\d+", allc_str[3])
+        allc_num2 = re.findall(r"\d+", allc_str[5])
         allc_num.append(allc_num2[0])
         ipa = int(allc_num[0])
         ipp = int(allc_num[1])
         ipf = int(allc_num[2])
         ipn = int(allc_num[3])
         ipi = int(allc_num[4])
-        allc_num3 = re.findall(r"\d+",allc_str[6])
-        allc_num4 = re.findall(r"\d+",allc_str[7])
+        allc_num3 = re.findall(r"\d+", allc_str[6])
+        allc_num4 = re.findall(r"\d+", allc_str[7])
         opp = int(allc_num3[0])
         opf = int(allc_num4[0])
 
-        id_find = re.findall(r"xfyqjd_id='(.*)' jdkcsx='1' leaf=''",str(soup))
+        id_find = re.findall(r"xfyqjd_id='(.*)' jdkcsx='1' leaf=''", str(soup))
         idList = list({}.fromkeys(id_find).keys())
-        if xh[0:2] != '19': #本校特色，19级因更改了培养方案导致id非体系
-            match = '20' + xh[0:6]
+        tsid = "None"
+        tzid = "None"
+        zyid = "None"
+        qtid = "None"
+        if xh[0:2] != '19':  # 本校特色，19级因更改了培养方案导致id非体系
+            # match = '20' + xh[0:6]
             for i in idList:
-                if re.findall(r"tsjy",i):
+                if re.findall(r"tsjy", i):
                     tsid = i[0:14]
-                elif re.findall(r"tzjy",i):
+                elif re.findall(r"tzjy", i):
                     tzid = i[0:14]
-                elif re.findall(r"zyjy",i):
+                elif re.findall(r"zyjy", i):
                     zyid = i[0:14]
-                elif re.findall(r"qtkcxfyq",i):
+                elif re.findall(r"qtkcxfyq", i):
                     qtid = i
         else:
             tsid = idList[0]
@@ -133,106 +145,111 @@ class GetInfo(object):
             zyid = idList[1]
             qtid = idList[3]
 
-        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
-        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
-        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
-        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+        res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies,
+                               proxies=self.proxies, timeout=(5, 10))
+        res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies,
+                               proxies=self.proxies, timeout=(5, 10))
+        res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies,
+                               proxies=self.proxies, timeout=(5, 10))
+        res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies,
+                               proxies=self.proxies, timeout=(5, 10))
 
-        ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",str(soup))
-        ts_point_list = list(list({}.fromkeys(ts_point_find).keys())[0])    #先得到元组再拆开转换成列表
+        ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
+                                   str(soup))
+        ts_point_list = list(list({}.fromkeys(ts_point_find).keys())[0])  # 先得到元组再拆开转换成列表
         ts_point = {
-            'tsr':ts_point_list[0],
-            'tsg':ts_point_list[1],
-            'tsn':ts_point_list[2]
+            'tsr': ts_point_list[0],
+            'tsg': ts_point_list[1],
+            'tsn': ts_point_list[2]
         }
-        tz_point_find = re.findall(r"拓展教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",str(soup))
+        tz_point_find = re.findall(r"拓展教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
+                                   str(soup))
         tz_point_list = list(list({}.fromkeys(tz_point_find).keys())[0])
         tz_point = {
-            'tzr':tz_point_list[0],
-            'tzg':tz_point_list[1],
-            'tzn':tz_point_list[2]
+            'tzr': tz_point_list[0],
+            'tzg': tz_point_list[1],
+            'tzn': tz_point_list[2]
         }
-        zy_point_find = re.findall(r"专业教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",str(soup))
+        zy_point_find = re.findall(r"专业教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
+                                   str(soup))
         zy_point_list = list(list({}.fromkeys(zy_point_find).keys())[0])
         zy_point = {
-            'zyr':zy_point_list[0],
-            'zyg':zy_point_list[1],
-            'zyn':zy_point_list[2]
+            'zyr': zy_point_list[0],
+            'zyg': zy_point_list[1],
+            'zyn': zy_point_list[2]
         }
-        
+
         res_main = {
-            'gpa':gpa,  #平均学分绩点GPA
-            'ipa':ipa,  #计划内总课程数
-            'ipp':ipp,  #计划内已过课程数
-            'ipf':ipf,  #计划内未过课程数
-            'ipn':ipn,  #计划内未修课程数
-            'ipi':ipi,  #计划内在读课程数
-            'opp':opp,  #计划外已过课程数
-            'opf':opf,  #计划外未过课程数
-            'err':'ok',
-            'tsData':{
-                'tsPoint':ts_point, #通识教育学分情况
-                'tsItems':[{
-                    'courseTitle':j["KCMC"],
-                    'courseId':j["KCH"],
-                    'courseSituation':j["XDZT"],
-                    'courseTerm':self.term_cn(xh,j["JYXDXNM"],j["JYXDXQMC"]),
-                    'courseCategory': ' ' if j.get('KCLBMC') == None else j.get('KCLBMC'),
-                    'courseAttribution': ' ' if j.get('KCXZMC') == None else j.get('KCXZMC'),
-                    'maxGrade':' ' if j.get('MAXCJ') == None else j["MAXCJ"],
-                    'credit':' ' if j.get('XF') == None else float(j["XF"]),
-                    'gradePoint':' ' if j.get('JD') == None else float(j["JD"]),
-                }for j in res_ts.json()], #通识教育修读情况
-                },
-            'tzdata':{
-                'tzPoint':tz_point, #拓展教育学分情况
-                'tzItems':[{
-                    'courseTitle':k["KCMC"],
-                    'courseId':k["KCH"],
-                    'courseSituation':k["XDZT"],
-                    'courseTerm':self.term_cn(xh,k["JYXDXNM"],k["JYXDXQMC"]),
-                    'courseCategory': ' ' if k.get('KCLBMC') == None else k.get('KCLBMC'),
-                    'courseAttribution': ' ' if k.get('KCXZMC') == None else k.get('KCXZMC'),
-                    'maxGrade':' ' if k.get('MAXCJ') == None else k["MAXCJ"],
-                    'credit':' ' if k.get('XF') == None else float(k["XF"]),
-                    'gradePoint':' ' if k.get('JD') == None else float(k["JD"]),
-                }for k in res_tz.json()], #拓展教育修读情况
-                },
-            'zydata':{
-                'zyPoint':zy_point, #专业教育学分情况
-                'zyItems':[{
-                    'courseTitle':l["KCMC"],
-                    'courseId':l["KCH"],
-                    'courseSituation':l["XDZT"],
-                    'courseTerm':self.term_cn(xh,l["JYXDXNM"],l["JYXDXQMC"]),
-                    'courseCategory': ' ' if l.get('KCLBMC') == None else l.get('KCLBMC'),
-                    'courseAttribution': ' ' if l.get('KCXZMC') == None else l.get('KCXZMC'),
-                    'maxGrade':' ' if l.get('MAXCJ') == None else l["MAXCJ"],
-                    'credit':' ' if l.get('XF') == None else float(l["XF"]),
-                    'gradePoint':' ' if l.get('JD') == None else float(l["JD"]),
-                }for l in res_zy.json()], #专业教育修读情况
-                },
-            'qtdata':{
-                'qtPoint':'{}', #其它课程学分情况
-                'qtItems':[{
-                    'courseTitle':m["KCMC"],
-                    'courseId':m["KCH"],
-                    'courseSituation':m["XDZT"],
-                    'courseTerm':self.term_cn(xh,m["XNM"],m["XQMMC"]),
-                    'courseCategory': ' ' if m.get('KCLBMC') == None else m.get('KCLBMC'),
-                    'courseAttribution': ' ' if m.get('KCXZMC') == None else m.get('KCXZMC'),
-                    'maxGrade':' ' if m.get('MAXCJ') == None else m["MAXCJ"],
-                    'credit':' ' if m.get('XF') == None else float(m["XF"]),
-                    'gradePoint':' ' if m.get('JD') == None else float(m["JD"]),
-                }for m in res_qt.json()], #其它课程修读情况
-                },
+            'gpa': gpa,  # 平均学分绩点GPA
+            'ipa': ipa,  # 计划内总课程数
+            'ipp': ipp,  # 计划内已过课程数
+            'ipf': ipf,  # 计划内未过课程数
+            'ipn': ipn,  # 计划内未修课程数
+            'ipi': ipi,  # 计划内在读课程数
+            'opp': opp,  # 计划外已过课程数
+            'opf': opf,  # 计划外未过课程数
+            'err': 'ok',
+            'tsData': {
+                'tsPoint': ts_point,  # 通识教育学分情况
+                'tsItems': [{
+                    'courseTitle': j["KCMC"],
+                    'courseId': j["KCH"],
+                    'courseSituation': j["XDZT"],
+                    'courseTerm': self.term_cn(xh, j["JYXDXNM"], j["JYXDXQMC"]),
+                    'courseCategory': ' ' if j.get('KCLBMC') is None else j.get('KCLBMC'),
+                    'courseAttribution': ' ' if j.get('KCXZMC') is None else j.get('KCXZMC'),
+                    'maxGrade': ' ' if j.get('MAXCJ') is None else j["MAXCJ"],
+                    'credit': ' ' if j.get('XF') is None else float(j["XF"]),
+                    'gradePoint': ' ' if j.get('JD') is None else float(j["JD"]),
+                } for j in res_ts.json()],  # 通识教育修读情况
+            },
+            'tzdata': {
+                'tzPoint': tz_point,  # 拓展教育学分情况
+                'tzItems': [{
+                    'courseTitle': k["KCMC"],
+                    'courseId': k["KCH"],
+                    'courseSituation': k["XDZT"],
+                    'courseTerm': self.term_cn(xh, k["JYXDXNM"], k["JYXDXQMC"]),
+                    'courseCategory': ' ' if k.get('KCLBMC') is None else k.get('KCLBMC'),
+                    'courseAttribution': ' ' if k.get('KCXZMC') is None else k.get('KCXZMC'),
+                    'maxGrade': ' ' if k.get('MAXCJ') is None else k["MAXCJ"],
+                    'credit': ' ' if k.get('XF') is None else float(k["XF"]),
+                    'gradePoint': ' ' if k.get('JD') is None else float(k["JD"]),
+                } for k in res_tz.json()],  # 拓展教育修读情况
+            },
+            'zydata': {
+                'zyPoint': zy_point,  # 专业教育学分情况
+                'zyItems': [{
+                    'courseTitle': l["KCMC"],
+                    'courseId': l["KCH"],
+                    'courseSituation': l["XDZT"],
+                    'courseTerm': self.term_cn(xh, l["JYXDXNM"], l["JYXDXQMC"]),
+                    'courseCategory': ' ' if l.get('KCLBMC') is None else l.get('KCLBMC'),
+                    'courseAttribution': ' ' if l.get('KCXZMC') is None else l.get('KCXZMC'),
+                    'maxGrade': ' ' if l.get('MAXCJ') is None else l["MAXCJ"],
+                    'credit': ' ' if l.get('XF') is None else float(l["XF"]),
+                    'gradePoint': ' ' if l.get('JD') is None else float(l["JD"]),
+                } for l in res_zy.json()],  # 专业教育修读情况
+            },
+            'qtdata': {
+                'qtPoint': '{}',  # 其它课程学分情况
+                'qtItems': [{
+                    'courseTitle': m["KCMC"],
+                    'courseId': m["KCH"],
+                    'courseSituation': m["XDZT"],
+                    'courseTerm': self.term_cn(xh, m["XNM"], m["XQMMC"]),
+                    'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
+                    'courseAttribution': ' ' if m.get('KCXZMC') is None else m.get('KCXZMC'),
+                    'maxGrade': ' ' if m.get('MAXCJ') is None else m["MAXCJ"],
+                    'credit': ' ' if m.get('XF') is None else float(m["XF"]),
+                    'gradePoint': ' ' if m.get('JD') is None else float(m["JD"]),
+                } for m in res_qt.json()],  # 其它课程修读情况
+            },
         }
 
         return res_main
 
-            
-
-    #def get_notice(self):
+    # def get_notice(self):
     #   """获取通知"""
     #    url_0 = parse.urljoin(self.base_url, '/xtgl/index_cxNews.html?localeKey=zh_CN&gnmkdm=index')
     #    url_1 = parse.urljoin(self.base_url, 'xtgl/index_cxAreaTwo.html?localeKey=zh_CN&gnmkdm=index')
@@ -274,7 +291,7 @@ class GetInfo(object):
             'sfyy': '0',  # 是否已阅，未阅未1，已阅为2
             'flag': '1',
             '_search': 'false',
-            'nd': int(time.time()*1000),
+            'nd': int(time.time() * 1000),
             'queryModel.showCount': '1000',  # 最多条数
             'queryModel.currentPage': '1',  # 当前页数
             'queryModel.sortName': 'cjsj',
@@ -282,10 +299,13 @@ class GetInfo(object):
             'time': '0'
         }
         try:
-            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
+                                timeout=(5, 10))
         except exceptions.Timeout as e:
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=消息超时&desp=' + str(e))
-            return {'err':'Connect Timeout'}
+            requests.get(
+                'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=消息超时&desp=' + str(
+                    e))
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         res_list = [{'message': i['xxnr'], 'ctime': i['cjsj']} for i in jres['items']]
         return res_list
@@ -314,7 +334,7 @@ class GetInfo(object):
             'xnm': year,  # 学年数
             'xqm': term,  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
             '_search': 'false',
-            'nd': int(time.time()*1000),
+            'nd': int(time.time() * 1000),
             'queryModel.showCount': '100',  # 每页最多条数
             'queryModel.currentPage': '1',
             'queryModel.sortName': '',
@@ -322,10 +342,13 @@ class GetInfo(object):
             'time': '0'  # 查询次数
         }
         try:
-            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
+                                timeout=(5, 10))
         except exceptions.Timeout as e:
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩超时&desp=' + str(e))
-            return {'err':'bad'}
+            requests.get(
+                'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩超时&desp=' + str(
+                    e))
+            return {'err': 'bad'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -333,43 +356,44 @@ class GetInfo(object):
                 'studentId': jres['items'][0]['xh'],
                 'schoolYear': jres['items'][0]['xnm'],
                 'schoolTerm': jres['items'][0]['xqmmc'],
-                'err':'ok',
+                'err': 'ok',
                 'course': [{
                     'courseTitle': i['kcmc'],
                     'teacher': i['jsxm'],
                     'courseId': i['kch_id'],
-                    'className': '无'if i.get('jxbmc')== None else i.get('jxbmc'),
-                    'courseNature': '无'if i.get('kcxzmc')== None else i.get('kcxzmc'),
-                    'credit': '无' if i.get('xf')== None else i.get('xf'),
+                    'className': '无' if i.get('jxbmc') is None else i.get('jxbmc'),
+                    'courseNature': '无' if i.get('kcxzmc') is None else i.get('kcxzmc'),
+                    'credit': '无' if i.get('xf') is None else i.get('xf'),
                     'grade': i['cj'],
-                    'gradePoint': '无' if i.get('jd') == None else i.get('jd'),
+                    'gradePoint': '无' if i.get('jd') is None else i.get('jd'),
                     'gradeNature': i['ksxz'],
-                    'startCollege': '无' if i.get('kkbmmc') == None else i.get('kkbmmc'),
+                    'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
                     'courseMark': i['kcbj'],
-                    'courseCategory': '无' if i.get('kclbmc') == None else i.get('kclbmc'),
-                    'courseAttribution': '无' if i.get('kcgsmc') == None else i.get('kcgsmc')
+                    'courseCategory': '无' if i.get('kclbmc') is None else i.get('kclbmc'),
+                    'courseAttribution': '无' if i.get('kcgsmc') is None else i.get('kcgsmc')
                 } for i in jres['items']]}
             return res_dict
         else:
             return {}
-    def calWeeks(self,args):
+
+    @staticmethod
+    def calWeeks(args):
         if len(args) == 1:
             num = int(args[0])
-            firstlist = []
-            firstlist.append(num)
+            firstlist = [num]
             return firstlist
         elif len(args) == 2:
             k1 = int(args[0])
             k2 = int(args[1])
             r = []
-            for n in range(k1,k2+1):
+            for n in range(k1, k2 + 1):
                 r.append(n)
             return r
         elif len(args) == 3:
             k12 = int(args[0])
             k22 = int(args[1])
             r2 = []
-            for n2 in range(k12,k22+1):
+            for n2 in range(k12, k22 + 1):
                 r2.append(n2)
             r2.append(int(args[2]))
             return r2
@@ -379,29 +403,35 @@ class GetInfo(object):
             num3 = int(args[2])
             num4 = int(args[3])
             clist = []
-            for i in range(num1,num2+1):
+            for i in range(num1, num2 + 1):
                 clist.append(i)
-            for j in range(num3,num4+1):
+            for j in range(num3, num4 + 1):
                 clist.append(j)
             return clist
         else:
-            return [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-    def calTime(self,args):
+            return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+
+    @staticmethod
+    def calTime(args):
         num1 = str(args[0])
         num2 = str(args[1])
         k1 = config["TimesUp"][num1]
         k2 = config["TimesDown"][num2]
         r = k1 + '~' + k2
         return r
-    def upTime(self,args):
+
+    @staticmethod
+    def upTime(args):
         num1 = str(args[0])
         k1 = config["TimesUp"][num1]
         return k1
-    def listTime(self,args):
+
+    @staticmethod
+    def listTime(args):
         num1 = int(args[0])
         num2 = int(args[1])
         itemList = []
-        for i in range(num1,num2):
+        for i in range(num1, num2):
             itemList.append(i)
         return itemList
 
@@ -420,40 +450,43 @@ class GetInfo(object):
             'xqm': term
         }
         try:
-            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies, timeout=(5,10))
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
+                                timeout=(5, 10))
         except exceptions.Timeout as e:
-            requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课表超时&desp=' + str(e))
-            return {'err':'Connect Timeout'}
+            requests.get(
+                'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课表超时&desp=' + str(
+                    e))
+            return {'err': 'Connect Timeout'}
         jres = res.json()
-        
-        res_dict2 = {
-            'name': jres['xsxx']['XM'],
-            'studentId': jres['xsxx']['XH'],
-            'schoolYear': jres['xsxx']['XNM'],
-            'schoolTerm': jres['xsxx']['XQMMC'],
-            'normalCourse': [{
-                'courseTitle': i['kcmc'],
-                'courseTitleShort':i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
-                'teacher': '无' if i.get('xm')== None else i.get('xm'),
-                'courseId': i['kch_id'],
-                'courseWeekday':i['xqj'],
-                'courseSection': i['jc'],
-                'upTime':self.upTime(re.findall(r"(\d+)",i['jc'])),
-                'courseTime': self.calTime(re.findall(r"(\d+)",i['jc'])),
-                'includeSection':self.listTime(re.findall(r"(\d+)",i['jc'])),
-                'courseWeek': i['zcd'],
-                'includeWeeks':self.calWeeks(re.findall(r"(\d+)",i['zcd'])),
-                'inNowWeek':1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)",i['zcd'])) else 0,
-                'exam':i['khfsmc'],
-                'campus': i['xqmc'],
-                'courseRoom': i['cdmc'],
-                'className': i['jxbmc'],
-                'hoursComposition': i['kcxszc'],
-                'weeklyHours': i['zhxs'],
-                'totalHours': i['zxs'],
-                'credit': i['xf']
-            } for i in jres['kbList']],
-        }
+
+        # res_dict2 = {
+        #     'name': jres['xsxx']['XM'],
+        #     'studentId': jres['xsxx']['XH'],
+        #     'schoolYear': jres['xsxx']['XNM'],
+        #     'schoolTerm': jres['xsxx']['XQMMC'],
+        #     'normalCourse': [{
+        #         'courseTitle': i['kcmc'],
+        #         'courseTitleShort': i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
+        #         'teacher': '无' if i.get('xm') is None else i.get('xm'),
+        #         'courseId': i['kch_id'],
+        #         'courseWeekday': i['xqj'],
+        #         'courseSection': i['jc'],
+        #         'upTime': self.upTime(re.findall(r"(\d+)", i['jc'])),
+        #         'courseTime': self.calTime(re.findall(r"(\d+)", i['jc'])),
+        #         'includeSection': self.listTime(re.findall(r"(\d+)", i['jc'])),
+        #         'courseWeek': i['zcd'],
+        #         'includeWeeks': self.calWeeks(re.findall(r"(\d+)", i['zcd'])),
+        #         'inNowWeek': 1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)", i['zcd'])) else 0,
+        #         'exam': i['khfsmc'],
+        #         'campus': i['xqmc'],
+        #         'courseRoom': i['cdmc'],
+        #         'className': i['jxbmc'],
+        #         'hoursComposition': i['kcxszc'],
+        #         'weeklyHours': i['zhxs'],
+        #         'totalHours': i['zxs'],
+        #         'credit': i['xf']
+        #     } for i in jres['kbList']],
+        # }
         res_dict = {
             'name': jres['xsxx']['XM'],
             'studentId': jres['xsxx']['XH'],
@@ -461,15 +494,15 @@ class GetInfo(object):
             'schoolTerm': jres['xsxx']['XQMMC'],
             'normalCourse': [{
                 'courseTitle': i['kcmc'],
-                'courseTitleShort':i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
-                'teacher': '无' if i.get('xm')== None else i.get('xm'),
+                'courseTitleShort': i['kcmc'][0:12] + '..' if len(i['kcmc']) > 12 else i['kcmc'],
+                'teacher': '无' if i.get('xm') is None else i.get('xm'),
                 'courseId': i['kch_id'],
-                'courseWeekday':i['xqj'],
+                'courseWeekday': i['xqj'],
                 'courseSection': i['jc'],
-                'courseTime': self.calTime(re.findall(r"(\d+)",i['jc'])),
+                'courseTime': self.calTime(re.findall(r"(\d+)", i['jc'])),
                 'courseWeek': i['zcd'],
-                'inNowWeek':1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)",i['zcd'])) else 0,
-                'exam':i['khfsmc'],
+                'inNowWeek': 1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)", i['zcd'])) else 0,
+                'exam': i['khfsmc'],
                 'campus': i['xqmc'],
                 'courseRoom': i['cdmc'],
                 'className': i['jxbmc'],
@@ -478,9 +511,9 @@ class GetInfo(object):
                 'totalHours': i['zxs'],
                 'credit': i['xf']
             } for i in jres['kbList']],
-            #'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
-            }
-        return res_dict2
+            # 'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
+        }
+        return res_dict
 
     # def get_classroom(self):
     #     """获取空教室信息"""
@@ -516,7 +549,7 @@ class GetInfo(object):
     #     res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies)
     #     return res
 
-    #def get_exam(self, year, term):
+    # def get_exam(self, year, term):
     #    """获取考试信息"""
     #    url = parse.urljoin(self.base_url, '/kwgl/kscx_cxXsksxxIndex.html?doType=query&gnmkdm=N358105')
     #    if term == '1':  # 修改检测学期

@@ -9,3 +9,6 @@ mylogs
 # python
 */__pycache__
 *.py[cod]
+
+# django
+db.sqlite3
