@@ -5,4 +5,4 @@
 # IntelliJ project files
 .idea
 mylogs
-.gitignore
+*/__pycache__
