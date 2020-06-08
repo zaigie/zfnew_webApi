@@ -79,6 +79,11 @@ def update_cookies(xh, pswd):
             # print('新cookies:')
             content = ('【%s】更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), spendTime))
             writeLog(content)
+            person = GetInfo(base_url=base_url, cookies=cookies)
+            pinfo = person.get_pinfo()
+            # print(pinfo)
+            filename = ('Pinfo')
+            newData(xh, filename, json.dumps(pinfo, ensure_ascii=False))
             # print(requests.utils.dict_from_cookiejar(cookies))
             return cookies
         else:
@@ -129,6 +134,8 @@ def get_pinfo(request):
                     content = ('【%s】[%s]第%d次登录了，耗时%.2fs' % (
                         datetime.datetime.now().strftime('%H:%M:%S'), pinfo["name"], refreshTimes, spendTime))
                     writeLog(content)
+                    filename = ('Pinfo')
+                    newData(xh, filename, json.dumps(pinfo, ensure_ascii=False))
                     return HttpResponse(json.dumps(pinfo, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 elif lgn.runcode == 2:
@@ -176,6 +183,8 @@ def get_pinfo(request):
                     content = ('【%s】[%s]第一次登录，耗时%.2fs' % (
                         datetime.datetime.now().strftime('%H:%M:%S'), pinfo["name"], spendTime))
                     writeLog(content)
+                    filename = ('Pinfo')
+                    newData(xh, filename, json.dumps(pinfo, ensure_ascii=False))
                     return HttpResponse(json.dumps(pinfo, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 elif lgn.runcode == 2:
