@@ -5,7 +5,7 @@ import time
 import json
 import requests
 from api import GetInfo, Login
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from info.models import Students
 
 with open('config.json', mode='r', encoding='utf-8') as f:
@@ -34,9 +34,16 @@ def cacheData(xh, filename):
 def newData(xh, filename, content):
     docurl = 'data/' + str(xh)[0:2] + '/' + str(xh) + '/'
     fileurl = docurl + str(filename) + '.json'
-    if not os.path.exists(fileurl):
+    if not os.path.exists(docurl):
+        os.makedirs(docurl)
         with open(fileurl, mode='w', encoding='utf-8') as n:
             n.write(content)
+    else:
+        with open(fileurl, mode='w', encoding='utf-8') as n:
+            n.write(content)
+    # if not os.path.exists(fileurl):
+    #     with open(fileurl, mode='w', encoding='utf-8') as n:
+    #         n.write(content)
 
 
 def writeLog(content):
@@ -77,21 +84,28 @@ def update_cookies(xh, pswd):
         else:
             content = ('【%s】[%s]更新cookies时网络或其他错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return '网络或token问题！'
+            return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     except Exception as e:
-        requests.get(
-            'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=更新cookies未知错误&desp=' + str(
-                e) + '\n' + str(xh) + '\n' + str(pswd))
-        return '未知错误'
+        ServerChan = config["ServerChan"]
+        text = "更新cookies未知错误"
+        if ServerChan == "none":
+            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        else:
+            requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
 
 
 def get_pinfo(request):
     if request.method == 'POST':
         if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
         else:
-            return HttpResponse('请提交正确的post数据！')
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if Students.objects.filter(studentId=int(xh)):
             stu = Students.objects.get(studentId=int(xh))
             refreshTimes = int(stu.refreshTimes)
@@ -120,19 +134,26 @@ def get_pinfo(request):
                 elif lgn.runcode == 2:
                     content = ('【%s】[%s]在登录时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse('学号或者密码错误！')
+                    return HttpResponse(json.dumps({'err':'学号或者密码错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
                 else:
                     content = ('【%s】[%s]在登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse('网络或token问题！')
+                    return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             except Exception as e:
                 print(e)
                 content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                 writeLog(content)
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return HttpResponse('unknowError')
+                ServerChan = config["ServerChan"]
+                text = "登录未知错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
         else:
             try:
                 startTime = time.time()
@@ -160,34 +181,44 @@ def get_pinfo(request):
                 elif lgn.runcode == 2:
                     content = ('【%s】[%s]在第一次登录时学号或者密码错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse('学号或者密码错误！')
+                    return HttpResponse(json.dumps({'err':'学号或者密码错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
                 else:
                     content = ('【%s】[%s]在第一次登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse('网络或token问题！')
+                    return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             except Exception as e:
-                print(e)
+                # print(e)
                 content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                 writeLog(content)
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录未知错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return HttpResponse('unknowError')
+                ServerChan = config["ServerChan"]
+                text = "登录未知错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse('请使用post并提交正确数据！')
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 
 def get_message(request):
     if request.method == 'POST':
         if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
         else:
-            return HttpResponse('请提交正确的post数据！')
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问消息' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse('还未登录！')
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
@@ -212,33 +243,50 @@ def get_message(request):
             content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 5 column 1 (char 9)':
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=消息错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return {'err': 'Unknow Error'}
+                ServerChan = config["ServerChan"]
+                text = "消息错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
-            if sta == '网络或token问题！' or sta == '未知错误':
-                return HttpResponse(sta)
             person = GetInfo(base_url=base_url, cookies=sta)
             message = person.get_message()
             return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse('请使用post并提交正确数据！')
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 
 def get_study(request):
     if request.method == 'POST':
         if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
+            refresh = request.POST.get("refresh")
         else:
-            return HttpResponse('请提交正确的post数据！')
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问学业情况' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse('还未登录！')
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
+        if refresh == "no":
+            filename = ('Study')
+            cache = cacheData(xh, filename)
+            if cache is not None:
+                # print('cache')
+                print('【%s】查看了学业缓存' % stu.name)
+                return HttpResponse(json.dumps(cache, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            else:
+                pass
         try:
             startTime = time.time()
             print('【%s】查看了学业情况' % stu.name)
@@ -251,59 +299,70 @@ def get_study(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
-            if study['err'] == 'bad':
+            if study['err'] == 'Connect Timeout':
                 sta = update_cookies(xh, pswd)
-                if sta == '网络或token问题！' or sta == '未知错误':
-                    return HttpResponse(sta)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
+                filename = ('Study')
+                newData(xh, filename, json.dumps(study, ensure_ascii=False))
                 return HttpResponse(json.dumps(study, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
             writeLog(content)
+            filename = ('Study')
+            newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
             content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'list index out of range':
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=学业错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return {'err': 'Unknow Error'}
+                ServerChan = config["ServerChan"]
+                text = "学业错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
-            if sta == '网络或token问题！' or sta == '未知错误':
-                return HttpResponse(sta)
             person = GetInfo(base_url=base_url, cookies=sta)
             study = person.get_study(xh)
+            filename = ('Study')
+            newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse('请使用post并提交正确数据！')
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 
 def get_grade(request):
     if request.method == 'POST':
         if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
-            year = request.POST["year"]
-            term = request.POST["term"]
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
+            year = request.POST.get("year")
+            term = request.POST.get("term")
+            refresh = request.POST.get("refresh")
         else:
-            return HttpResponse('请提交正确的post数据！')
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse('还未登录！')
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
-        newest = config["gradesTime"]
-        if (str(year) + str(term)) != newest:
+        if refresh == "no":
             filename = ('Grades-%s%s' % (str(year), str(term)))
             cache = cacheData(xh, filename)
             if cache is not None:
-                print('cache')
+                # print('cache')
+                print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
                 return HttpResponse(json.dumps(cache, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
@@ -325,54 +384,63 @@ def get_grade(request):
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
                 datetime.datetime.now().strftime('%H:%M:%S'), stu.name, year, term, spendTime))
             writeLog(content)
-            if (str(year) + str(term)) != newest:
-                filename = ('Grades-%s%s' % (str(year), str(term)))
-                newData(xh, filename, json.dumps(grade, ensure_ascii=False))
-                print('write')
+            
+            filename = ('Grades-%s%s' % (str(year), str(term)))
+            newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+            # print('write')
+
             return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            print(e)
+            # print(e)
             content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=成绩错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return {'err': 'Unknow Error'}
+                ServerChan = config["ServerChan"]
+                text = "成绩错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
-            if sta == '网络或token问题！' or sta == '未知错误':
-                return HttpResponse(sta)
             person = GetInfo(base_url=base_url, cookies=sta)
             grade = person.get_grade(year, term)
-            if (str(year) + str(term)) != newest:
-                filename = ('Grades-%s%s' % (str(year), str(term)))
-                newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+
+            filename = ('Grades-%s%s' % (str(year), str(term)))
+            newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+
             return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse('请使用post并提交正确数据！')
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 
 def get_schedule(request):
     if request.method == 'POST':
         if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
-            year = request.POST["year"]
-            term = request.POST["term"]
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
+            year = request.POST.get("year")
+            term = request.POST.get("term")
+            refresh = request.POST.get("refresh")
         else:
-            return HttpResponse('请提交正确的post数据！')
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问课程' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse('还未登录！')
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
-        newest = config["schedulesTime"]
-        if (str(year) + str(term)) != newest:
+        if refresh == "no":
             filename = ('Schedules-%s%s' % (str(year), str(term)))
             cache = cacheData(xh, filename)
             if cache is not None:
-                print('cache')
+                # print('cache')
+                print('【%s】查看了%s-%s的课表缓存' % (stu.name, year, term))
                 return HttpResponse(json.dumps(cache, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
@@ -394,28 +462,34 @@ def get_schedule(request):
             content = ('【%s】[%s]访问了%s-%s的课程，耗时%.2fs' % (
                 datetime.datetime.now().strftime('%H:%M:%S'), stu.name, year, term, spendTime))
             writeLog(content)
-            if (str(year) + str(term)) != newest:
-                filename = ('Schedules-%s%s' % (str(year), str(term)))
-                newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
-                print('write')
+
+            filename = ('Schedules-%s%s' % (str(year), str(term)))
+            newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
+            # print('write')
+
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
             content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=课程错误&desp=' + str(
-                        e) + '\n' + str(xh) + '\n' + str(pswd))
-                return {'err': 'Unknow Error'}
+                ServerChan = config["ServerChan"]
+                text = "课程错误"
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
-            if sta == '网络或token问题！' or sta == '未知错误':
-                return HttpResponse(sta)
             person = GetInfo(base_url=base_url, cookies=sta)
             schedule = person.get_schedule(year, term)
-            if (str(year) + str(term)) != newest:
-                filename = ('Schedules-%s%s' % (str(year), str(term)))
-                newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
+            
+            filename = ('Schedules-%s%s' % (str(year), str(term)))
+            newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
+
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse('请使用post并提交正确数据！')
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")

@@ -3,6 +3,5 @@ from recruit import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('idcard',views.getByIdCard),
-    path('ksh',views.getByKsh)
+    path('query',views.getResult),
 ]

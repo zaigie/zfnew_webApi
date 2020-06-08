@@ -1,9 +1,9 @@
 
-基于Django的新正方教务管理系统的爬虫webApi，请求**返回JSON数据**
+基于Django+MySQL的新正方教务管理系统的爬虫webApi
 
-**登录、消息及成绩和课程**API基于[NeroAsmarr/zfnew](https://github.com/NeroAsmarr/zfnew)【2020.2.16】
+**登录、消息及成绩和课程**部分API基于[NeroAsmarr/zfnew](https://github.com/NeroAsmarr/zfnew)【2020.2.16】
 
-目前项目部署在“西院助手”微信/QQ小程序中作为API测试
+目前项目部署在“西院助手”微信/QQ小程序中作为API
 
 求⭐⭐⭐⭐⭐（跪
 
@@ -15,66 +15,67 @@
 
 ### Tips
 
- - **config.json**中包含了小程序所需加载的配置项
- - 通过pinfo新增学生，并将cookies存入数据库
+ - 由于学校教务系统可能会不定期无法访问，所以将学生请求到的信息以json格式分类存储到服务器
+ - 为了方便管理和请求，不采用传递cookies的方法，而是**将cookies存储到数据库**让服务器请求
+ - 须先通过pinfo新增学生后才能访问其它API
+ - 使用simpleui后台，自定义在**settings.py**以及**info/admin.py**和**info/models.py**
  - 请求其它内容时，cookies失效后将重新执行登录，并更新数据库中的两个cookies字段和updateTime字段以及增加refreshTimes次数字段（请求内容失败可能并不完全是因为cookies失效，但目前暂未遇到其它错误，且更新cookies也是一个较为通用的解决办法）
- - config.json中的proxy为**http代理**
  - 选课API可能**并不通用**，这里仅提供思路，具体请参照自己学校情况
  - 代码中有关于开发者本校的**录取查询(recruitApp)**，**不通用**，请自行编写替换或删除
- - 鉴于实现方式和并发量，并**不推荐**将本项目部署到产品项目中，若须经过自己的服务器，推荐**混合开发**
- - CentOs自带的sqlite3版本较低，**Django2.1.8**以上不兼容
-     - 解决办法一：通过requirements.txt安装模块，将requirements.txt中的Django版本**更改为2.1.8**
-     - 解决办法二：升级自带的sqlite3版本，并重新链接（移步百度
- - **部署的时候代码中Server酱部分麻烦换成自己的**🙏
+ - 使用MySQL数据库，请保证MySQL版本为**5.6及以上**
+ - **config.json**中包含了http代理、官网、Server酱、上下课时间配置
+    - ServerChan为**none**时，不使用Server酱，而配置时须填上完整url，**末尾以'.send?'结尾**
+    - proxy为**none**时，不使用代理
+    - nowterm本来想写成自动判断的，但想到第一个期末成绩出来的时间不定，所以还是用了手动配置，'3'为上学期，'12'为下学期
 
 ### POST地址&Data
 #### 请求信息
 ```
-个人信息(必须，用以登录)：xxx:8000/info/pinfo
-※信息FromData={xh:'学号',pswd:'密码'}
+个人信息(必须，用以登录)：/info/pinfo
+※信息参数={xh:'学号',pswd:'密码'}
 
-停补换课消息：xxx:8000/info/message
-※消息FromData={xh:'学号',pswd:'密码'}
+停补换课消息：/info/message
+※消息参数={xh:'学号',pswd:'密码'}
 
-课程修读情况(学业详情)：xxx:8000/info/study
-※学业FromData={xh:'学号',pswd:'密码'}
+课程修读情况(学业详情)：/info/study
+※学业参数={xh:'学号',pswd:'密码',refresh:'是否刷新(no/yes)'}
 
-请求成绩: xxx:8000/info/grade
-※成绩FromData={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期'}
+请求成绩: /info/grade
+※成绩参数={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期',refresh:'是否刷新(no/yes)'}
 
-请求课表：xxx:8000/info/schedule
-※课表FromData={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期'}
+请求课表：/info/schedule
+※课表参数={xh:'学号',pswd:'密码',year:'查询学年',term:'查询学期',refresh:'是否刷新(no/yes)'}
 
-手动更新cookies：xxx:8000/info/update
-※更新FromData={xh:'学号',pswd:'密码'}
+手动更新cookies：/info/update
+※更新参数={xh:'学号',pswd:'密码'}
 ```
 #### 选课请求
 ```
-请求已选课程：xxx:8000/choose/choosed
-※已选FromData={xh:'学号',pswd:'密码'}
+请求已选课程：/choose/choosed
+※已选参数={xh:'学号',pswd:'密码',refresh:'是否刷新(no/yes)'}
 
-板块课：xxx:8000/choose/bkk
-板块课FromData={xh:'学号',pswd:'密码',bkk:'1 or 2'}
+板块课：/choose/bkk
+板块课参数={xh:'学号',pswd:'密码',bkk:'1 or 2'}
 
-选择某课：xxx:8000/choose/choose
-※选课FromData={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号',kklxdm:'板块课1/2特有ID'}
+选择某课：/choose/choose
+※选课参数={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号',kklxdm:'板块课1/2特有ID'}
 
-退掉某课：xxx:8000/choose/cancel
-※退课FromData={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号'}
+退掉某课：/choose/cancel
+※退课参数={xh:'学号',pswd:'密码',doId:'执行ID',kcId:'课程号'}
 ```
 
 ### 额外请求
 ```
-one·一个 每日文字：xxx:8000/one
+one·一个 每日文字：/one
 ※GET请求
 
-录取查询（通过开发者所在学校招生网获取数据，不通用）：xxx:8000/recruit/ksh(idcard)
-※录取FromData={ksh:'考生号'(idcard:'身份证号')}
+录取查询（通过开发者所在学校招生网获取数据，不通用）：/recruit/query
+※录取参数={identity:'考生号' or '身份证号'}
 ```
 
 ## 使用部署
  - 推荐使用**uswgi+nginx**，具体部署可移步百度
- - 更改config.json中各项：base_url为学校教务系统网址，proxy为http代理
+ - 更改config.json中各项：参照上方Tips
 
 ## 测试部署(建议仅测试用)
 
@@ -87,9 +88,22 @@ $ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 ```
 
 ### 2.开放安全组配置
- - 开放80、8000端口
+ - 开放8000端口
 
-### 3.用终端打开zfnweb文件夹，并运行
+### 3.迁移数据库
+
+```shell
+$ python manage.py makemigrations
+$ python manage.py migrate
+```
+
+### 4.创建后台用户
+
+```shell
+$ python manage.py createsuperuser
+```
+
+### 5.用终端打开zfnweb文件夹，并运行
 
 ```shell
 $ python manage.py runserver 0.0.0.0:8000
@@ -260,9 +274,11 @@ $ python manage.py runserver 0.0.0.0:8000
         "courseId": "课程号",
         "courseWeekday":"星期几",
         "courseSection": "课程节数",
+        "includeSection": "该课程所在节数列表",
+        "upTime": "课程上课时间",
         "courseTime":"课程时间",    #根据config.json里面的TimesUp和TimesDown
         "courseWeek": "课程周数",
-        "inNowWeek":"是否当前周课程",   #根据config.json里面的nowWeekI判断
+        "includeWeeks":"该课程所在周数列表",
         "exam":"考试性质",
         "campus": "上课校区",
         "courseRoom": "上课地点",

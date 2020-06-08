@@ -8,6 +8,8 @@ import json
 from urllib import parse
 from requests import exceptions
 
+with open('config.json', mode='r', encoding='utf-8') as f:
+    config = json.loads(f.read())
 
 class Xuanke(object):
     def __init__(self, base_url, cookies):
@@ -17,11 +19,12 @@ class Xuanke(object):
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         }
         self.cookies = cookies
-        with open('config.json', mode='r', encoding='utf-8') as f:
-            config = json.loads(f.read())
-        self.proxies = {
-            'http': config["proxy"]
-        }
+        if config["proxy"] == "none":
+            self.proxies = None
+        else:
+            self.proxies = {
+                'http': config["proxy"]
+            }
         self.nowyear = str(int(time.strftime("%Y", time.localtime())) - 1)
         self.nowterm = config["nowterm"]
 
@@ -37,10 +40,13 @@ class Xuanke(object):
                 res = requests.post(choosed_url, data=data, headers=self.headers, cookies=self.cookies,
                                     proxies=self.proxies, timeout=(5, 15))
             except exceptions.Timeout as e:
-                requests.get(
-                    'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=已选超时&desp=' + str(
-                        e))
-                return {'err': 'Connect Timeout'}
+                ServerChan = config["ServerChan"]
+                text = "已选超时"
+                if ServerChan == "none":
+                    return {'err': 'Connect Timeout'}
+                else:
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
+                    return {'err': 'Connect Timeout'}
             jres = res.json()
             res_dict = {
                 'courseNumber': len(jres),  # 已选课程数
@@ -170,7 +176,7 @@ class Xuanke(object):
                                     proxies=self.proxies, timeout=(5, 15))
             jbkk_res = bkk_res.json()
             if bkk != '3' and (len(jkch_res["tmpList"]) != len(jbkk_res)):
-                res_dict = {'error': 'ErrorLength'}
+                res_dict = {'err': 'Error Length'}
                 return res_dict
             list1 = jkch_res["tmpList"]
             list2 = jbkk_res

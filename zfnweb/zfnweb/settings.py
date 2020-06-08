@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
         'NAME': 'xcchelper',  # 数据库名
         'USER': 'root',  # 账号
-        'PASSWORD': 'joycewen2514',  # 密码
+        'PASSWORD': '#',  # 密码
         'HOST': '127.0.0.1',  # HOST
         'POST': 3306,  # 端口
     }

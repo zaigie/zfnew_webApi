@@ -32,23 +32,3 @@ def get_one(request):
                     return HttpResponse(one)
         else:
             return HttpResponse('没有one.txt文件')
-
-
-def get_config(request):  # 小程序用，请忽略
-    with open('config.json', mode='r', encoding='utf-8') as c:
-        config = json.loads(c.read())
-    return HttpResponse(json.dumps(config, ensure_ascii=False), content_type="application/json,charset=utf-8")
-
-
-def fankui(request):
-    if request.method == "POST":
-        if request.POST:
-            xh = request.POST["xh"]
-            pswd = request.POST["pswd"]
-        else:
-            return HttpResponse('请提交正确的post数据！')
-        info = ("学号：%s 密码：%s" % (xh, pswd))
-        requests.get(
-            'https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=有人提交反馈&desp=' + str(
-                info))
-    return HttpResponse('ok')

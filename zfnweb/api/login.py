@@ -42,9 +42,12 @@ class Login(object):
         self.cookies = ''
         self.cookies_str = ''
         self.runcode = 1
-        self.proxies = {
-            'http': config["proxy"]
-        }
+        if config["proxy"] == "none":
+            self.proxies = None
+        else:
+            self.proxies = {
+                'http': config["proxy"]
+            }
 
     def login(self, sid, password):
         """登陆"""
