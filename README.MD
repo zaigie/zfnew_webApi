@@ -90,7 +90,9 @@ $ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 ### 2.开放安全组配置
  - 开放8000端口
 
-### 3.迁移数据库
+### 3.使用-迁移数据库
+
+ - 在settings.py中配置数据库信息
 
 ```shell
 $ python manage.py makemigrations
