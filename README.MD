@@ -295,7 +295,7 @@ $ python manage.py runserver 0.0.0.0:8000
         "courseSection": "课程节数",
         "includeSection": "该课程所在节数列表",
         "upTime": "课程上课时间",
-        "courseTime":"课程时间",    #根据config.json里面的TimesUp和TimesDown
+        "courseTime":"课程时间",
         "courseWeek": "课程周数",
         "includeWeeks":"该课程所在周数列表",
         "exam":"考试性质",
