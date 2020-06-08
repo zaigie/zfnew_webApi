@@ -1,5 +1,5 @@
 
-基于Django+MySQL的新正方教务管理系统的爬虫webApi
+基于Django+MySQL的新正方教务管理系统的爬虫webApi(带后台)
 
 **登录、消息及成绩和课程**部分API基于[NeroAsmarr/zfnew](https://github.com/NeroAsmarr/zfnew)【2020.2.16】
 
@@ -109,7 +109,13 @@ $ python manage.py createsuperuser
 $ python manage.py runserver 0.0.0.0:8000
 ```
 
-访问你服务器的**IP地址:8000**
+### 6.访问后台
+
+```
+/admin
+```
+
+访问你服务器的**IP地址:8000/xxx**
 
 # JSON键值
 
