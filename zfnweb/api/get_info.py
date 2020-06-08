@@ -50,7 +50,7 @@ class GetInfo(object):
         num1 = int(args[0])
         num2 = int(args[1])
         itemList = []
-        for i in range(num1, num2):
+        for i in range(num1, num2+1):
             itemList.append(i)
         return itemList
 
