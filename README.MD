@@ -101,11 +101,17 @@ year | 是 | 学年 |
 term | 是 | 学期(1 or 2) |
 refresh | 否 | 填入'no'则读取缓存 |
 
-**手动更新cookies：/info/update**
+**查询各院/专业/班级加入情况：/info/joindetail**
+**方法：GET**
+参数名 | 必选 |  说明  
+-|-|-
+type | 是 | college-二级学院,major-专业,class-班级 |
+
+**查询GPA在专业与班级的排名：/info/position（未实验）**
+**方法：GET**
 参数名 | 必选 |  说明  
 -|-|-
 xh | 是 | 学号 |
-pswd | 是 | 密码 |
 
 ------
 

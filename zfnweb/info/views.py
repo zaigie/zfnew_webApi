@@ -303,6 +303,8 @@ def get_study(request):
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
+                gpa = str(study["gpa"])
+                Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
                 filename = ('Study')
                 newData(xh, filename, json.dumps(study, ensure_ascii=False))
                 return HttpResponse(json.dumps(study, ensure_ascii=False),
@@ -311,6 +313,8 @@ def get_study(request):
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
             writeLog(content)
+            gpa = str(study["gpa"])
+            Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
             filename = ('Study')
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
@@ -331,6 +335,8 @@ def get_study(request):
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
             study = person.get_study(xh)
+            gpa = str(study["gpa"])
+            Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
             filename = ('Study')
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
@@ -493,3 +499,68 @@ def get_schedule(request):
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+
+def joinDetail(request):
+    type = request.GET.get("type")
+    if type == 'college':
+        detail = [{
+            'collegeName': i["collegeName"],
+            'collegeNum': Students.objects.filter(collegeName=i["collegeName"]).count()
+        } for i in Students.objects.values('collegeName').distinct().order_by('collegeName')]
+        ndetail = sorted(detail,key=lambda keys:keys['collegeNum'], reverse=True)
+        res = {
+            'collegeNum': int(Students.objects.values('collegeName').distinct().order_by('collegeName').count()),
+            'detail': ndetail
+        }
+    elif type == 'major':
+        detail = [{
+            'majorName': i["majorName"],
+            'majorNum': Students.objects.filter(majorName=i["majorName"]).count()
+        } for i in Students.objects.values('majorName').distinct().order_by('majorName')]
+        ndetail = sorted(detail,key=lambda keys:keys['majorNum'], reverse=True)
+        res = {
+            'majorNum': int(Students.objects.values('majorName').distinct().order_by('majorName').count()),
+            'detail': ndetail
+        }
+    elif type == 'class':
+        detail = [{
+            'className': i["className"],
+            'classNum': Students.objects.filter(className=i["className"]).count()
+        } for i in Students.objects.values('className').distinct().order_by('className')]
+        ndetail = sorted(detail,key=lambda keys:keys['classNum'], reverse=True)
+        res = {
+            'classNum': int(Students.objects.values('className').distinct().order_by('className').count()),
+            'detail': ndetail
+        }
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+
+def get_position(request):
+    xh = request.GET.get("xh")
+    if not Students.objects.filter(studentId=int(xh)):
+        return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    else:
+        stu = Students.objects.get(studentId=int(xh))
+        majorName = stu.majorName
+        className = stu.className
+        gpa = float(stu.gpa)
+        majorCount = 1
+        classCount = 1
+        for m in Students.objects.filter(majorName=majorName).all().order_by('-gpa'):
+            if m.gpa == "init":
+                pass
+            elif gpa >= float(m.gpa):
+                break
+            else:
+                majorCount += 1
+        for c in Students.objects.filter(className=className).all().order_by('-gpa'):
+            if m.gpa == "init":
+                pass
+            elif gpa >= float(m.gpa):
+                break
+            else:
+                classCount += 1
+        return HttpResponse(json.dumps({'majorCount':majorCount,'classCount':classCount}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+

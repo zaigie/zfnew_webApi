@@ -8,5 +8,7 @@ urlpatterns = [
     path('study', views.get_study),
     path('grade', views.get_grade),
     path('schedule', views.get_schedule),
+    path('joindetail', views.joinDetail),
+    path('position', views.get_position)
     # path('update',views.update_cookies)
 ]
