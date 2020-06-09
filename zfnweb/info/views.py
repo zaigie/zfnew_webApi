@@ -557,7 +557,7 @@ def get_position(request):
         majorCount = 1
         classCount = 1
         for m in Students.objects.filter(majorName=majorName).all().order_by('-gpa'):
-            if m.gpa == "init":
+            if m.gpa == "init" or m.studentId[0:2] != xh[0:2]:
                 pass
             elif gpa >= float(m.gpa):
                 break
