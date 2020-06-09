@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'choose',
     'recruit',
     'one',
+    'mp',
     'werkzeug_debugger_runserver',
     'django_extensions',
     'corsheaders',

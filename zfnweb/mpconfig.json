@@ -1,0 +1,37 @@
+{
+    "version": 20,
+    "nowweek": 15,
+    "notice": {
+        "show": true,
+        "title": "全新小程序已上线",
+        "detail": "这次将界面UI全部重做，很多功能使用起来也行云流水，不再卡顿...",
+        "key": "8rxa03fL"
+    },
+    "countdown": [
+        {
+            "name": "2021考研",
+            "shortname": "考研",
+            "date": "2020-12-25"
+        },
+        {
+            "name": "计算机二级",
+            "shortname": "计算机",
+            "date": "none"
+        },
+        {
+            "name": "英语四六级",
+            "shortname": "四六级",
+            "date": "none"
+        },
+        {
+            "name": "教师资格证",
+            "shortname": "教资",
+            "date": "none"
+        },
+        {
+            "name": "期末大概",
+            "shortname": "期末",
+            "date": "2020-07-10"
+        }
+    ]
+}

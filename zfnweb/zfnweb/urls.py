@@ -22,4 +22,5 @@ urlpatterns = [
     path('choose/', include(('choose.urls','choose'),namespace='choose')),
     path('recruit/', include(('recruit.urls','recruit'),namespace='recruit')),
     path('one/', include(('one.urls','one'),namespace='one')),
+    path('mp/', include(('mp.urls','mp'),namespace='mp')),
 ]
