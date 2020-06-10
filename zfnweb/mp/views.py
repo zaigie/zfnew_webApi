@@ -32,3 +32,9 @@ def countdown(request):
         } for item in countdown]
     return HttpResponse(json.dumps(res, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
+
+def navigate(request):
+    with open('mpconfig.json', mode='r', encoding='utf-8') as f:
+        content = json.loads(f.read())["navigate"]
+    return HttpResponse(json.dumps(content, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")

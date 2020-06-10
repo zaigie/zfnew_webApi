@@ -33,5 +33,21 @@
             "shortname": "期末",
             "date": "2020-07-10"
         }
-    ]
+    ],
+    "navigate": {
+        "bar": [
+            {
+                "title": "107路",
+                "ltitle": "107路公交线路",
+                "content": "线路内容"
+            }
+        ],
+        "school": [
+            {
+                "title": "顺丰快递",
+                "ltitle": "顺丰快递位置",
+                "content": "坐标"
+            }
+        ]
+    }
 }
