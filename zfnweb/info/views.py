@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+import traceback
 
 import json
 import requests
@@ -95,6 +96,7 @@ def update_cookies(xh, pswd):
         ServerChan = config["ServerChan"]
         text = "更新cookies未知错误"
         if ServerChan == "none":
+            print(str(e))
             return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
@@ -155,6 +157,7 @@ def get_pinfo(request):
                 ServerChan = config["ServerChan"]
                 text = "登录未知错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -204,6 +207,7 @@ def get_pinfo(request):
                 ServerChan = config["ServerChan"]
                 text = "登录未知错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -255,6 +259,7 @@ def get_message(request):
                 ServerChan = config["ServerChan"]
                 text = "消息错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -308,7 +313,7 @@ def get_study(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
-            if study['err'] == 'Connect Timeout':
+            if study.get("err") == 'Connect Timeout':
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
@@ -335,6 +340,7 @@ def get_study(request):
                 ServerChan = config["ServerChan"]
                 text = "学业错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -413,6 +419,7 @@ def get_grade(request):
                 ServerChan = config["ServerChan"]
                 text = "成绩错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -485,12 +492,14 @@ def get_schedule(request):
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             print(e)
+            traceback.print_exc()
             content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
                 ServerChan = config["ServerChan"]
                 text = "课程错误"
                 if ServerChan == "none":
+                    print(str(e))
                     return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -511,6 +520,7 @@ def get_schedule(request):
 
 def joinDetail(request):
     type = request.GET.get("type")
+    allUsers = Students.objects.filter().all().count()
     if type == 'college':
         detail = [{
             'collegeName': i["collegeName"],
@@ -518,6 +528,7 @@ def joinDetail(request):
         } for i in Students.objects.values('collegeName').distinct().order_by('collegeName')]
         ndetail = sorted(detail,key=lambda keys:keys['collegeNum'], reverse=True)
         res = {
+            'allUsers': allUsers,
             'collegeNum': int(Students.objects.values('collegeName').distinct().order_by('collegeName').count()),
             'detail': ndetail
         }
@@ -528,6 +539,7 @@ def joinDetail(request):
         } for i in Students.objects.values('majorName').distinct().order_by('majorName')]
         ndetail = sorted(detail,key=lambda keys:keys['majorNum'], reverse=True)
         res = {
+            'allUsers': allUsers,
             'majorNum': int(Students.objects.values('majorName').distinct().order_by('majorName').count()),
             'detail': ndetail
         }
@@ -538,6 +550,7 @@ def joinDetail(request):
         } for i in Students.objects.values('className').distinct().order_by('className')]
         ndetail = sorted(detail,key=lambda keys:keys['classNum'], reverse=True)
         res = {
+            'allUsers': allUsers,
             'classNum': int(Students.objects.values('className').distinct().order_by('className').count()),
             'detail': ndetail
         }
@@ -545,7 +558,11 @@ def joinDetail(request):
                         content_type="application/json,charset=utf-8")
 
 def get_position(request):
+    #print(request)
     xh = request.GET.get("xh")
+    if xh is None:
+        return HttpResponse(json.dumps({'err':'参数不全'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if not Students.objects.filter(studentId=int(xh)):
         return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -553,11 +570,16 @@ def get_position(request):
         stu = Students.objects.get(studentId=int(xh))
         majorName = stu.majorName
         className = stu.className
-        gpa = float(stu.gpa)
+        if stu.gpa == "init":
+            gpa = "init"
+            return HttpResponse(json.dumps({'gpa': gpa,'majorCount':0,'classCount':0}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        else:
+            gpa = float(stu.gpa)
         majorCount = 1
         classCount = 1
         for m in Students.objects.filter(majorName=majorName).all().order_by('-gpa'):
-            if m.gpa == "init" or m.studentId[0:2] != xh[0:2]:
+            if m.gpa == "init" or str(m.studentId)[0:2] != xh[0:2]:
                 pass
             elif gpa >= float(m.gpa):
                 break
@@ -570,6 +592,6 @@ def get_position(request):
                 break
             else:
                 classCount += 1
-        return HttpResponse(json.dumps({'majorCount':majorCount,'classCount':classCount}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'gpa': gpa,'majorCount':majorCount,'classCount':classCount}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 

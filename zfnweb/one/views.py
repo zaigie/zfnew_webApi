@@ -17,7 +17,8 @@ def get_one(request):
             if datetime.datetime.now().strftime('%Y-%m-%d') in last_line:
                 # print('读取模式')
                 content = last_line[12:]
-                return HttpResponse(content)
+                return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 with open('one.txt', mode='a', encoding='utf-8') as n:
                     # print('第一个访问了one!')
@@ -29,6 +30,8 @@ def get_one(request):
                     one = oneall.a.string
                     if int(datetime.datetime.now().strftime('%H')) > 8:  # 每天九点后one肯定更新了
                         n.write('\n【%s】%s' % (datetime.datetime.now().strftime('%Y-%m-%d'), one))
-                    return HttpResponse(one)
+                    return HttpResponse(json.dumps({'msg':'success','content':one}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
         else:
-            return HttpResponse('没有one.txt文件')
+            return HttpResponse(json.dumps({'msg':'error','content':"提醒管理员配置每日一言"}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")

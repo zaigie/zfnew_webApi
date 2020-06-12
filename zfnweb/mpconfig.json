@@ -1,9 +1,12 @@
 {
     "version": 20,
     "nowweek": 15,
+    "choose": true,
+    "nowGrade": 2,
     "notice": {
         "show": true,
         "title": "全新小程序已上线",
+        "ltitle": "重要通知",
         "detail": "这次将界面UI全部重做，很多功能使用起来也行云流水，不再卡顿...",
         "key": "8rxa03fL"
     },
@@ -34,19 +37,115 @@
             "date": "2020-07-10"
         }
     ],
+    "about":{
+        "qa":[
+            {
+                "question":"这个小程序会泄露我的隐私吗？",
+                "answer":"小程序各功能为简便同学们使用教务系统的各种复杂操作，所以需要输入教务系统账号，隐私信息采用非对称加密存储，任何人无法直接查看，并承诺不会将隐私信息发布给任何人和机构。开发者为在校生，以后小程序使用人数越多，也会有相关组织互相监督，不会做无意义且违法的事情。"
+            },
+            {
+                "question":"为何开发这个小程序？",
+                "answer":"每次进教务系统查询数据或选课时会耗费大量时间，同时还会出现某个设备无法访问而其他设备可以访问的问题，主要是为了节省时间和一针见血，以及一些教务系统没有明显展示的有趣的数据统计。让同学们更加明显的了解自己的学业情况。同时也给新生提供了一站式的录取查询和校园导航窗口。"
+            }
+        ],
+        "license":[
+            {
+                "title":"免责声明",
+                "content":"提供即时查询服务，本程序通过微信官方接口缓存到本地以及加密上传至服务器，点击登录即代表你已经同意将账号密码缓存在本地以及加密服务器，非通过本小程序造成的任何账号密码相关问题与开发者无关"
+            },
+            {
+                "title":"服务资源",
+                "content":"暂系使用轻量服务器，故在多人并发访问，服务器资源方面条件并不是很优越。而教务系统又经常出现无法访问的情况，所以出现无法登录或者刷新数据的情况时，可选择联系开发者，非教务系统问题会得到很快的解决，谢谢。"
+            }
+        ],
+        "money":[
+            "无"
+        ],
+        "aboutus":{
+            "title":"关于AlgoriMind实验室",
+            "content":"AlgoriMind实验室系信息技术学院,由一群喜欢硬件、软件及物联网的学生组成，学习知识包括前端、后端、单片机及边缘计算，参加过多次各类教育部办互联网和电子比赛并为校获奖"
+        },
+        "contact":{
+            "wechat":"RiotJS",
+            "email":"jokerwho@yeah.net",
+            "qq": "709662329"
+        }
+    },
     "navigate": {
         "bar": [
             {
-                "title": "107路",
-                "ltitle": "107路公交线路",
-                "content": "线路内容"
+                "title": "北107路",
+                "ltitle": "经北校区107路公交线路",
+                "content": "川兴-西宁",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n107.png"
+            },
+            {
+                "title": "北110路",
+                "ltitle": "经北校区110路公交线路",
+                "content": "北校区-南校区",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n110.png"
+            },
+            {
+                "title": "北116路",
+                "ltitle": "经北校区116路公交线路",
+                "content": "大成商业广场-樟木",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n116.png"
+            },
+            {
+                "title": "北118路",
+                "ltitle": "经北校区118路公交线路",
+                "content": "大成商业广场-礼州",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n118.png"
+            },
+            {
+                "title": "北126路",
+                "ltitle": "经北校区126路公交线路",
+                "content": "大坝口-大成商业广场",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n126.png"
+            },
+            {
+                "title": "北168路",
+                "ltitle": "经北校区168路公交线路",
+                "content": "大成商业广场-月华",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n168.png"
+            },
+            {
+                "title": "北188路",
+                "ltitle": "经北校区188路公交线路",
+                "content": "大成商业广场-小桥",
+                "image":"https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/n188.png"
             }
         ],
         "school": [
             {
-                "title": "顺丰快递",
-                "ltitle": "顺丰快递位置",
-                "content": "坐标"
+                "title": "各快递",
+                "ltitle": "各快递所在位置",
+                "content": "菜鸟驿站(韵达、圆通、申通)：\n商业街中上段\n顺丰：商业街最上\n百世：商业街最上星星快递\n中通：商业街中下段\n天天、苏宁：商业街中下段学生之家\n京东：中心广场下一段左端\n邮政：中心广场下一段最左端",
+                "image":false
+            },
+            {
+                "title": "饰品",
+                "ltitle": "校内饰品店位置",
+                "content": "暂无",
+                "image": false
+            },
+            {
+                "title": "超市",
+                "ltitle": "校内超市位置",
+                "content": "荷塘月色二号超市：商业街中段",
+                "image": false
+            },
+            {
+                "title": "奶茶甜点",
+                "ltitle": "校内奶茶甜品店位置",
+                "content": "本宫的茶：商业街最下段\n一杯酸奶牛：商业街最下段\n书亦烧仙草：商业街最下段\n蜜雪冰城：商业街中上段",
+                "image": false
+            },
+            {
+                "title": "营业厅",
+                "ltitle": "校内营业厅位置",
+                "content": "三大营业厅：中心广场下一段左端",
+                "image": false
             }
         ]
     }

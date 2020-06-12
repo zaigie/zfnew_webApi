@@ -261,7 +261,6 @@ class GetInfo(object):
             'ipi': ipi,  # 计划内在读课程数
             'opp': opp,  # 计划外已过课程数
             'opf': opf,  # 计划外未过课程数
-            'err': 'ok',
             'tsData': {
                 'tsPoint': ts_point,  # 通识教育学分情况
                 'tsItems': [{
@@ -272,8 +271,8 @@ class GetInfo(object):
                     'courseCategory': ' ' if j.get('KCLBMC') is None else j.get('KCLBMC'),
                     'courseAttribution': ' ' if j.get('KCXZMC') is None else j.get('KCXZMC'),
                     'maxGrade': ' ' if j.get('MAXCJ') is None else j["MAXCJ"],
-                    'credit': ' ' if j.get('XF') is None else float(j["XF"]),
-                    'gradePoint': ' ' if j.get('JD') is None else float(j["JD"]),
+                    'credit': ' ' if j.get('XF') is None else format(float(j["XF"]),'.1f'),
+                    'gradePoint': ' ' if j.get('JD') is None else format(float(j["JD"]),'.1f'),
                 } for j in res_ts.json()],  # 通识教育修读情况
             },
             'tzdata': {
@@ -286,8 +285,8 @@ class GetInfo(object):
                     'courseCategory': ' ' if k.get('KCLBMC') is None else k.get('KCLBMC'),
                     'courseAttribution': ' ' if k.get('KCXZMC') is None else k.get('KCXZMC'),
                     'maxGrade': ' ' if k.get('MAXCJ') is None else k["MAXCJ"],
-                    'credit': ' ' if k.get('XF') is None else float(k["XF"]),
-                    'gradePoint': ' ' if k.get('JD') is None else float(k["JD"]),
+                    'credit': ' ' if k.get('XF') is None else format(float(k["XF"]),'.1f'),
+                    'gradePoint': ' ' if k.get('JD') is None else format(float(k["JD"]),'.1f'),
                 } for k in res_tz.json()],  # 拓展教育修读情况
             },
             'zydata': {
@@ -300,8 +299,8 @@ class GetInfo(object):
                     'courseCategory': ' ' if l.get('KCLBMC') is None else l.get('KCLBMC'),
                     'courseAttribution': ' ' if l.get('KCXZMC') is None else l.get('KCXZMC'),
                     'maxGrade': ' ' if l.get('MAXCJ') is None else l["MAXCJ"],
-                    'credit': ' ' if l.get('XF') is None else float(l["XF"]),
-                    'gradePoint': ' ' if l.get('JD') is None else float(l["JD"]),
+                    'credit': ' ' if l.get('XF') is None else format(float(l["XF"]),'.1f'),
+                    'gradePoint': ' ' if l.get('JD') is None else format(float(l["JD"]),'.1f'),
                 } for l in res_zy.json()],  # 专业教育修读情况
             },
             'qtdata': {
@@ -314,8 +313,8 @@ class GetInfo(object):
                     'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
                     'courseAttribution': ' ' if m.get('KCXZMC') is None else m.get('KCXZMC'),
                     'maxGrade': ' ' if m.get('MAXCJ') is None else m["MAXCJ"],
-                    'credit': ' ' if m.get('XF') is None else float(m["XF"]),
-                    'gradePoint': ' ' if m.get('JD') is None else float(m["JD"]),
+                    'credit': ' ' if m.get('XF') is None else format(float(m["XF"]),'.1f'),
+                    'gradePoint': ' ' if m.get('JD') is None else format(float(m["JD"]),'.1f'),
                 } for m in res_qt.json()],  # 其它课程修读情况
             },
         }
@@ -399,9 +398,9 @@ class GetInfo(object):
                     'courseId': i['kch_id'],
                     'className': '无' if i.get('jxbmc') is None else i.get('jxbmc'),
                     'courseNature': '无' if i.get('kcxzmc') is None else i.get('kcxzmc'),
-                    'credit': '无' if i.get('xf') is None else i.get('xf'),
+                    'credit': '无' if i.get('xf') is None else format(float(i.get('xf')),'.1f'),
                     'grade': i['cj'],
-                    'gradePoint': '无' if i.get('jd') is None else i.get('jd'),
+                    'gradePoint': '无' if i.get('jd') is None else format(float(i.get('jd')),'.1f'),
                     'gradeNature': i['ksxz'],
                     'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
                     'courseMark': i['kcbj'],
@@ -464,7 +463,7 @@ class GetInfo(object):
                 'hoursComposition': i['kcxszc'],
                 'weeklyHours': i['zhxs'],
                 'totalHours': i['zxs'],
-                'credit': i['xf']
+                'credit': '0.0' if i.get('xf') == '无' else format(float(i['xf']),'.1f')
             } for i in jres['kbList']],
             # 'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
         }

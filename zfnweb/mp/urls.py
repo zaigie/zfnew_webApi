@@ -4,5 +4,7 @@ from mp import views
 urlpatterns = [
     path('', views.config),
     path('countdown', views.countdown),
-    path('navigate', views.navigate)
+    path('navigate', views.navigate),
+    path('about', views.about),
+    path('out', views.outimg)
 ]
