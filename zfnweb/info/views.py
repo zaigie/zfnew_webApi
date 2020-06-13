@@ -97,6 +97,7 @@ def update_cookies(xh, pswd):
         text = "更新cookies未知错误"
         if ServerChan == "none":
             print(str(e))
+            traceback.print_exc()
             return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
@@ -151,13 +152,13 @@ def get_pinfo(request):
                     return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
-                print(e)
                 content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                 writeLog(content)
                 ServerChan = config["ServerChan"]
                 text = "登录未知错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -208,6 +209,7 @@ def get_pinfo(request):
                 text = "登录未知错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -252,7 +254,6 @@ def get_message(request):
             writeLog(content)
             return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            print(e)
             content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 5 column 1 (char 9)':
@@ -260,6 +261,7 @@ def get_message(request):
                 text = "消息错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -333,7 +335,6 @@ def get_study(request):
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            print(e)
             content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'list index out of range':
@@ -341,6 +342,7 @@ def get_study(request):
                 text = "学业错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -420,6 +422,7 @@ def get_grade(request):
                 text = "成绩错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -491,8 +494,6 @@ def get_schedule(request):
 
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            print(e)
-            traceback.print_exc()
             content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
@@ -500,6 +501,7 @@ def get_schedule(request):
                 text = "课程错误"
                 if ServerChan == "none":
                     print(str(e))
+                    traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:

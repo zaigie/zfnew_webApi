@@ -51,21 +51,21 @@ class Xuanke(object):
             res_dict = {
                 'courseNumber': len(jres),  # 已选课程数
                 'items': [{
-                    'courseTitle': i["kcmc"],
-                    'courseCategory': i["kklxmc"],
-                    'teacher': (re.findall(r"/(.*?)/", i["jsxx"]))[0],
-                    'teacher_id': (re.findall(r"(.*?\d+)/", i["jsxx"]))[0],
-                    'classId': i["jxb_id"],
-                    'classVolume': int(i["jxbrs"]),
-                    'classPeople': int(i["yxzrs"]),
-                    'courseRoom': (i["jxdd"].split('<br/>'))[0] if '<br/>' in i["jxdd"] else i["jxdd"],
-                    'courseId': i["kch"],
-                    'doId': i["do_jxb_id"],
-                    'courseTime': (i["sksj"].split('<br/>'))[0] + '、' + (i["sksj"].split('<br/>'))[1] if '<br/>' in i[
-                        "sksj"] else i["sksj"],
-                    'credit': float(i["xf"]),
-                    'chooseSelf': int(i["zixf"]),
-                    'waiting': i["sxbj"]
+                    'courseTitle': i.get("kcmc"),
+                    'courseCategory': i.get("kklxmc"),
+                    'teacher': (re.findall(r"/(.*?)/", i.get("jsxx")))[0],
+                    'teacher_id': (re.findall(r"(.*?\d+)/", i.get("jsxx")))[0],
+                    'classId': i.get("jxb_id"),
+                    'classVolume': int(i.get("jxbrs")),
+                    'classPeople': int(i.get("yxzrs")),
+                    'courseRoom': (i.get("jxdd").split('<br/>'))[0] if '<br/>' in i.get("jxdd") else i.get("jxdd"),
+                    'courseId': i.get("kch"),
+                    'doId': i.get("do_jxb_id"),
+                    'courseTime': (i.get("sksj").split('<br/>'))[0] + '、' + (i.get("sksj").split('<br/>'))[1] if '<br/>' in i.get(
+                        "sksj") else i.get("sksj"),
+                    'credit': float(i.get("xf")),
+                    'chooseSelf': int(i.get("zixf")),
+                    'waiting': i.get("sxbj")
                 } for i in jres]
             }
             return res_dict
@@ -186,19 +186,19 @@ class Xuanke(object):
             res_dict = {
                 'courseNumber': len(list1),
                 'items': [{
-                    'courseTitle': j["kcmc"],
-                    'teacher': (re.findall(r"/(.*?)/", j["jsxx"]))[0],
-                    'teacher_id': (re.findall(r"(.*?\d+)/", j["jsxx"]))[0],
-                    'classId': j["jxb_id"],
-                    'doId': j["do_jxb_id"],
+                    'courseTitle': j.get("kcmc"),
+                    'teacher': (re.findall(r"/(.*?)/", j.get("jsxx")))[0],
+                    'teacher_id': (re.findall(r"(.*?\d+)/", j.get("jsxx")))[0],
+                    'classId': j.get("jxb_id"),
+                    'doId': j.get("do_jxb_id"),
                     'kklxdm': head_data["bkk" + bkk + "_kklxdm"],
-                    'classVolume': int(j["jxbrl"]),
-                    'classPeople': int(j["yxzrs"]),
-                    'courseRoom': (j["jxdd"].split('<br/>'))[0] if '<br/>' in j["jxdd"] else j["jxdd"],
+                    'classVolume': int(j.get("jxbrl")),
+                    'classPeople': int(j.get("yxzrs")),
+                    'courseRoom': (j.get("jxdd").split('<br/>'))[0] if '<br/>' in j.get("jxdd") else j.get("jxdd"),
                     'courseId': j["kch_id"],
-                    'courseTime': (j["sksj"].split('<br/>'))[0] + '、' + (j["sksj"].split('<br/>'))[1] if '<br/>' in j[
-                        "sksj"] else j["sksj"],
-                    'credit': float(j["xf"]),
+                    'courseTime': (j.get("sksj").split('<br/>'))[0] + '、' + (j.get("sksj").split('<br/>'))[1] if '<br/>' in j.get(
+                        "sksj") else j.get("sksj"),
+                    'credit': float(j.get("xf")),
                 } for j in list1]
             }
             return res_dict
