@@ -18,6 +18,10 @@ def get_one(request):
                 # print('读取模式')
                 content = last_line[12:]
                 return HttpResponse(content)
+            elif int(datetime.datetime.now().strftime('%H')) < 8:
+                content = last_line[12:]
+                return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 with open('one.txt', mode='a', encoding='utf-8') as n:
                     # print('第一个访问了one!')
