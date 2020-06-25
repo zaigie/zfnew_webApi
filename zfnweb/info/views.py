@@ -7,7 +7,7 @@ import json
 import requests
 from api import GetInfo, Login
 from django.http import HttpResponse, JsonResponse
-from info.models import Students
+from info.models import Students, Teachers
 
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
@@ -90,7 +90,7 @@ def update_cookies(xh, pswd):
         else:
             content = ('【%s】[%s]更新cookies时网络或其他错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     except Exception as e:
         ServerChan = config["ServerChan"]
@@ -98,11 +98,12 @@ def update_cookies(xh, pswd):
         if ServerChan == "none":
             print(str(e))
             traceback.print_exc()
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'更新cookies未知错误，初次请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
+            traceback.print_exc()
             requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'更新cookies未知错误，初次请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
 
 
@@ -149,7 +150,7 @@ def get_pinfo(request):
                 else:
                     content = ('【%s】[%s]在登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
                 content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
@@ -159,11 +160,12 @@ def get_pinfo(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                    traceback.print_exc()
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\\n' + str(xh) + '\\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
         else:
             try:
@@ -199,7 +201,7 @@ def get_pinfo(request):
                 else:
                     content = ('【%s】[%s]在第一次登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
                 # print(e)
@@ -210,11 +212,12 @@ def get_pinfo(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
+                    traceback.print_exc()
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'登录未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
@@ -262,11 +265,12 @@ def get_message(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'消息未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
+                    traceback.print_exc()
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'消息未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'消息未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
@@ -315,7 +319,7 @@ def get_study(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
-            if study.get("err") == 'Connect Timeout':
+            if study.get("err") == '请求超时，大概是教务系统又挂了，等一会就好了':
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
@@ -343,11 +347,12 @@ def get_study(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'学业未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
+                    traceback.print_exc()
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'学业未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'学业未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
@@ -423,11 +428,12 @@ def get_grade(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'成绩未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
+                    traceback.print_exc()
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'成绩未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'成绩未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
@@ -502,11 +508,12 @@ def get_schedule(request):
                 if ServerChan == "none":
                     print(str(e))
                     traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'课程未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
+                    traceback.print_exc()
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'课程未知错误'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'课程未知错误，初次请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
@@ -580,20 +587,112 @@ def get_position(request):
             gpa = float(stu.gpa)
         majorCount = 1
         classCount = 1
+        nMajorCount = 0
+        nClassCount = 0
         for m in Students.objects.filter(majorName=majorName).all().order_by('-gpa'):
-            if m.gpa == "init" or str(m.studentId)[0:2] != xh[0:2]:
+            if m.gpa == "init" and str(m.studentId)[0:2] == xh[0:2]:
+                nMajorCount += 1
+            elif m.gpa == "init" or str(m.studentId)[0:2] != xh[0:2]:
                 pass
             elif gpa >= float(m.gpa):
                 break
             else:
                 majorCount += 1
         for c in Students.objects.filter(className=className).all().order_by('-gpa'):
-            if m.gpa == "init":
-                pass
-            elif gpa >= float(m.gpa):
+            if c.gpa == "init":
+                nClassCount += 1
+            elif gpa >= float(c.gpa):
                 break
             else:
                 classCount += 1
-        return HttpResponse(json.dumps({'gpa': gpa,'majorCount':majorCount,'classCount':classCount}, ensure_ascii=False),
+        majorNum = Students.objects.filter(majorName=majorName,studentId__startswith=int(xh[0:2])).all().count()
+        classNum = Students.objects.filter(className=className).all().count()
+        return HttpResponse(json.dumps({'gpa': gpa,'majorCount':majorCount,'nMajorCount':nMajorCount,'nClassCount':nClassCount,'classCount':classCount,'majorNum':majorNum,'classNum':classNum}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
+def searchTeacher(request):
+    if request.method == "GET":
+        xh = request.GET.get("xh")
+        tname = request.GET.get("tname")
+    elif request.method == "POST":
+        xh = request.POST.get("xh")
+        tname = request.POST.get("tname")
+        
+    if xh is None or tname is None:
+        return HttpResponse(json.dumps({'err': '参数不全'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    else:
+        if not Students.objects.filter(studentId=int(xh)):
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        else:
+            date = datetime.datetime.now().strftime('%Y-%m-%d')
+            stu = Students.objects.filter(studentId=int(xh))
+            thisStu = Students.objects.get(studentId=int(xh))
+            lastTime = thisStu.searchTimes.split(',')[0]
+            remainTimes = thisStu.searchTimes.split(',')[1]
+            if lastTime == date:
+                if remainTimes != '0':
+                    nremainTimes = int(remainTimes) - 1
+                    stu.update(searchTimes=lastTime+','+str(nremainTimes))
+                    searchList = []
+                    for s in Teachers.objects.filter(name__contains=tname):
+                        item = {
+                            'name': s.name,
+                            'collegeName': s.collegeName,
+                            'title': s.title,
+                            'phoneNumber': s.phoneNumber
+                        }
+                        searchList.append(item)
+                        content = ('【%s】%s学号查询[%s]' % (datetime.datetime.now().strftime('%H:%M:%S'), xh, tname))
+                        writeLog(content)
+                    return HttpResponse(json.dumps({'count': len(searchList),'result':searchList,'times':nremainTimes}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    return HttpResponse(json.dumps({'err': '同学，你今天的查询次数已满哦~'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+            else:
+                if thisStu.classMonitor == 1:
+                    nlastTime = date
+                    nremainTimes = '4'
+                    ncontent = nlastTime + ',' + nremainTimes
+                    stu.update(searchTimes=ncontent)
+                    searchList = []
+                    for s in Teachers.objects.filter(name__contains=tname):
+                        item = {
+                            'name': s.name,
+                            'collegeName': s.collegeName,
+                            'title': s.title,
+                            'phoneNumber': s.phoneNumber
+                        }
+                        searchList.append(item)
+                        content = ('【%s】%s学号查询[%s]' % (datetime.datetime.now().strftime('%H:%M:%S'), xh, tname))
+                        writeLog(content)
+                    return HttpResponse(json.dumps({'count': len(searchList),'result':searchList,'times':int(nremainTimes)}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    nlastTime = date
+                    nremainTimes = '2'
+                    ncontent = nlastTime + ',' + nremainTimes
+                    stu.update(searchTimes=ncontent)
+                    searchList = []
+                    for s in Teachers.objects.filter(name__contains=tname):
+                        item = {
+                            'name': s.name,
+                            'collegeName': s.collegeName,
+                            'title': s.title,
+                            'phoneNumber': s.phoneNumber
+                        }
+                        searchList.append(item)
+                        content = ('【%s】%s学号查询[%s]' % (datetime.datetime.now().strftime('%H:%M:%S'), xh, tname))
+                        writeLog(content)
+                    return HttpResponse(json.dumps({'count': len(searchList),'result':searchList,'times':int(nremainTimes)}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+
+def searchExcept(request):
+    type = request.POST.get("type")
+    data = request.POST.get("data")
+    if type == 'error':
+        pass
+    elif type == 'add':
+        pass

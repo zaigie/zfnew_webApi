@@ -20,6 +20,7 @@ SIMPLEUI_DEFAULT_THEME = 'element.css'
 SIMPLEUI_LOGO = 'https://api.xcchelper.cn/static/admin/simpleui-x/img/logo.png'
 SIMPLEUI_ICON = {
 	'学生': 'fas fa-users',
+    '教师': 'fas fa-graduation-cap',
 	'Info': 'fas fa-users',
 }
 # Quick-start development settings - unsuitable for production

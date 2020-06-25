@@ -128,10 +128,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "个人信息超时"
             if ServerChan is "none":
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
         jres = res.json()
         # print(jres)
         res_dict = {
@@ -171,10 +171,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "学业超时"
             if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -341,10 +341,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "消息超时"
             if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
         jres = res.json()
         res_list = [{'message': i.get('xxnr'), 'ctime': i.get('cjsj')} for i in jres.get('items')]
         return res_list
@@ -379,10 +379,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "成绩超时"
             if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -408,7 +408,7 @@ class GetInfo(object):
                 } for i in jres.get('items')]}
             return res_dict
         else:
-            return {'err': 'You Get Nothing'}
+            return {'err': '看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~'}
 
     def get_schedule(self, year, term):
         """获取课程表信息"""
@@ -431,10 +431,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "课表超时"
             if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
         jres = res.json()
 
         res_dict = {
