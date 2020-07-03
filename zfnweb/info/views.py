@@ -60,6 +60,7 @@ def writeLog(content):
 def update_cookies(xh, pswd):
     try:
         stu = Students.objects.get(studentId=int(xh))
+        refreshTimes = int(stu.refreshTimes)
         startTime = time.time()
         content = ('【%s】[%s]更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
         writeLog(content)
@@ -73,8 +74,9 @@ def update_cookies(xh, pswd):
             NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
             nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
             updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            refreshTimes += 1
             Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute,
-                                                              updateTime=updateTime)
+                                                              refreshTimes=refreshTimes, updateTime=updateTime)
             endTime = time.time()
             spendTime = endTime - startTime
             # print('新cookies:')
@@ -135,7 +137,7 @@ def get_pinfo(request):
                     endTime = time.time()
                     spendTime = endTime - startTime
                     print('【%s】登录了' % pinfo["name"])
-                    content = ('【%s】[%s]第%d次登录了，耗时%.2fs' % (
+                    content = ('【%s】[%s]第%d次访问登录了，耗时%.2fs' % (
                         datetime.datetime.now().strftime('%H:%M:%S'), pinfo["name"], refreshTimes, spendTime))
                     writeLog(content)
                     filename = ('Pinfo')
@@ -259,7 +261,7 @@ def get_message(request):
         except Exception as e:
             content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
-            if str(e) != 'Expecting value: line 5 column 1 (char 9)':
+            if str(e) != 'Expecting value: line 6 column 1 (char 11)':
                 ServerChan = config["ServerChan"]
                 text = "消息错误"
                 if ServerChan == "none":

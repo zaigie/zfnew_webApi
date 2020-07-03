@@ -14,7 +14,7 @@ class Students(models.Model):
     JSESSIONID = models.CharField(max_length=60)
     route = models.CharField(max_length=80)
     searchTimes = models.CharField(verbose_name="查询次数",max_length=30,default="2020-01-01,3")
-    refreshTimes = models.IntegerField(verbose_name="登录次数",default=0)
+    refreshTimes = models.IntegerField(verbose_name="访问次数",default=0)
     updateTime = models.CharField(verbose_name="最后登录",max_length=40)
     def __str__(self):
         return smart_str('%s-%s' % (self.studentId, self.name))

@@ -16,7 +16,7 @@ class StuAdmin(admin.ModelAdmin):
         ("登录相关", {'fields':['updateTime', 'refreshTimes']}),
         ("Cookies", {'fields':['JSESSIONID', 'route']}),
     )
-    list_display = ('studentId','name','collegeName','majorName','className','gpa','phoneNumber','birthDay','updateTime')
+    list_display = ('studentId','name','collegeName','majorName','className','gpa','phoneNumber','birthDay','refreshTimes','updateTime')
     search_fields = ('studentId','name','collegeName','majorName','className','phoneNumber','birthDay')
     list_filter = ('collegeName','majorName','className')
     list_per_page = 20
