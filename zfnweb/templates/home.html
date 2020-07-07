@@ -1,0 +1,25 @@
+{% load i18n static simpletags %}
+<link rel="stylesheet" href="{% static 'admin/simplepro/css/home.css' %}">
+<script type="text/javascript" src="{% static 'admin/simplepro/echarts/echarts.min.js' %}"></script>
+<div class="home-body">
+
+     {% block quick %}
+        {% include 'admin/parts/quick.html' %}
+    {% endblock %}
+
+    {% block chart_cards %}
+        {% include 'admin/parts/charts_cards.html' %}
+    {% endblock %}
+
+    {% block line_chart %}
+       {% include 'admin/parts/line_chart.html' %}
+    {% endblock %}
+
+    {% block info %}
+       {% include 'admin/parts/info.html' %}
+    {% endblock %}
+
+
+    <div style="height: 80px"></div>
+</div>
+<el-backtop target=".home-body"></el-backtop>

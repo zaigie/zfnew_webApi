@@ -359,8 +359,8 @@ class GetInfo(object):
         elif term == '0':
             term = ''
         else:
-            print('Please enter the correct term value！！！ ("0" or "1" or "2")')
-            return {'err': 'Error Term'}
+            term = config["nowterm"]
+            #return {'err': 'Error Term'}
         data = {
             'xnm': year,  # 学年数
             'xqm': term,  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
@@ -418,8 +418,9 @@ class GetInfo(object):
         elif term == '2':
             term = '12'
         else:
-            print('Please enter the correct term value！！！ ("1" or "2")')
-            return {'err': 'Error Term'}
+            term = config["nowterm"]
+            # print('Please enter the correct term value！！！ ("1" or "2")')
+            # return {'err': 'Error Term'}
         data = {
             'xnm': year,
             'xqm': term
