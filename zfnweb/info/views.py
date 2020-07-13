@@ -635,10 +635,8 @@ def searchTeacher(request):
             remainTimes = thisStu.searchTimes.split(',')[1]
             if lastTime == date:
                 if remainTimes != '0':
-                    nremainTimes = int(remainTimes) - 1
-                    stu.update(searchTimes=lastTime+','+str(nremainTimes))
                     searchList = []
-                    for s in Teachers.objects.filter(name__contains=tname):
+                    for s in Teachers.objects.filter(name__contains=tname).order_by('name'):
                         item = {
                             'name': s.name,
                             'collegeName': s.collegeName,
@@ -648,6 +646,11 @@ def searchTeacher(request):
                         searchList.append(item)
                         content = ('【%s】%s学号查询[%s]' % (datetime.datetime.now().strftime('%H:%M:%S'), xh, tname))
                         writeLog(content)
+                    if len(searchList) != 0:
+                        nremainTimes = int(remainTimes) - 1
+                        stu.update(searchTimes=lastTime+','+str(nremainTimes))
+                    else:
+                        nremainTimes = int(remainTimes)
                     return HttpResponse(json.dumps({'count': len(searchList),'result':searchList,'times':nremainTimes}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
                 else:
@@ -660,7 +663,7 @@ def searchTeacher(request):
                     ncontent = nlastTime + ',' + nremainTimes
                     stu.update(searchTimes=ncontent)
                     searchList = []
-                    for s in Teachers.objects.filter(name__contains=tname):
+                    for s in Teachers.objects.filter(name__contains=tname).order_by('name'):
                         item = {
                             'name': s.name,
                             'collegeName': s.collegeName,
@@ -678,7 +681,7 @@ def searchTeacher(request):
                     ncontent = nlastTime + ',' + nremainTimes
                     stu.update(searchTimes=ncontent)
                     searchList = []
-                    for s in Teachers.objects.filter(name__contains=tname):
+                    for s in Teachers.objects.filter(name__contains=tname).order_by('name'):
                         item = {
                             'name': s.name,
                             'collegeName': s.collegeName,
@@ -692,9 +695,16 @@ def searchTeacher(request):
                                         content_type="application/json,charset=utf-8")
 
 def searchExcept(request):
-    type = request.POST.get("type")
-    data = request.POST.get("data")
-    if type == 'error':
-        pass
-    elif type == 'add':
-        pass
+    xh = request.POST.get("xh")
+    tname = request.POST.get("tname")
+    collegeName = request.POST.get("college")
+    content = request.POST.get("content")
+    ServerChan = config["ServerChan"]
+    text = "黄页反馈"
+    if ServerChan == "none":
+        return HttpResponse(json.dumps({'err':'反馈失败，管理员未打开反馈接口'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    else:
+        requests.get(ServerChan + 'text=' + text + '&desp=' + str(xh) + '\n' + str(tname) + str(collegeName) + '\n' + str(content))
+        return HttpResponse(json.dumps({'msg':'反馈成功'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")

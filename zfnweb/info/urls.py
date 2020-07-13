@@ -10,6 +10,7 @@ urlpatterns = [
     path('schedule', views.get_schedule),
     path('joindetail', views.joinDetail),
     path('position', views.get_position),
-    path('steacher', views.searchTeacher)
+    path('steacher', views.searchTeacher),
+    path('scallback',views.searchExcept)
     # path('update',views.update_cookies)
 ]
