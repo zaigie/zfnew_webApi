@@ -3,17 +3,14 @@ import json
 import time,datetime
 
 def config(request):
-    with open('config.json', mode='r', encoding='utf-8') as c:
-        apiconfig = json.loads(c.read())
-    if apiconfig["nowterm"] == '12':
-        nowterm = 2
-    elif apiconfig["nowterm"] == '3':
-        nowterm = 1
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         config = json.loads(f.read())
         res = {
             'version': config["version"],
-            'nowterm': nowterm,
+            'nowterm': config["nowterm"], # 待新版本上线废除
+            'nGrade': config["nGrade"],
+            'nSchedule': config["nSchedule"],
+            'vacation': config["vacation"],
             'nowweek': config["nowweek"],
             'choose': config["choose"],
             'nowGrade': config["nowGrade"],

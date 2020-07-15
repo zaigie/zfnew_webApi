@@ -2,6 +2,10 @@
     "version": 20,
     "nowweek": 15,
     "choose": true,
+    "nGrade": "20192",
+    "nSchedule": "20201",
+    "vacation" : true,
+    "nowterm": 2,
     "nowGrade": 2,
     "notice": {
         "show": true,

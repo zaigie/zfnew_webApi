@@ -95,6 +95,9 @@ def update_cookies(xh, pswd):
             return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     except Exception as e:
+        if str(e) == "'NoneType' object has no attribute 'get'":
+            return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         ServerChan = config["ServerChan"]
         text = "更新cookies未知错误"
         if ServerChan == "none":
@@ -209,6 +212,9 @@ def get_pinfo(request):
                 # print(e)
                 content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                 writeLog(content)
+                if str(e) == "'NoneType' object has no attribute 'get'":
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
                 ServerChan = config["ServerChan"]
                 text = "登录未知错误"
                 if ServerChan == "none":
@@ -261,6 +267,9 @@ def get_message(request):
         except Exception as e:
             content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
+            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             if str(e) != 'Expecting value: line 6 column 1 (char 11)':
                 ServerChan = config["ServerChan"]
                 text = "消息错误"
@@ -321,7 +330,7 @@ def get_study(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
-            if study.get("err") == '请求超时，大概是教务系统又挂了，等一会就好了':
+            if study.get("err") == '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~':
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
@@ -409,6 +418,9 @@ def get_grade(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             grade = person.get_grade(year, term)
+            if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
+                update_cookies(xh, pswd)
+            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
@@ -424,6 +436,9 @@ def get_grade(request):
             # print(e)
             content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
+            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
                 ServerChan = config["ServerChan"]
                 text = "成绩错误"
@@ -504,6 +519,9 @@ def get_schedule(request):
         except Exception as e:
             content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
+            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             if str(e) != 'Expecting value: line 4 column 1 (char 6)':
                 ServerChan = config["ServerChan"]
                 text = "课程错误"

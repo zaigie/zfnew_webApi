@@ -128,10 +128,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "个人信息超时"
             if ServerChan is "none":
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
         jres = res.json()
         # print(jres)
         res_dict = {
@@ -158,6 +158,38 @@ class GetInfo(object):
         }
         return res_dict
 
+    def cat_by_courseid(self, courseid):
+        """根据课程号获取类别"""
+        url = parse.urljoin(self.base_url, '/jxjhgl/common_cxKcJbxx.html?id='+ courseid)
+        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+        soup = BeautifulSoup(res.text, 'html.parser')
+        th_list = soup.find_all('th')
+        data_list = []
+        for content in th_list:
+            if (content.text).strip() != "":
+                data_list.append((content.text).strip())
+        try:
+            return data_list[5]
+        except exceptions.Timeout as e:
+            print(str(e))
+            return '未知类别'
+
+    def gpa_only(self):
+        url_main = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
+        mainr = requests.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
+                            timeout=(5, 10))
+        mainr.encoding = mainr.apparent_encoding
+        soup = BeautifulSoup(mainr.text, 'html.parser')
+        allc_str = []
+        for allc in soup.find_all('font', size=re.compile('2px')):
+            allc_str.append(allc.get_text())
+        gpa = float(allc_str[2])
+        try:
+            return gpa
+        except exceptions.Timeout as e:
+            print(str(e))
+            return 0.0
+
     def get_study(self, xh):
         """获取学业情况"""
         sessions = requests.Session()
@@ -171,10 +203,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "学业超时"
             if ServerChan == "none":
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -309,7 +341,8 @@ class GetInfo(object):
                     'courseId': m.get("KCH"),
                     'courseSituation': m.get("XDZT"),
                     'courseTerm': self.term_cn(xh, m["XNM"], m["XQMMC"]),
-                    'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
+                    # 'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
+                    'courseCategory': self.cat_by_courseid(m.get("KCH")),
                     'courseAttribution': ' ' if m.get('KCXZMC') is None else m.get('KCXZMC'),
                     'maxGrade': ' ' if m.get('MAXCJ') is None else m.get("MAXCJ"),
                     'credit': ' ' if m.get('XF') is None else format(float(m.get("XF")),'.1f'),
@@ -341,10 +374,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "消息超时"
             if ServerChan == "none":
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
         jres = res.json()
         res_list = [{'message': i.get('xxnr'), 'ctime': i.get('cjsj')} for i in jres.get('items')]
         return res_list
@@ -379,14 +412,15 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "成绩超时"
             if ServerChan == "none":
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
                 'name': jres['items'][0]['xm'],
+                'gpa': self.gpa_only(),
                 'studentId': jres['items'][0]['xh'],
                 'schoolYear': jres['items'][0]['xnm'],
                 'schoolTerm': jres['items'][0]['xqmmc'],
@@ -432,10 +466,10 @@ class GetInfo(object):
             ServerChan = config["ServerChan"]
             text = "课表超时"
             if ServerChan == "none":
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
             else:
                 requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，大概是教务系统又挂了，等一会就好了'}
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
         jres = res.json()
 
         res_dict = {
