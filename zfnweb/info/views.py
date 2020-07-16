@@ -455,7 +455,7 @@ def get_grade(request):
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
             grade = person.get_grade(year, term)
-
+            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             filename = ('Grades-%s%s' % (str(year), str(term)))
             newData(xh, filename, json.dumps(grade, ensure_ascii=False))
 

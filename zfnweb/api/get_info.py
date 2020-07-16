@@ -57,6 +57,8 @@ class GetInfo(object):
     @staticmethod
     def term_cn(xh, year, term):
         """计算培养方案具体学期"""
+        if year is None or term is None:
+            return "未知"
         grade = "None"
         nj = int(xh[0:2])
         xnm = int(year[2:4])
@@ -185,10 +187,13 @@ class GetInfo(object):
             allc_str.append(allc.get_text())
         gpa = float(allc_str[2])
         try:
-            return gpa
+            if gpa != "":
+                return gpa
+            else:
+                return "init"
         except exceptions.Timeout as e:
             print(str(e))
-            return 0.0
+            return "init"
 
     def get_study(self, xh):
         """获取学业情况"""
@@ -298,7 +303,7 @@ class GetInfo(object):
                     'courseTitle': j.get('KCMC'),
                     'courseId': j.get('KCH'),
                     'courseSituation': j.get('XDZT'),
-                    'courseTerm': self.term_cn(xh, j['JYXDXNM'], j['JYXDXQMC']),
+                    'courseTerm': self.term_cn(xh, j.get('JYXDXNM'), j.get('JYXDXQMC')),
                     'courseCategory': '无' if j.get('KCLBMC') is None else j.get('KCLBMC'),
                     'courseAttribution': '无' if j.get('KCXZMC') is None else j.get('KCXZMC'),
                     'maxGrade': ' ' if j.get('MAXCJ') is None else j.get('MAXCJ'),
@@ -312,7 +317,7 @@ class GetInfo(object):
                     'courseTitle': k.get('KCMC'),
                     'courseId': k.get('KCH'),
                     'courseSituation': k.get("XDZT"),
-                    'courseTerm': self.term_cn(xh, k["JYXDXNM"], k["JYXDXQMC"]),
+                    'courseTerm': self.term_cn(xh, k.get("JYXDXNM"), k.get("JYXDXQMC")),
                     'courseCategory': '无' if k.get('KCLBMC') is None else k.get('KCLBMC'),
                     'courseAttribution': '无' if k.get('KCXZMC') is None else k.get('KCXZMC'),
                     'maxGrade': ' ' if k.get('MAXCJ') is None else k.get("MAXCJ"),
@@ -326,7 +331,7 @@ class GetInfo(object):
                     'courseTitle': l.get("KCMC"),
                     'courseId': l.get("KCH"),
                     'courseSituation': l.get("XDZT"),
-                    'courseTerm': self.term_cn(xh, l["JYXDXNM"], l["JYXDXQMC"]),
+                    'courseTerm': self.term_cn(xh, l.get("JYXDXNM"), l.get("JYXDXQMC")),
                     'courseCategory': '无' if l.get('KCLBMC') is None else l.get('KCLBMC'),
                     'courseAttribution': '无' if l.get('KCXZMC') is None else l.get('KCXZMC'),
                     'maxGrade': ' ' if l.get('MAXCJ') is None else l.get("MAXCJ"),
