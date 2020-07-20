@@ -420,6 +420,7 @@ def get_grade(request):
             grade = person.get_grade(year, term)
             if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
                 update_cookies(xh, pswd)
+                return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             endTime = time.time()
             spendTime = endTime - startTime
@@ -455,6 +456,9 @@ def get_grade(request):
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
             grade = person.get_grade(year, term)
+            if grade.get("gpa") == "" or grade.get("gpa") is None:
+                return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             filename = ('Grades-%s%s' % (str(year), str(term)))
             newData(xh, filename, json.dumps(grade, ensure_ascii=False))
