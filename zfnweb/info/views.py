@@ -231,6 +231,69 @@ def get_pinfo(request):
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
+def refresh_class(request):
+    if request.method == 'POST':
+        if request.POST:
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
+        else:
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录更新班级信息' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
+            writeLog(content)
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        else:
+            stu = Students.objects.get(studentId=int(xh))
+        try:
+            startTime = time.time()
+            print('【%s】更新了班级信息' % stu.name)
+            JSESSIONID = str(stu.JSESSIONID)
+            route = str(stu.route)
+            cookies_dict = {
+                'JSESSIONID': JSESSIONID,
+                'route': route
+            }
+            cookies = requests.utils.cookiejar_from_dict(cookies_dict)
+            person = GetInfo(base_url=base_url, cookies=cookies)
+            nowClass = person.get_now_class()
+            if stu.className == nowClass:
+                return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            Students.objects.filter(studentId=int(xh)).update(className=nowClass)
+            endTime = time.time()
+            spendTime = endTime - startTime
+            content = ('【%s】[%s]更新了班级信息，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
+            writeLog(content)
+            return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+        except Exception as e:
+            content = ('【%s】[%s]更新班级信息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+            writeLog(content)
+            if str(e) == "'NoneType' object has no attribute 'get'":
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+            ServerChan = config["ServerChan"]
+            text = "更新班级错误"
+            if ServerChan == "none":
+                print(str(e))
+                traceback.print_exc()
+                return HttpResponse(json.dumps({'err':'更新班级未知错误，初次请返回重试'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            else:
+                traceback.print_exc()
+                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return HttpResponse(json.dumps({'err':'更新班级未知错误，初次请返回重试'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+            sta = update_cookies(xh, pswd)
+            person = GetInfo(base_url=base_url, cookies=sta)
+            nowClass = person.get_now_class()
+            if stu.className == nowClass:
+                return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            Students.objects.filter(studentId=int(xh)).update(className=nowClass)
+            return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+    else:
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 def get_message(request):
     if request.method == 'POST':

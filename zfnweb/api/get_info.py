@@ -160,6 +160,22 @@ class GetInfo(object):
         }
         return res_dict
 
+    def get_now_class(self):
+        """获取当前班级"""
+        url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
+        try:
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+        except exceptions.Timeout as e:
+            ServerChan = config["ServerChan"]
+            text = "个人信息超时"
+            if ServerChan is "none":
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            else:
+                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+        jres = res.json()
+        return jres.get('xjztdm') if jres.get('bh_id') is None else jres.get('bh_id')
+
     def cat_by_courseid(self, courseid):
         """根据课程号获取类别"""
         url = parse.urljoin(self.base_url, '/jxjhgl/common_cxKcJbxx.html?id='+ courseid)

@@ -11,6 +11,7 @@ urlpatterns = [
     path('joindetail', views.joinDetail),
     path('position', views.get_position),
     path('steacher', views.searchTeacher),
-    path('scallback',views.searchExcept)
+    path('scallback',views.searchExcept),
+    path('refreshclass',views.refresh_class)
     # path('update',views.update_cookies)
 ]
