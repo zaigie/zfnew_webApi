@@ -14,6 +14,8 @@ from openpyxl.styles import Font, colors, Alignment
 
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
+with open('mpconfig.json', mode='r', encoding='utf-8') as m:
+    mpconfig = json.loads(m.read())
 base_url = config["base_url"]
 
 
@@ -138,6 +140,9 @@ def writeToExcel(json,saveUrl):
     excel.save(saveUrl)
 
 def get_pinfo(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -257,6 +262,9 @@ def get_pinfo(request):
                             content_type="application/json,charset=utf-8")
 
 def refresh_class(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -283,6 +291,9 @@ def refresh_class(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             nowClass = person.get_now_class()
+            if "err" in nowClass:
+                update_cookies(xh, pswd)
+                return HttpResponse(json.dumps({'err':nowClass.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             if stu.className == nowClass:
                 return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(className=nowClass)
@@ -321,6 +332,9 @@ def refresh_class(request):
                             content_type="application/json,charset=utf-8")
 
 def get_message(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -381,6 +395,9 @@ def get_message(request):
 
 
 def get_study(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -467,6 +484,9 @@ def get_study(request):
 
 
 def get_grade(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -558,6 +578,9 @@ def get_grade(request):
 
 
 def get_schedule(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")

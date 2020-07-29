@@ -10,6 +10,8 @@ from info.models import Students
 
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
+with open('mpconfig.json', mode='r', encoding='utf-8') as m:
+    mpconfig = json.loads(m.read())
 base_url = config["base_url"]
 
 
@@ -97,6 +99,9 @@ def update_cookies(xh, pswd):
 
 def get_choosed(request):
     """已选课程"""
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -176,6 +181,9 @@ def get_choosed(request):
 
 def get_bkk_list(request):
     """板块课（通识选修课）"""
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -233,6 +241,9 @@ def get_bkk_list(request):
 
 def choose(request):
     """选课"""
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -270,6 +281,9 @@ def choose(request):
 
 def cancel(request):
     """取消选课"""
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")

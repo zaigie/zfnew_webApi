@@ -5,6 +5,7 @@
     "nGrade": "20192",
     "nSchedule": "20201",
     "vacation" : true,
+    "jwxtbad":false,
     "nowterm": 2,
     "nowGrade": 2,
     "notice": {
