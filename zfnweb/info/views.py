@@ -5,9 +5,12 @@ import traceback
 
 import json
 import requests
+import openpyxl
 from api import GetInfo, Login
-from django.http import HttpResponse, JsonResponse
+from django.utils.encoding import escape_uri_path
+from django.http import HttpResponse, JsonResponse, FileResponse
 from info.models import Students, Teachers
+from openpyxl.styles import Font, colors, Alignment
 
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
@@ -111,6 +114,28 @@ def update_cookies(xh, pswd):
             return HttpResponse(json.dumps({'err':'更新cookies未知错误，初次请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
 
+def writeToExcel(json,saveUrl):
+    lastCourses = json["lastCourses"]
+    res = json["res"]
+    excel = openpyxl.Workbook()
+    sheet1 = excel.create_sheet('sheet1', index=0)
+    sheet1.cell(row=1,column=1,value="学号").alignment = Alignment(horizontal='center', vertical='center')
+    sheet1.cell(row=1,column=2,value="姓名").alignment = Alignment(horizontal='center', vertical='center')
+    sheet1.column_dimensions['A'].width = 15
+    for c in range(0,len(lastCourses)):
+        sheet1.cell(row=1, column=c + 3, value=lastCourses[c]).alignment = Alignment(horizontal='center', vertical='center')
+        # sheet1.column_dimensions[chr(67+c)].width = 8
+    for items in range(0,len(res)):
+        sheet1.cell(row=items+2,column=1,value=res[items]["xh"]).alignment = Alignment(horizontal='center', vertical='center')
+        sheet1.cell(row=items+2,column=2,value=res[items]["name"]).alignment = Alignment(horizontal='center', vertical='center')
+        for n in range(0,len(res[items]["grades"])):
+            for cs in range(0,len(lastCourses)):
+                if res[items]["grades"][n]["n"] == lastCourses[cs]:
+                    try:
+                        sheet1.cell(row=items+2,column=cs+3,value=int(res[items]["grades"][n]["g"])).alignment = Alignment(horizontal='center', vertical='center')
+                    except:
+                        sheet1.cell(row=items+2,column=cs+3,value=res[items]["grades"][n]["g"]).alignment = Alignment(horizontal='center', vertical='center')
+    excel.save(saveUrl)
 
 def get_pinfo(request):
     if request.method == 'POST':
@@ -793,3 +818,56 @@ def searchExcept(request):
         requests.get(ServerChan + 'text=' + text + '&desp=' + str(xh) + '\n' + str(tname) + str(collegeName) + '\n' + str(content))
         return HttpResponse(json.dumps({'msg':'反馈成功'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+
+def classGrades(request):
+    className = request.GET.get("className")
+    yt = request.GET.get("yt")
+    year = yt[0:4]
+    term = yt[4:5]
+    studentIdList = []
+    for i in Students.objects.filter(className=className).order_by("studentId"):
+        studentIdList.append(i.studentId)
+    res = []
+    lastCourses = []
+    try:
+        lastStu = Students.objects.filter(className=className).order_by("-updateTime")[0].studentId
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
+            lastReq = json.loads(l.read())
+            for course in lastReq.get("course"):
+                if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
+                    lastCourses.append(course.get("courseTitle"))
+    except:
+        lastStu = Students.objects.filter(className=className).order_by("-updateTime")[1].studentId
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
+            lastReq = json.loads(l.read())
+            for course in lastReq.get("course"):
+                if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
+                    lastCourses.append(course.get("courseTitle"))
+    for stu in studentIdList:
+        nowUrl = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/Grades-' + yt + '.json'
+        try:
+            with open(nowUrl,mode='r',encoding='UTF-8') as f:
+                stuReq = json.loads(f.read())
+                stuRes = {
+                    'name':stuReq.get("name"),
+                    'xh':stuReq.get("studentId"),
+                    'grades':[{
+                        'n':item.get("courseTitle"),
+                        'g':item.get("grade")
+                    }for item in stuReq["course"] if item.get("courseNature") != "通识教育任选" and item.get("courseNature") != "无" and item.get("gradeNature") == "正常考试"]
+                }
+                res.append(stuRes)
+        except:
+            res.append({'name':Students.objects.get(studentId=int(str(stu))).name,'xh':str(stu),'grades':[]})
+    result = {'lastCourses':lastCourses,'res':res}
+    writeToExcel(result,'data/classes/'+className+'.xlsx')
+    try:
+        file = open('data/classes/'+className+'.xlsx', 'rb')
+    except:
+        return HttpResponse(json.dumps({'error': "文件不存在"}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response["Content-Disposition"] = "attachment; filename*=UTF-8''{}".format(escape_uri_path(className)+'.xlsx')
+    return response
+

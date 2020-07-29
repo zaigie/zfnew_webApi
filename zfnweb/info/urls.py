@@ -12,6 +12,7 @@ urlpatterns = [
     path('position', views.get_position),
     path('steacher', views.searchTeacher),
     path('scallback',views.searchExcept),
-    path('refreshclass',views.refresh_class)
+    path('refreshclass',views.refresh_class),
+    path('classgrades',views.classGrades)
     # path('update',views.update_cookies)
 ]
