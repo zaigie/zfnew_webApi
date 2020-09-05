@@ -6,7 +6,7 @@ import traceback
 import json
 import requests
 import openpyxl
-from api import GetInfo, Login
+from api import GetInfo, Login, PLogin, Personal, Infos, Search
 from django.utils.encoding import escape_uri_path
 from django.http import HttpResponse, JsonResponse, FileResponse
 from info.models import Students, Teachers
@@ -97,24 +97,27 @@ def update_cookies(xh, pswd):
         else:
             content = ('【%s】[%s]更新cookies时网络或其他错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'网络或token问题，请返回重试'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     except Exception as e:
         if str(e) == "'NoneType' object has no attribute 'get'":
             return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
-        ServerChan = config["ServerChan"]
-        text = "更新cookies未知错误"
-        if ServerChan == "none":
-            print(str(e))
-            traceback.print_exc()
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误，初次请返回重试'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
+        if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+            return update_cookies(xh, pswd)
         else:
-            traceback.print_exc()
-            requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误，初次请返回重试'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
+            ServerChan = config["ServerChan"]
+            text = "更新cookies未知错误"
+            if ServerChan == "none":
+                print(str(e))
+                traceback.print_exc()
+                return HttpResponse(json.dumps({'err':'更新cookies未知错误，请返回重试'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            else:
+                traceback.print_exc()
+                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                return HttpResponse(json.dumps({'err':'更新cookies未知错误，请返回重试'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
 
 def writeToExcel(json,saveUrl):
     lastCourses = json["lastCourses"]
@@ -185,23 +188,26 @@ def get_pinfo(request):
                 else:
                     content = ('【%s】[%s]在登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'网络或token问题，请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
-                content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
-                writeLog(content)
-                ServerChan = config["ServerChan"]
-                text = "登录未知错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
+                if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                    return get_pinfo(request)
                 else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\\n' + str(xh) + '\\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
+                    content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
+                    writeLog(content)
+                    ServerChan = config["ServerChan"]
+                    text = "登录未知错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\\n' + str(xh) + '\\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
         else:
             try:
                 startTime = time.time()
@@ -236,27 +242,30 @@ def get_pinfo(request):
                 else:
                     content = ('【%s】[%s]在第一次登录时网络或其它错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
-                    return HttpResponse(json.dumps({'err':'网络或token问题，初次请返回重试'}, ensure_ascii=False),
+                    return HttpResponse(json.dumps({'err':'网络或token问题，请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
                 # print(e)
-                content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
-                writeLog(content)
-                if str(e) == "'NoneType' object has no attribute 'get'":
-                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-                ServerChan = config["ServerChan"]
-                text = "登录未知错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
+                if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                    return get_pinfo(request)
                 else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'登录未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
+                    content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
+                    writeLog(content)
+                    if str(e) == "'NoneType' object has no attribute 'get'":
+                        return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    ServerChan = config["ServerChan"]
+                    text = "登录未知错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -308,25 +317,28 @@ def refresh_class(request):
             if str(e) == "'NoneType' object has no attribute 'get'":
                     return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-            ServerChan = config["ServerChan"]
-            text = "更新班级错误"
-            if ServerChan == "none":
-                print(str(e))
-                traceback.print_exc()
-                return HttpResponse(json.dumps({'err':'更新班级未知错误，初次请返回重试'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return refresh_class(request)
             else:
-                traceback.print_exc()
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                return HttpResponse(json.dumps({'err':'更新班级未知错误，初次请返回重试'}, ensure_ascii=False),
+                ServerChan = config["ServerChan"]
+                text = "更新班级错误"
+                if ServerChan == "none":
+                    print(str(e))
+                    traceback.print_exc()
+                    return HttpResponse(json.dumps({'err':'更新班级未知错误，请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-            sta = update_cookies(xh, pswd)
-            person = GetInfo(base_url=base_url, cookies=sta)
-            nowClass = person.get_now_class()
-            if stu.className == nowClass:
-                return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            Students.objects.filter(studentId=int(xh)).update(className=nowClass)
-            return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                else:
+                    traceback.print_exc()
+                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                    return HttpResponse(json.dumps({'err':'更新班级未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                nowClass = person.get_now_class()
+                if stu.className == nowClass:
+                    return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                Students.objects.filter(studentId=int(xh)).update(className=nowClass)
+                return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -367,28 +379,31 @@ def get_message(request):
             writeLog(content)
             return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-            writeLog(content)
-            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
-                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            if str(e) != 'Expecting value: line 6 column 1 (char 11)':
-                ServerChan = config["ServerChan"]
-                text = "消息错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'消息未知错误，初次请返回重试'}, ensure_ascii=False),
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return get_message(request)
+            else:
+                content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+                writeLog(content)
+                if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-                else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'消息未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-            sta = update_cookies(xh, pswd)
-            person = GetInfo(base_url=base_url, cookies=sta)
-            message = person.get_message()
-            return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                if str(e) != 'Expecting value: line 6 column 1 (char 11)':
+                    ServerChan = config["ServerChan"]
+                    text = "消息错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'消息未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'消息未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                message = person.get_message()
+                return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -455,29 +470,32 @@ def get_study(request):
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-            writeLog(content)
-            if str(e) != 'list index out of range':
-                ServerChan = config["ServerChan"]
-                text = "学业错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'学业未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-                else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'学业未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-            sta = update_cookies(xh, pswd)
-            person = GetInfo(base_url=base_url, cookies=sta)
-            study = person.get_study(xh)
-            gpa = str(study["gpa"])
-            Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
-            filename = ('Study')
-            newData(xh, filename, json.dumps(study, ensure_ascii=False))
-            return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return get_study(request)
+            else:
+                content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+                writeLog(content)
+                if str(e) != 'list index out of range':
+                    ServerChan = config["ServerChan"]
+                    text = "学业错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'学业未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'学业未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                study = person.get_study(xh)
+                gpa = str(study["gpa"])
+                Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
+                filename = ('Study')
+                newData(xh, filename, json.dumps(study, ensure_ascii=False))
+                return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -543,35 +561,38 @@ def get_grade(request):
             return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             # print(e)
-            content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-            writeLog(content)
-            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
-                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
-                ServerChan = config["ServerChan"]
-                text = "成绩错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'成绩未知错误，初次请返回重试'}, ensure_ascii=False),
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return get_grade(request)
+            else:
+                content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+                writeLog(content)
+                if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-                else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'成绩未知错误，初次请返回重试'}, ensure_ascii=False),
+                if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                    ServerChan = config["ServerChan"]
+                    text = "成绩错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                grade = person.get_grade(year, term)
+                if grade.get("gpa") == "" or grade.get("gpa") is None:
+                    return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-            sta = update_cookies(xh, pswd)
-            person = GetInfo(base_url=base_url, cookies=sta)
-            grade = person.get_grade(year, term)
-            if grade.get("gpa") == "" or grade.get("gpa") is None:
-                return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
-            filename = ('Grades-%s%s' % (str(year), str(term)))
-            newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+                Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+                filename = ('Grades-%s%s' % (str(year), str(term)))
+                newData(xh, filename, json.dumps(grade, ensure_ascii=False))
 
-            return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -632,32 +653,35 @@ def get_schedule(request):
 
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
-            content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-            writeLog(content)
-            if str(e) == 'Expecting value: line 1 column 1 (char 0)':
-                return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            if str(e) != 'Expecting value: line 4 column 1 (char 6)':
-                ServerChan = config["ServerChan"]
-                text = "课程错误"
-                if ServerChan == "none":
-                    print(str(e))
-                    traceback.print_exc()
-                    return HttpResponse(json.dumps({'err':'课程未知错误，初次请返回重试'}, ensure_ascii=False),
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return get_schedule(request)
+            else:
+                content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+                writeLog(content)
+                if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-                else:
-                    traceback.print_exc()
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-                    return HttpResponse(json.dumps({'err':'课程未知错误，初次请返回重试'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-            sta = update_cookies(xh, pswd)
-            person = GetInfo(base_url=base_url, cookies=sta)
-            schedule = person.get_schedule(year, term)
-            
-            filename = ('Schedules-%s%s' % (str(year), str(term)))
-            newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
+                if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                    ServerChan = config["ServerChan"]
+                    text = "课程错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'课程未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'课程未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                schedule = person.get_schedule(year, term)
+                
+                filename = ('Schedules-%s%s' % (str(year), str(term)))
+                newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
 
-            return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -894,3 +918,117 @@ def classGrades(request):
     response["Content-Disposition"] = "attachment; filename*=UTF-8''{}".format(escape_uri_path(className)+'.xlsx')
     return response
 
+def book_search(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    type = request.GET.get("type")
+    content = request.GET.get("content")
+    page = request.GET.get("page")
+    result = Search()
+    res = result.search_book(type,content,page)
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def book_detail(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    marc = request.GET.get("marc")
+    result = Search()
+    res = result.book_detail(marc)
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def library_info(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    lgn = PLogin()
+    cookies = lgn.login(xh,ppswd)
+    person = Personal(cookies)
+    res = person.get_info()
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def library_list(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    lgn = PLogin()
+    cookies = lgn.login(xh,ppswd)
+    person = Personal(cookies)
+    res = person.book_list()
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def library_hist(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    lgn = PLogin()
+    cookies = lgn.login(xh,ppswd)
+    person = Personal(cookies)
+    res = person.book_hist()
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def library_paylist(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    lgn = PLogin()
+    cookies = lgn.login(xh,ppswd)
+    person = Personal(cookies)
+    res = person.paylist()
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def library_paydetail(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前图书馆系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    lgn = PLogin()
+    cookies = lgn.login(xh,ppswd)
+    person = Personal(cookies)
+    res = person.paydetail()
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def school_card(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前财务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    page = request.POST.get("page")
+    lgn = PLogin()
+    cookies = lgn.plogin(xh,ppswd)
+    person = Infos(cookies)
+    res = person.school_card(page)
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+
+def financial(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前财务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    xh = request.POST.get("xh")
+    ppswd = request.POST.get("ppswd")
+    page = request.POST.get("page")
+    lgn = PLogin()
+    cookies = lgn.plogin(xh,ppswd)
+    person = Infos(cookies)
+    res = person.financial(page)
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")

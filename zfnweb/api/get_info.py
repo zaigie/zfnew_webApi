@@ -15,10 +15,9 @@ with open('config.json', mode='r', encoding='utf-8') as f:
 class GetInfo(object):
     def __init__(self, base_url, cookies):
         self.base_url = base_url
-        self.headers = {
-            'Referer': base_url,
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
-        }
+        self.headers = requests.utils.default_headers()
+        self.headers["Referer"] = base_url
+        self.headers["User-Agent"] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
         self.cookies = cookies
         if config["proxy"] == "none":
             self.proxies = None

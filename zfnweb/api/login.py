@@ -33,10 +33,10 @@ class Login(object):
         self.base_url = base_url
         self.key_url = parse.urljoin(base_url, '/xtgl/login_getPublicKey.html')
         self.login_url = parse.urljoin(base_url, '/xtgl/login_slogin.html')
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-            'Referer': self.login_url}
+        self.headers = requests.utils.default_headers()
+        self.headers["Referer"] = self.login_url
+        self.headers["User-Agent"] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+        self.headers["Accept"] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3'
         self.sess = requests.Session()
         self.req = ''
         self.cookies = ''

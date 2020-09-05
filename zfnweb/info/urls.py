@@ -13,6 +13,15 @@ urlpatterns = [
     path('steacher', views.searchTeacher),
     path('scallback',views.searchExcept),
     path('refreshclass',views.refresh_class),
-    path('classgrades',views.classGrades)
+    path('classgrades',views.classGrades),
+    path('booksearch',views.book_search),
+    path('bookdetail',views.book_detail),
+    path('libinfo',views.library_info),
+    path('liblist',views.library_list),
+    path('libhist',views.library_hist),
+    path('libpayl',views.library_paylist),
+    path('libpayd',views.library_paydetail),
+    path('schoolcard',views.school_card),
+    path('financial',views.financial)
     # path('update',views.update_cookies)
 ]
