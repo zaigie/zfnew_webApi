@@ -402,6 +402,68 @@ class GetInfo(object):
         res_list = [{'message': i.get('xxnr'), 'ctime': i.get('cjsj')} for i in jres.get('items')]
         return res_list
 
+    def get_grade2(self, year, term):
+        """获取成绩接口2"""
+        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxXsKcList.html?gnmkdm=N305007')
+        if term == '1':  # 修改检测学期
+            term = '3'
+        elif term == '2':
+            term = '12'
+        elif term == '0':
+            term = ''
+        else:
+            term = config["nowterm"]
+            #return {'err': 'Error Term'}
+        data = {
+            'xnm': year,  # 学年数
+            'xqm': term,  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
+            '_search': 'false',
+            'nd': int(time.time() * 1000),
+            'queryModel.showCount': '100',  # 每页最多条数
+            'queryModel.currentPage': '1',
+            'queryModel.sortName': '',
+            'queryModel.sortOrder': 'asc',
+            'time': '0'  # 查询次数
+        }
+        try:
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
+                                timeout=(5, 10))
+        except exceptions.Timeout as e:
+            ServerChan = config["ServerChan"]
+            text = "成绩超时"
+            if ServerChan == "none":
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            else:
+                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
+                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+        jres = res.json()
+        if jres.get('items'):  # 防止数据出错items为空
+            res_dict = {
+                'name': '无',
+                'gpa': self.gpa_only(),
+                'studentId': jres['items'][0]['xh_id'],
+                'schoolYear': jres['items'][0]['xnm'],
+                'schoolTerm': jres['items'][0]['xqmmc'],
+                'err': 'ok',
+                'course': [{
+                    'courseTitle': i.get('kcmc'),
+                    'teacher': '无',
+                    'courseId': i.get('kch_id'),
+                    'className': '无' if i.get('jxbmc') is None else i.get('jxbmc'),
+                    'courseNature': '无',
+                    'credit': '无' if i.get('xf') is None else format(float(i.get('xf')),'.1f'),
+                    'grade': ' ' if i.get('zpcj') is None else i.get('zpcj'),
+                    'gradePoint': format(float( (int(i.get('zpcj'))-60) // 5 * 0.5 + 1 ),'.1f'),
+                    'gradeNature': '无',
+                    'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
+                    'courseMark': '无',
+                    'courseCategory': '无',
+                    'courseAttribution': '无'
+                } for i in jres.get('items')]}
+            return res_dict
+        else:
+            return {'err': '看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~'}
+
     def get_grade(self, year, term):
         """获取成绩"""
         url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005')
@@ -521,6 +583,37 @@ class GetInfo(object):
             } for i in jres['kbList']],
             # 'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
         }
+        repetIndex = []
+        count = 0
+        for items in res_dict["normalCourse"]:
+            for index in range(0,len(res_dict["normalCourse"])):
+                if (res_dict["normalCourse"]).index(items) == count:
+                    pass
+                elif items["courseTitle"] == res_dict["normalCourse"][index]["courseTitle"] and items["courseWeekday"] == res_dict["normalCourse"][index]["courseWeekday"] and items["courseWeek"] == res_dict["normalCourse"][index]["courseWeek"]:
+                    repetIndex.append(index)
+                    # print(res_dict["normalCourse"][index]["courseTitle"])
+                else:
+                    pass
+            count = count + 1
+        if len(repetIndex) % 2 != 0:
+            return res_dict
+        for r in range(0,len(repetIndex),2):
+            fir = repetIndex[r]
+            sec = repetIndex[r+1]
+            if len(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])) == 4:
+                res_dict["normalCourse"][fir]["courseSection"] = re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])[0] + "-" + re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])[1] + "节"
+                res_dict["normalCourse"][fir]["includeSection"] = self.listTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+                res_dict["normalCourse"][fir]["upTime"] = self.upTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+                res_dict["normalCourse"][fir]["courseTime"] = self.calTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+
+                res_dict["normalCourse"][sec]["courseSection"] = re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"])[2] + "-" + re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"])[3] + "节"
+                res_dict["normalCourse"][sec]["includeSection"] = self.listTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                res_dict["normalCourse"][sec]["upTime"] = self.upTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                res_dict["normalCourse"][sec]["courseTime"] = self.calTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                # print(res_dict["normalCourse"][fir])
+                # print(res_dict["normalCourse"][sec])
+            else:
+                pass
         return res_dict
 
     # def get_notice(self):
