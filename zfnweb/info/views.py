@@ -597,6 +597,101 @@ def get_grade(request):
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
+def get_grade2(request):
+    if mpconfig["jwxtbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+    if request.method == 'POST':
+        if request.POST:
+            xh = request.POST.get("xh")
+            pswd = request.POST.get("pswd")
+            year = request.POST.get("year")
+            term = request.POST.get("term")
+            refresh = request.POST.get("refresh")
+        else:
+            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        if not Students.objects.filter(studentId=int(xh)):
+            content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
+            writeLog(content)
+            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
+        else:
+            stu = Students.objects.get(studentId=int(xh))
+        if refresh == "no":
+            filename = ('GradesN-%s%s' % (str(year), str(term)))
+            cache = cacheData(xh, filename)
+            if cache is not None:
+                # print('cache')
+                print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
+                return HttpResponse(json.dumps(cache, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            else:
+                pass
+        try:
+            startTime = time.time()
+            print('【%s】查看了%s-%s的成绩' % (stu.name, year, term))
+            JSESSIONID = str(stu.JSESSIONID)
+            route = str(stu.route)
+            cookies_dict = {
+                'JSESSIONID': JSESSIONID,
+                'route': route
+            }
+            cookies = requests.utils.cookiejar_from_dict(cookies_dict)
+            person = GetInfo(base_url=base_url, cookies=cookies)
+            grade = person.get_grade2(year, term)
+            if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
+                update_cookies(xh, pswd)
+                return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+            endTime = time.time()
+            spendTime = endTime - startTime
+            content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
+                datetime.datetime.now().strftime('%H:%M:%S'), stu.name, year, term, spendTime))
+            writeLog(content)
+            
+            filename = ('GradesN-%s%s' % (str(year), str(term)))
+            newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+            # print('write')
+
+            return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
+        except Exception as e:
+            # print(e)
+            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+                return get_grade2(request)
+            else:
+                content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+                writeLog(content)
+                if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                    ServerChan = config["ServerChan"]
+                    text = "成绩错误"
+                    if ServerChan == "none":
+                        print(str(e))
+                        traceback.print_exc()
+                        return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    else:
+                        traceback.print_exc()
+                        requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
+                        return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                sta = update_cookies(xh, pswd)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                grade = person.get_grade2(year, term)
+                if grade.get("gpa") == "" or grade.get("gpa") is None:
+                    return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+                filename = ('GradesN-%s%s' % (str(year), str(term)))
+                newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+
+                return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
+    else:
+        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
 
 def get_schedule(request):
     if mpconfig["jwxtbad"]:

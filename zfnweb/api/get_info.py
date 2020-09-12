@@ -404,7 +404,7 @@ class GetInfo(object):
 
     def get_grade2(self, year, term):
         """获取成绩接口2"""
-        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxXsKcList.html?gnmkdm=N305007')
+        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxXsKccjList.html?gnmkdm=N305007')
         if term == '1':  # 修改检测学期
             term = '3'
         elif term == '2':
@@ -439,7 +439,7 @@ class GetInfo(object):
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
-                'name': '无',
+                'name': '接口2',
                 'gpa': self.gpa_only(),
                 'studentId': jres['items'][0]['xh_id'],
                 'schoolYear': jres['items'][0]['xnm'],
@@ -450,16 +450,56 @@ class GetInfo(object):
                     'teacher': '无',
                     'courseId': i.get('kch_id'),
                     'className': '无' if i.get('jxbmc') is None else i.get('jxbmc'),
-                    'courseNature': '无',
+                    'courseNature': 'N',
                     'credit': '无' if i.get('xf') is None else format(float(i.get('xf')),'.1f'),
-                    'grade': ' ' if i.get('zpcj') is None else i.get('zpcj'),
-                    'gradePoint': format(float( (int(i.get('zpcj'))-60) // 5 * 0.5 + 1 ),'.1f'),
-                    'gradeNature': '无',
+                    'grade': ' ' if i.get('xmcj') is None else i.get('xmcj'),
+                    'gradePoint': 'null' if (i.get('xmcj')).isdigit() is False else format(float( (int(i.get('xmcj'))-60) // 5 * 0.5 + 1 ),'.1f'),
+                    'gradeNature': 'N',
+                    'gradeDetail': i.get('xmblmc'),
                     'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
                     'courseMark': '无',
                     'courseCategory': '无',
                     'courseAttribution': '无'
                 } for i in jres.get('items')]}
+            new_dict = []
+            alreadyId = []
+            for items in  res_dict["course"]:
+                if items["courseId"] in alreadyId:
+                    continue
+                newc = {
+                    "courseTitle": items["courseTitle"],
+                    "courseId": items["courseId"],
+                    "courseNature": items["courseNature"],
+                    "credit": items["credit"],
+                    "grade": items["grade"],
+                    "gradePoint": items["gradePoint"],
+                    "gradeNature": items["gradeNature"],
+                    "courseMark": 'N',
+                    "courseCategory": 'N',
+                    "courseAttribution": 'N',
+                    "nor": 'N',
+                    "exam": 'N'
+                }
+                for index in range(0,len(res_dict["course"])):
+                    if items["courseId"] == res_dict["course"][index]["courseId"]:
+                        #print(res_dict["course"][index]["courseTitle"])
+                        if "总评" in res_dict["course"][index]["gradeDetail"]:
+                            newc["grade"] = res_dict["course"][index]["grade"]
+                            if newc["grade"].isdigit():
+                                newc["gradePoint"] = format(float( (int(newc["grade"])-60) // 5 * 0.5 + 1 ),'.1f')
+                                if float(newc["gradePoint"]) < 0:
+                                    newc["gradePoint"] = "0.0"
+                            else:
+                                newc["gradePoint"] = 'null'
+                        elif "平时" in res_dict["course"][index]["gradeDetail"]:
+                            newc["nor"] = res_dict["course"][index]["gradeDetail"] + ":" + res_dict["course"][index]["grade"]
+                        elif "期末" in res_dict["course"][index]["gradeDetail"]:
+                            newc["exam"] = res_dict["course"][index]["gradeDetail"] + ":" + res_dict["course"][index]["grade"]
+                    else:
+                        pass
+                alreadyId.append(items["courseId"])
+                new_dict.append(newc)
+            res_dict["course"] = new_dict
             return res_dict
         else:
             return {'err': '看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~'}
@@ -583,21 +623,22 @@ class GetInfo(object):
             } for i in jres['kbList']],
             # 'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
         }
+        """处理同周同天同课程不同时段合并显示的问题"""
         repetIndex = []
         count = 0
         for items in res_dict["normalCourse"]:
             for index in range(0,len(res_dict["normalCourse"])):
-                if (res_dict["normalCourse"]).index(items) == count:
+                if (res_dict["normalCourse"]).index(items) == count:    #如果对比到自己就忽略
                     pass
                 elif items["courseTitle"] == res_dict["normalCourse"][index]["courseTitle"] and items["courseWeekday"] == res_dict["normalCourse"][index]["courseWeekday"] and items["courseWeek"] == res_dict["normalCourse"][index]["courseWeek"]:
-                    repetIndex.append(index)
+                    repetIndex.append(index)    # 满足条件记录索引
                     # print(res_dict["normalCourse"][index]["courseTitle"])
                 else:
                     pass
-            count = count + 1
-        if len(repetIndex) % 2 != 0:
+            count = count + 1   # 记录当前对比课程的索引
+        if len(repetIndex) % 2 != 0:    # 暂时考虑一天两个时段上同一门课，不满足条件不进行修改
             return res_dict
-        for r in range(0,len(repetIndex),2):
+        for r in range(0,len(repetIndex),2):    # 索引数组两两成对，故步进2循环
             fir = repetIndex[r]
             sec = repetIndex[r+1]
             if len(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])) == 4:
