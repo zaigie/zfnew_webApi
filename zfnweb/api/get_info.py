@@ -259,7 +259,9 @@ class GetInfo(object):
         opf = int(allc_num4[0])
 
         id_find = re.findall(r"xfyqjd_id='(.*)' jdkcsx='1' leaf=''", str(soup))
+        id_find2 = re.findall(r"xfyqjd_id='(.*)' jdkcsx='2' leaf=''", str(soup))
         idList = list({}.fromkeys(id_find).keys())
+        idList2 = list({}.fromkeys(id_find2).keys())
         tsid = "None"
         tzid = "None"
         zyid = "None"
@@ -279,7 +281,7 @@ class GetInfo(object):
             tsid = idList[0]
             tzid = idList[2]
             zyid = idList[1]
-            qtid = idList[3]
+            qtid = idList2[0]
 
         res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies,
                                proxies=self.proxies, timeout=(5, 10))
