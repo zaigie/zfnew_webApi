@@ -319,7 +319,7 @@ def refresh_class(request):
                                         content_type="application/json,charset=utf-8")
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
                 return refresh_class(request)
-            else:
+            if 'Expecting value' not in str(e):
                 ServerChan = config["ServerChan"]
                 text = "更新班级错误"
                 if ServerChan == "none":
@@ -332,13 +332,13 @@ def refresh_class(request):
                     requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
                     return HttpResponse(json.dumps({'err':'更新班级未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
-                sta = update_cookies(xh, pswd)
-                person = GetInfo(base_url=base_url, cookies=sta)
-                nowClass = person.get_now_class()
-                if stu.className == nowClass:
-                    return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                Students.objects.filter(studentId=int(xh)).update(className=nowClass)
-                return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            sta = update_cookies(xh, pswd)
+            person = GetInfo(base_url=base_url, cookies=sta)
+            nowClass = person.get_now_class()
+            if stu.className == nowClass:
+                return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            Students.objects.filter(studentId=int(xh)).update(className=nowClass)
+            return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")

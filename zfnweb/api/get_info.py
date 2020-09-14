@@ -27,6 +27,17 @@ class GetInfo(object):
             }
 
     @staticmethod
+    def calPoint(xmcj):
+        """计算绩点"""
+        if xmcj is None:
+            return 'null'
+        else:
+            if xmcj.isdigit() is False:
+                return 'null'
+            else:
+                return format(float( (int(xmcj)-60) // 5 * 0.5 + 1 ),'.1f')
+
+    @staticmethod
     def calTime(args):
         """根据config.json返回上下课时间"""
         num1 = str(args[0])
@@ -453,7 +464,7 @@ class GetInfo(object):
                     'courseNature': 'N',
                     'credit': '无' if i.get('xf') is None else format(float(i.get('xf')),'.1f'),
                     'grade': ' ' if i.get('xmcj') is None else i.get('xmcj'),
-                    'gradePoint': 'null' if (i.get('xmcj')).isdigit() is False else format(float( (int(i.get('xmcj'))-60) // 5 * 0.5 + 1 ),'.1f'),
+                    'gradePoint': self.calPoint(i.get('xmcj')),
                     'gradeNature': 'N',
                     'gradeDetail': i.get('xmblmc'),
                     'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
@@ -485,6 +496,8 @@ class GetInfo(object):
                         #print(res_dict["course"][index]["courseTitle"])
                         if "总评" in res_dict["course"][index]["gradeDetail"]:
                             newc["grade"] = res_dict["course"][index]["grade"]
+                            if newc["grade"] is None:
+                                pass
                             if newc["grade"].isdigit():
                                 newc["gradePoint"] = format(float( (int(newc["grade"])-60) // 5 * 0.5 + 1 ),'.1f')
                                 if float(newc["gradePoint"]) < 0:
