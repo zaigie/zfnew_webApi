@@ -143,8 +143,16 @@ def writeToExcel(json,saveUrl):
     excel.save(saveUrl)
 
 def get_pinfo(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/pinfo",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["loginbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -271,8 +279,16 @@ def get_pinfo(request):
                             content_type="application/json,charset=utf-8")
 
 def refresh_class(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/refreshclass",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["loginbad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -344,6 +360,14 @@ def refresh_class(request):
                             content_type="application/json,charset=utf-8")
 
 def get_message(request):
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/message",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -410,8 +434,17 @@ def get_message(request):
 
 
 def get_study(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'refresh':request.POST.get("refresh")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/study",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["studybad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求学业，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -471,7 +504,10 @@ def get_study(request):
             return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                return get_study(request)
+                # return get_study(request)
+                print(str(e))
+                return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -502,8 +538,19 @@ def get_study(request):
 
 
 def get_grade(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'year':request.POST.get("year"),
+            'term':request.POST.get("term"),
+            'refresh':request.POST.get("refresh")
+        }
+        res = requests.post(url=mpconfig["otherapi"],data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["gradebad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -598,8 +645,19 @@ def get_grade(request):
                             content_type="application/json,charset=utf-8")
 
 def get_grade2(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'year':request.POST.get("year"),
+            'term':request.POST.get("term"),
+            'refresh':request.POST.get("refresh")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/grade",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["gradebad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -658,7 +716,10 @@ def get_grade2(request):
         except Exception as e:
             # print(e)
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                return get_grade2(request)
+                # return get_grade2(request)
+                print(str(e))
+                return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -694,8 +755,19 @@ def get_grade2(request):
                             content_type="application/json,charset=utf-8")
 
 def get_schedule(request):
-    if mpconfig["jwxtbad"]:
-        return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'year':request.POST.get("year"),
+            'term':request.POST.get("term"),
+            'refresh':request.POST.get("refresh")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/schedule",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["schedulebad"]:
+        return HttpResponse(json.dumps({'err':'当前教务系统无法请求课表，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
@@ -782,6 +854,10 @@ def get_schedule(request):
                             content_type="application/json,charset=utf-8")
 
 def joinDetail(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/info/joindetail?type=" + request.GET.get("type"))
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
     allUsers = Students.objects.filter().all().count()
     if type == 'college':
@@ -821,6 +897,10 @@ def joinDetail(request):
                         content_type="application/json,charset=utf-8")
 
 def get_position(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/info/position?xh=" + request.GET.get("xh"))
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     #print(request)
     xh = request.GET.get("xh")
     if xh is None:
@@ -868,9 +948,21 @@ def searchTeacher(request):
     if request.method == "GET":
         xh = request.GET.get("xh")
         tname = request.GET.get("tname")
+        if mpconfig["apichange"]:
+            res = requests.get(url=mpconfig["otherapi"]+"/info/steacher?xh=" + request.GET.get("xh") + "&tname=" + request.GET.get("tname"))
+            return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
     elif request.method == "POST":
         xh = request.POST.get("xh")
         tname = request.POST.get("tname")
+        if mpconfig["apichange"]:
+            data = {
+                'xh':request.POST.get("xh"),
+                'tname':request.POST.get("tname")
+            }
+            res = requests.post(url=mpconfig["otherapi"]+"/info/steacher",data=data)
+            return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")
         
     if xh is None or tname is None:
         return HttpResponse(json.dumps({'err': '参数不全'}, ensure_ascii=False),
@@ -947,6 +1039,16 @@ def searchTeacher(request):
                                         content_type="application/json,charset=utf-8")
 
 def searchExcept(request):
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'tname':request.POST.get("tname"),
+            'collegeName':request.POST.get("collegeName"),
+            'content':request.POST.get("content")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/info/scallback",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     xh = request.POST.get("xh")
     tname = request.POST.get("tname")
     collegeName = request.POST.get("college")
@@ -962,6 +1064,10 @@ def searchExcept(request):
                             content_type="application/json,charset=utf-8")
 
 def classGrades(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/info/classgrades?className=" + request.GET.get("className") + "&yt=" + request.GET.get("yt"))
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     className = request.GET.get("className")
     yt = request.GET.get("yt")
     year = yt[0:4]

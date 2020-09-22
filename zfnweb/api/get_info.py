@@ -229,7 +229,7 @@ class GetInfo(object):
         url_info = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
         try:
             mainr = sessions.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
-                                 timeout=(5, 10))
+                                 timeout=(5, 10), stream=True)
         except exceptions.Timeout as e:
             ServerChan = config["ServerChan"]
             text = "学业超时"
@@ -284,13 +284,13 @@ class GetInfo(object):
             qtid = idList2[0]
 
         res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
 
         ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
                                    str(soup))

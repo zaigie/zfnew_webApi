@@ -1,8 +1,16 @@
 from django.shortcuts import render,HttpResponse
 import json
 import time,datetime
+import requests
+
+with open('mpconfig.json', mode='r', encoding='utf-8') as m:
+    mpconfig = json.loads(m.read())
 
 def config(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/mp")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         config = json.loads(f.read())
         res = {
@@ -23,12 +31,16 @@ def countTime(date):
     if date != "none":
         nowdate = datetime.datetime.now()
         rdate = datetime.datetime.strptime(date, '%Y-%m-%d')
-        days = (rdate - nowdate).days
+        days = (rdate - nowdate).days + 1
         return ("%d天" % days)
     else:
         return "暂定"
 
 def countdown(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/mp/countdown")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         countdown = json.loads(f.read())["countdown"]
         res = [{
@@ -40,6 +52,10 @@ def countdown(request):
                         content_type="application/json,charset=utf-8")
 
 def navigate(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/mp/navigate?type=" + request.GET.get("type"))
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         content = json.loads(f.read())["navigate"]
@@ -54,6 +70,10 @@ def navigate(request):
                             content_type="application/json,charset=utf-8")
 
 def about(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/mp/about")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         about = json.loads(f.read())["about"]
     return HttpResponse(json.dumps(about, ensure_ascii=False),

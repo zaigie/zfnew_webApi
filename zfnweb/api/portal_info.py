@@ -45,7 +45,7 @@ class Infos(object):
         
     def financial(self, page):
         try:
-            req = self.sess.get(self.financial_url + page, headers=self.headers,cookies=self.cookies)
+            req = self.sess.get((self.financial_url + page).encode('utf-8'), headers=self.headers,cookies=self.cookies)
             table = BeautifulSoup(req.text, 'lxml').find('table')
             trs = table.find_all('tr')
             num = table.find('div',class_='page_nav').find_all('i')[0].get_text()

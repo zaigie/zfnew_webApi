@@ -12,7 +12,7 @@ with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
 
 class Xuanke(object):
-    def __init__(self, base_url, cookies):
+    def __init__(self, base_url, cookies, year, term):
         self.base_url = base_url
         self.headers = {
             'Referer': base_url,
@@ -25,8 +25,10 @@ class Xuanke(object):
             self.proxies = {
                 'http': config["proxy"]
             }
-        self.nowyear = str(int(time.strftime("%Y", time.localtime())) - 1)
-        self.nowterm = config["nowterm"]
+        # self.nowyear = str(int(time.strftime("%Y", time.localtime())) - 1)
+        # self.nowterm = config["nowterm"]
+        self.nowyear = year
+        self.nowterm = term
 
     def get_choosed(self):
         """获取已选课程信息"""

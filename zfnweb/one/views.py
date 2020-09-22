@@ -7,8 +7,14 @@ import requests
 import re
 import datetime
 
+with open('mpconfig.json', mode='r', encoding='utf-8') as m:
+    mpconfig = json.loads(m.read())
 
 def get_one(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/one")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     with open('one.txt', mode='r', encoding='utf-8') as f:
         if os.path.exists('one.txt'):
             lines = f.readlines()

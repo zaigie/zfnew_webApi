@@ -13,6 +13,12 @@ with open('config.json', mode='r', encoding='utf-8') as f:
 with open('mpconfig.json', mode='r', encoding='utf-8') as m:
     mpconfig = json.loads(m.read())
 base_url = config["base_url"]
+year = mpconfig["nChoose"][0:4]
+term = mpconfig["nChoose"][4:]
+if term == "1":
+    term = "3"
+elif term == "2":
+    term = "12"
 
 
 def index():
@@ -99,6 +105,15 @@ def update_cookies(xh, pswd):
 
 def get_choosed(request):
     """已选课程"""
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'refresh':request.POST.get("refresh")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/choose/choosed",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -137,7 +152,7 @@ def get_choosed(request):
                 'route': route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            person = Xuanke(base_url=base_url, cookies=cookies)
+            person = Xuanke(base_url=base_url, cookies=cookies, year=year, term=term)
             choosed = person.get_choosed()
             endTime = time.time()
             spendTime = endTime - startTime
@@ -145,7 +160,7 @@ def get_choosed(request):
                 content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
                 sta = update_cookies(xh, pswd)
-                person = Xuanke(base_url=base_url, cookies=sta)
+                person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
                 nchoosed = person.get_choosed()
 
                 filename = ('Choosed')
@@ -181,6 +196,15 @@ def get_choosed(request):
 
 def get_bkk_list(request):
     """板块课（通识选修课）"""
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'bkk':request.POST.get("bkk")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/choose/bkk",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -209,7 +233,7 @@ def get_bkk_list(request):
                 'route': route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            person = Xuanke(base_url=base_url, cookies=cookies)
+            person = Xuanke(base_url=base_url, cookies=cookies, year=year, term=term)
             bkk_list = person.get_bkk_list(bkk)
             endTime = time.time()
             spendTime = endTime - startTime
@@ -231,7 +255,7 @@ def get_bkk_list(request):
             content = ('【%s】[%s]访问板块课出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
             sta = update_cookies(xh, pswd)
-            person = Xuanke(base_url=base_url, cookies=sta)
+            person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
             bkk_list = person.get_bkk_list(bkk)
             return HttpResponse(json.dumps(bkk_list, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
@@ -241,6 +265,17 @@ def get_bkk_list(request):
 
 def choose(request):
     """选课"""
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'doId':request.POST.get("doId"),
+            'kcId':request.POST.get("kcId"),
+            'kklxdm':request.POST.get("kklxdm")
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/choose/choose",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -271,7 +306,7 @@ def choose(request):
                 'route': route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-        person = Xuanke(base_url=base_url, cookies=cookies)
+        person = Xuanke(base_url=base_url, cookies=cookies, year=year, term=term)
         result = person.choose(doId, kcId, gradeId, majorId, kklxdm)
         return HttpResponse(json.dumps(result, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
@@ -281,6 +316,16 @@ def choose(request):
 
 def cancel(request):
     """取消选课"""
+    if mpconfig["apichange"]:
+        data = {
+            'xh':request.POST.get("xh"),
+            'pswd':request.POST.get("pswd"),
+            'doId':request.POST.get("doId"),
+            'kcId':request.POST.get("kcId"),
+        }
+        res = requests.post(url=mpconfig["otherapi"]+"/choose/cancel",data=data)
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问，小程序暂时无法登录和更新'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -308,7 +353,7 @@ def cancel(request):
                 'route': route
             }
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-        person = Xuanke(base_url=base_url, cookies=cookies)
+        person = Xuanke(base_url=base_url, cookies=cookies, year=year, term=term)
         result = person.cancel(doId, kcId)
         return HttpResponse(json.dumps(result, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
