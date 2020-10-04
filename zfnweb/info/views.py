@@ -109,7 +109,6 @@ def update_cookies(xh, pswd):
             ServerChan = config["ServerChan"]
             text = "更新cookies未知错误"
             if ServerChan == "none":
-                print(str(e))
                 traceback.print_exc()
                 return HttpResponse(json.dumps({'err':'更新cookies未知错误，请返回重试'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
@@ -172,6 +171,9 @@ def get_pinfo(request):
                     cookies = lgn.cookies
                     person = GetInfo(base_url=base_url, cookies=cookies)
                     pinfo = person.get_pinfo()
+                    if pinfo.get("idNumber")[-6:] == pswd:
+                        return HttpResponse(json.dumps({'err':"新生或专升本同学请在教务系统(jwxt.xcc.edu.cn)完善信息并审核且修改密码后登陆小程序！"}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                     route = requests.utils.dict_from_cookiejar(cookies)["route"]
                     refreshTimes += 1
@@ -207,7 +209,6 @@ def get_pinfo(request):
                     ServerChan = config["ServerChan"]
                     text = "登录未知错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -265,7 +266,6 @@ def get_pinfo(request):
                     ServerChan = config["ServerChan"]
                     text = "登录未知错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'登录未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -339,7 +339,6 @@ def refresh_class(request):
                 ServerChan = config["ServerChan"]
                 text = "更新班级错误"
                 if ServerChan == "none":
-                    print(str(e))
                     traceback.print_exc()
                     return HttpResponse(json.dumps({'err':'更新班级未知错误，请返回重试'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
@@ -415,7 +414,6 @@ def get_message(request):
                     ServerChan = config["ServerChan"]
                     text = "消息错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'消息未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -505,7 +503,6 @@ def get_study(request):
         except Exception as e:
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
                 # return get_study(request)
-                print(str(e))
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
@@ -515,7 +512,6 @@ def get_study(request):
                     ServerChan = config["ServerChan"]
                     text = "学业错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'学业未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -620,7 +616,6 @@ def get_grade(request):
                     ServerChan = config["ServerChan"]
                     text = "成绩错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -717,7 +712,6 @@ def get_grade2(request):
             # print(e)
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
                 # return get_grade2(request)
-                print(str(e))
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
@@ -730,7 +724,6 @@ def get_grade2(request):
                     ServerChan = config["ServerChan"]
                     text = "成绩错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'成绩未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -832,7 +825,6 @@ def get_schedule(request):
                     ServerChan = config["ServerChan"]
                     text = "课程错误"
                     if ServerChan == "none":
-                        print(str(e))
                         traceback.print_exc()
                         return HttpResponse(json.dumps({'err':'课程未知错误，请返回重试'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
@@ -1079,20 +1071,20 @@ def classGrades(request):
     lastCourses = []
     try:
         lastStu = Students.objects.filter(className=className).order_by("-updateTime")[0].studentId
-        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/GradesN-' + yt + '.json') as l:
             lastReq = json.loads(l.read())
             for course in lastReq.get("course"):
                 if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
                     lastCourses.append(course.get("courseTitle"))
     except:
         lastStu = Students.objects.filter(className=className).order_by("-updateTime")[1].studentId
-        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/GradesN-' + yt + '.json') as l:
             lastReq = json.loads(l.read())
             for course in lastReq.get("course"):
                 if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
                     lastCourses.append(course.get("courseTitle"))
     for stu in studentIdList:
-        nowUrl = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/Grades-' + yt + '.json'
+        nowUrl = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/GradesN-' + yt + '.json'
         try:
             with open(nowUrl,mode='r',encoding='UTF-8') as f:
                 stuReq = json.loads(f.read())
