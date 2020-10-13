@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SIMPLEUI_HOME_INFO = False
 SIMPLEUI_DEFAULT_THEME = 'element.css'
-SIMPLEUI_LOGO = 'https://api.xcchelper.cn/static/admin/simpleui-x/img/logo.png'
+SIMPLEUI_LOGO = 'https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/uploads%2F2020-10-12%2Fxcchelper_logo.png'
 SIMPLEUI_ICON = {
 	'学生': 'fas fa-users',
     '教师': 'fas fa-graduation-cap',

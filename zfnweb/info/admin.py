@@ -10,15 +10,15 @@ admin.site.index_title="欢迎来到西院助手后台管理"
 class StuAdmin(admin.ModelAdmin):
     ordering = ('-updateTime',)
     fieldsets = (
-        ("基本信息", {'fields': ['studentId', 'name', 'gpa', 'classMonitor']}),
+        ("基本信息", {'fields': ['studentId', 'name', 'gpa', 'classMonitor','national']}),
         ("院系班级", {'fields':['collegeName', 'majorName', 'className']}),
-        ("额外信息", {'fields':['phoneNumber', 'birthDay', 'searchTimes']}),
+        ("额外信息", {'fields':['phoneNumber', 'birthDay', 'searchTimes','graduationSchool','domicile','email','idNumber']}),
         ("登录相关", {'fields':['updateTime', 'refreshTimes']}),
         ("Cookies", {'fields':['JSESSIONID', 'route']}),
     )
-    list_display = ('studentId','name','collegeName','majorName','className','gpa','phoneNumber','birthDay','refreshTimes','updateTime')
-    search_fields = ('studentId','name','collegeName','majorName','className','phoneNumber','birthDay')
-    list_filter = ('collegeName','majorName','className')
+    list_display = ('studentId','name','national','collegeName','majorName','className','gpa','email','phoneNumber','birthDay','domicile','graduationSchool','refreshTimes','updateTime')
+    search_fields = ('studentId','name','email','phoneNumber','birthDay','graduationSchool')
+    list_filter = ('majorName','className','domicile')
     list_per_page = 20
 
 class TeaAdmin(admin.ModelAdmin):

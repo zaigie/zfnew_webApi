@@ -89,6 +89,8 @@ def update_cookies(xh, pswd):
             writeLog(content)
             person = GetInfo(base_url=base_url, cookies=cookies)
             pinfo = person.get_pinfo()
+            if stu.email == "无":
+                Students.objects.filter(studentId=int(xh)).update(email=pinfo["email"])
             # print(pinfo)
             filename = ('Pinfo')
             newData(xh, filename, json.dumps(pinfo, ensure_ascii=False))
@@ -149,6 +151,9 @@ def get_pinfo(request):
         }
         res = requests.post(url=mpconfig["otherapi"]+"/info/pinfo",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if mpconfig["loginbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
@@ -226,12 +231,17 @@ def get_pinfo(request):
                     cookies = lgn.cookies
                     person = GetInfo(base_url=base_url, cookies=cookies)
                     pinfo = person.get_pinfo()
+                    if pinfo.get("idNumber")[-6:] == pswd:
+                        return HttpResponse(json.dumps({'err':"新生或专升本同学请在教务系统(jwxt.xcc.edu.cn)完善信息并审核且修改密码后登陆小程序！"}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                     route = requests.utils.dict_from_cookiejar(cookies)["route"]
                     updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], pinfo["collegeName"],
                                              pinfo["majorName"], pinfo["className"], pinfo["phoneNumber"],
-                                             pinfo["birthDay"], JSESSIONID, route, updateTime)
+                                             pinfo["birthDay"], pinfo["graduationSchool"], pinfo["domicile"],
+                                             pinfo["email"], pinfo["national"], pinfo["idNumber"],
+                                             JSESSIONID, route, updateTime)
                     newstu.save()
                     endTime = time.time()
                     spendTime = endTime - startTime
@@ -286,6 +296,9 @@ def refresh_class(request):
         }
         res = requests.post(url=mpconfig["otherapi"]+"/info/refreshclass",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if mpconfig["loginbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
@@ -367,6 +380,9 @@ def get_message(request):
         res = requests.post(url=mpconfig["otherapi"]+"/info/message",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["jwxtbad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -440,6 +456,9 @@ def get_study(request):
         }
         res = requests.post(url=mpconfig["otherapi"]+"/info/study",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if mpconfig["studybad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求学业，请待学校修复！'}, ensure_ascii=False),
@@ -544,6 +563,9 @@ def get_grade(request):
         }
         res = requests.post(url=mpconfig["otherapi"],data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if mpconfig["gradebad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
@@ -651,6 +673,9 @@ def get_grade2(request):
         res = requests.post(url=mpconfig["otherapi"]+"/info/grade",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if mpconfig["gradebad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -695,6 +720,8 @@ def get_grade2(request):
             grade = person.get_grade2(year, term)
             if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
                 update_cookies(xh, pswd)
+                return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+            if grade.get("err") == "看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~":
                 return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             endTime = time.time()
@@ -758,6 +785,9 @@ def get_schedule(request):
         }
         res = requests.post(url=mpconfig["otherapi"]+"/info/schedule",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if mpconfig["schedulebad"]:
         return HttpResponse(json.dumps({'err':'当前教务系统无法请求课表，请待学校修复！'}, ensure_ascii=False),
@@ -850,6 +880,9 @@ def joinDetail(request):
         res = requests.get(url=mpconfig["otherapi"]+"/info/joindetail?type=" + request.GET.get("type"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
     allUsers = Students.objects.filter().all().count()
     if type == 'college':
@@ -892,6 +925,9 @@ def get_position(request):
     if mpconfig["apichange"]:
         res = requests.get(url=mpconfig["otherapi"]+"/info/position?xh=" + request.GET.get("xh"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     #print(request)
     xh = request.GET.get("xh")
@@ -937,6 +973,9 @@ def get_position(request):
                             content_type="application/json,charset=utf-8")
 
 def searchTeacher(request):
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if request.method == "GET":
         xh = request.GET.get("xh")
         tname = request.GET.get("tname")
@@ -1041,6 +1080,9 @@ def searchExcept(request):
         res = requests.post(url=mpconfig["otherapi"]+"/info/scallback",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     xh = request.POST.get("xh")
     tname = request.POST.get("tname")
     collegeName = request.POST.get("college")
@@ -1059,6 +1101,9 @@ def classGrades(request):
     if mpconfig["apichange"]:
         res = requests.get(url=mpconfig["otherapi"]+"/info/classgrades?className=" + request.GET.get("className") + "&yt=" + request.GET.get("yt"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if mpconfig["maintenance"]:
+        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     className = request.GET.get("className")
     yt = request.GET.get("yt")

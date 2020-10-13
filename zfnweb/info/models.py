@@ -11,6 +11,11 @@ class Students(models.Model):
     gpa = models.CharField(verbose_name="GPA",max_length=10,default="init")
     phoneNumber = models.CharField(verbose_name="手机号",max_length=20)
     birthDay = models.CharField(verbose_name="生日",max_length=20)
+    graduationSchool = models.CharField(verbose_name="毕业中学",max_length=40,default="init")
+    domicile = models.CharField(verbose_name="所在地",max_length=20,default="init")
+    email = models.CharField(verbose_name="邮箱",max_length=36,default="init")
+    national = models.CharField(verbose_name="民族",max_length=6,default="init")
+    idNumber = models.CharField(verbose_name="身份证号码",max_length=20,default="init")
     JSESSIONID = models.CharField(max_length=60)
     route = models.CharField(max_length=80)
     searchTimes = models.CharField(verbose_name="查询次数",max_length=30,default="2020-01-01,3")
@@ -19,8 +24,8 @@ class Students(models.Model):
     def __str__(self):
         return smart_str('%s-%s' % (self.studentId, self.name))
     @classmethod
-    def create(cls,studentId,name,collegeName,majorName,className,phoneNumber,birthDay,JSESSIONID,route,updateTime):
-        return cls(studentId=studentId, name=name, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, JSESSIONID=JSESSIONID, route=route, updateTime=updateTime)
+    def create(cls,studentId,name,collegeName,majorName,className,phoneNumber,birthDay,graduationSchool,domicile,email,national,idNumber,JSESSIONID,route,updateTime):
+        return cls(studentId=studentId, name=name, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, graduationSchool=graduationSchool, domicile=domicile, email=email, national=national, idNumber=idNumber, JSESSIONID=JSESSIONID, route=route, updateTime=updateTime)
     class Meta:
         db_table = "students"
         verbose_name = '学生'

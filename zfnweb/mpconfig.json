@@ -8,6 +8,7 @@
     "apichange":false,
     "otherapi":"https://api.xcchelper.cn",
     "vacation" : true,
+    "maintenance": false,
     "jwxtbad":false,
     "gradebad":false,
     "studybad":false,
