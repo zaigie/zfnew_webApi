@@ -23,6 +23,7 @@ urlpatterns = [
     path('libpayl',views.library_paylist),
     path('libpayd',views.library_paydetail),
     path('schoolcard',views.school_card),
-    path('financial',views.financial)
+    path('financial',views.financial),
+    path('award',views.award)
     # path('update',views.update_cookies)
 ]

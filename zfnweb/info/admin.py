@@ -1,5 +1,7 @@
 from django.contrib import admin
 from info.models import Students,Teachers
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin, ImportExportActionModelAdmin
 
 admin.site.site_title="西院助手后台系统"
 
@@ -7,7 +9,13 @@ admin.site.site_header="西院助手后台管理"
 
 admin.site.index_title="欢迎来到西院助手后台管理"
 
-class StuAdmin(admin.ModelAdmin):
+class StuResource(resources.ModelResource):
+    class Meta:
+        model = Students
+        fields = ('studentId','name','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
+        export_order = ('studentId','name','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
+
+class StuAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     ordering = ('-updateTime',)
     fieldsets = (
         ("基本信息", {'fields': ['studentId', 'name', 'gpa', 'classMonitor','national']}),
@@ -16,10 +24,11 @@ class StuAdmin(admin.ModelAdmin):
         ("登录相关", {'fields':['updateTime', 'refreshTimes']}),
         ("Cookies", {'fields':['JSESSIONID', 'route']}),
     )
-    list_display = ('studentId','name','national','collegeName','majorName','className','gpa','email','phoneNumber','birthDay','domicile','graduationSchool','refreshTimes','updateTime')
+    list_display = ('studentId','name','collegeName','className','gpa','email','birthDay','domicile','refreshTimes','updateTime')
     search_fields = ('studentId','name','email','phoneNumber','birthDay','graduationSchool')
     list_filter = ('majorName','className','domicile')
     list_per_page = 20
+    resource_class = StuResource
 
 class TeaAdmin(admin.ModelAdmin):
     fieldsets = (

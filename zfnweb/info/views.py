@@ -6,6 +6,7 @@ import traceback
 import json
 import requests
 import openpyxl
+from bs4 import BeautifulSoup
 from api import GetInfo, Login, PLogin, Personal, Infos, Search
 from django.utils.encoding import escape_uri_path
 from django.http import HttpResponse, JsonResponse, FileResponse
@@ -1270,3 +1271,28 @@ def financial(request):
     res = person.financial(page)
     return HttpResponse(json.dumps(res, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+
+def award(request):
+    if request.method == "POST":
+        keyword = request.POST.get("keyword")
+    else:
+        keyword = request.GET.get("keyword")
+    url = "http://xcctw.cn/app/index.php?keyword=" + keyword + "&i=2&c=entry&a=site&do=fm&m=yoby_cha&rid=13"
+    res = requests.get(url=url)
+    soup = BeautifulSoup(res.text,'lxml')
+    if soup.find(class_="weui-msgbox"):
+        return HttpResponse(json.dumps({'err':"没有查询到结果"}, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+    list = soup.find_all(class_="weui-cell__bd")
+    result = []
+    for items in list:
+        name = (items.find_all(class_="f16")[0].get_text()[3:]).strip()
+        studentId = (items.find_all(class_="f16")[1].get_text()[3:]).strip()
+        college = (items.find_all(class_="f16")[2].get_text()[5:]).strip()
+        major = (items.find_all(class_="f16")[3].get_text()[3:]).strip()
+        detail = (items.find_all(class_="f16")[4].get_text()[5:]).strip()
+        number = (items.find_all(class_="f16")[5].get_text()[5:]).strip()
+        items = {'name':name,'studentId':studentId,'college':college,'major':major,'detail':detail,'number':number}
+        result.append(items)
+    return HttpResponse(json.dumps(result, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")

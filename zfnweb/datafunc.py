@@ -43,21 +43,40 @@ if __name__ == '__main__':
             traceback.print_exc()
     print("修复了%s个信息"%saved)
     # allList = Students.objects.values_list('studentId',flat=True)
-    # print("共" + str(len(allList)) + "个学生数据")
+    # print("当前共" + str(len(allList)) + "个学生数据")
     # print("----------------------------------")
+    # print("民族统计：")
+    # national = [{
+    #     'nationalName': i["national"],
+    #     'nationalNum': Students.objects.filter(national=i["national"]).count()
+    # } for i in Students.objects.values('national').distinct().order_by('national')]
+    # snational = sorted(national,key=lambda keys:keys['nationalNum'], reverse=True)
+    # for j in snational:
+    #     print(str(j["nationalName"])+":"+str(j["nationalNum"])+"人")
+    # print("----------------------------------")
+    # print("地区统计：（只显示前20）")
+    # area = [{
+    #     'areaName': k["domicile"],
+    #     'areaNum': Students.objects.filter(domicile=k["domicile"]).count()
+    # } for k in Students.objects.values('domicile').distinct().order_by('domicile')]
+    # sdomicile = sorted(area,key=lambda keys:keys['areaNum'], reverse=True)
     # count = 1
-    # for stu in allList:
-    #     filename = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/' + "Pinfo.json"
-    #     thisStu = Students.objects.filter(studentId=stu)
-    #     try:
-    #         if os.path.exists(filename):
-    #             with open(filename,mode='r',encoding='utf-8') as f:
-    #                 pinfo = json.loads(f.read())
-    #             thisStu.update(graduationSchool=pinfo["graduationSchool"],domicile=pinfo["domicile"],
-    #                             email=pinfo["email"],national=pinfo["national"],idNumber=pinfo["idNumber"])
-    #             print("第"+str(count)+"个" + "      ok")
-    #         else:
-    #             print("第"+str(count)+"个" + "      not fount")
-    #         count=count+1
-    #     except:
-    #         traceback.print_exc()
+    # for l in sdomicile:
+    #     print(str(l["areaName"])+":"+str(l["areaNum"])+"人")
+    #     count = count+1
+    #     if count > 20:
+    #         break
+    # print("----------------------------------")
+    # print("学校统计：（只显示前20）")
+    # graduationSchool = [{
+    #     'graduationSchoolName': m["graduationSchool"],
+    #     'graduationSchoolNum': Students.objects.filter(graduationSchool=m["graduationSchool"]).count()
+    # } for m in Students.objects.values('graduationSchool').distinct().order_by('graduationSchool')]
+    # sgraduationSchool = sorted(graduationSchool,key=lambda keys:keys['graduationSchoolNum'], reverse=True)
+    # count2 = 1
+    # for l in sgraduationSchool:
+    #     print(str(l["graduationSchoolName"])+":"+str(l["graduationSchoolNum"])+"人")
+    #     count2 = count2+1
+    #     if count2 > 20:
+    #         break
+    # print("----------------------------------")
