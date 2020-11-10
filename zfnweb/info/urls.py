@@ -24,6 +24,7 @@ urlpatterns = [
     path('libpayd',views.library_paydetail),
     path('schoolcard',views.school_card),
     path('financial',views.financial),
-    path('award',views.award)
+    path('award',views.award),
+    path('maps',views.get_maps)
     # path('update',views.update_cookies)
 ]

@@ -525,6 +525,9 @@ def get_study(request):
                 # return get_study(request)
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
+            elif "list index out of range" in str(e):
+                return HttpResponse(json.dumps({'err':'暂无学业信息或临时请求失败'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -748,7 +751,7 @@ def get_grade2(request):
                 if str(e) == 'Expecting value: line 1 column 1 (char 0)':
                     return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-                if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     ServerChan = config["ServerChan"]
                     text = "成绩错误"
                     if ServerChan == "none":
@@ -852,7 +855,7 @@ def get_schedule(request):
                 if str(e) == 'Expecting value: line 1 column 1 (char 0)':
                     return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                         content_type="application/json,charset=utf-8")
-                if str(e) != 'Expecting value: line 4 column 1 (char 6)':
+                if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     ServerChan = config["ServerChan"]
                     text = "课程错误"
                     if ServerChan == "none":
@@ -1296,3 +1299,45 @@ def award(request):
         result.append(items)
     return HttpResponse(json.dumps(result, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
+
+def get_maps(request):
+    if request.method == "GET":
+        xh = request.GET.get("xh")
+    elif request.method == "POST":
+        xh = request.POST.get("xh")
+    thisStu = Students.objects.get(studentId=int(xh))
+    thisStuBirthDayAndMonth = (thisStu.birthDay)[5:]
+    names = Students.objects.filter(name=thisStu.name).count() - 1
+    birthDay = Students.objects.filter(birthDay=thisStu.birthDay).count() - 1
+    birthDayAndMonth = Students.objects.filter(birthDay__contains=thisStuBirthDayAndMonth).count() - 1
+    classBirthDay = Students.objects.filter(className=thisStu.className,birthDay=thisStu.birthDay).count() - 1
+    classBirthDayAndMonth = Students.objects.filter(className=thisStu.className,birthDay__contains=thisStuBirthDayAndMonth).count() - 1
+    graduationSchool = Students.objects.filter(graduationSchool=thisStu.graduationSchool).count() - 1
+    classGraduationSchool = Students.objects.filter(className=thisStu.className,graduationSchool=thisStu.graduationSchool).count() - 1
+    domicile = Students.objects.filter(domicile=thisStu.domicile).count() - 1
+    classDomicile = Students.objects.filter(className=thisStu.className,domicile=thisStu.domicile).count() - 1
+    res = {
+        'name': names,
+        'birthDay': birthDay,
+        'birthDayAndMonth': birthDayAndMonth,
+        'classBirthDay': classBirthDay,
+        'classBirthDayAndMonth': classBirthDayAndMonth,
+        'graduationSchool': graduationSchool,
+        'classGraduationSchool': classGraduationSchool,
+        'domicile': domicile,
+        'classDomicile': classDomicile
+    }
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+
+# def freetime(request):
+#     xh = request.GET.get("xh")
+#     term = request.GET.get("term")
+#     datafile = '/data/' + xh[0:2] + "/" + xh + "/" + "Schedules-" + term + ".json"
+#     if os.path.exists(datafile):
+#         with open(datafile,mode='r',encoding='UTF-8') as f:
+#             schedule_data = json.loads(f.read())
+#         res = {"Mon":{},"Tue":{},"Wed":{},"Thu":{},"Fri":{},"Sat":{},"Sun":{}}
+#         for item in schedule_data["normalCourse"]:
+#             if item["courseWeekday"] == "1":
+                
