@@ -23,12 +23,8 @@ def get_one(request):
             if datetime.datetime.now().strftime('%Y-%m-%d') in last_line:
                 # print('读取模式')
                 content = last_line[12:]
-<<<<<<< HEAD
-                return HttpResponse(content)
-=======
                 return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
->>>>>>> xcchelper
             elif int(datetime.datetime.now().strftime('%H')) < 8:
                 content = last_line[12:]
                 return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),

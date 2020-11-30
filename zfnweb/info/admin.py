@@ -9,20 +9,6 @@ admin.site.site_header="西院助手后台管理"
 
 admin.site.index_title="欢迎来到西院助手后台管理"
 
-<<<<<<< HEAD
-class StuAdmin(admin.ModelAdmin):
-    ordering = ('-updateTime',)
-    fieldsets = (
-        ("基本信息", {'fields': ['studentId', 'name', 'gpa']}),
-        ("院系班级", {'fields':['collegeName', 'majorName', 'className']}),
-        ("额外信息", {'fields':['phoneNumber', 'birthDay']}),
-        ("登录相关", {'fields':['updateTime', 'refreshTimes']}),
-        ("Cookies", {'fields':['JSESSIONID', 'route']}),
-    )
-    list_display = ('studentId','name','collegeName','majorName','className','phoneNumber','birthDay','updateTime')
-    search_fields = ('studentId','name','collegeName','majorName','className','phoneNumber','birthDay')
-    list_filter = ('collegeName','majorName','className')
-=======
 class StuResource(resources.ModelResource):
     class Meta:
         model = Students
@@ -52,7 +38,6 @@ class TeaAdmin(admin.ModelAdmin):
     list_display = ('name', 'sex', 'collegeName', 'title', 'phoneNumber', 'QQ', 'wechat')
     search_fields = ('name', 'collegeName', 'phoneNumber')
     list_filter = ('name', 'collegeName', 'phoneNumber')
->>>>>>> xcchelper
     list_per_page = 20
 
 admin.site.register(Students, StuAdmin)
