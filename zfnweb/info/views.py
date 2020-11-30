@@ -325,11 +325,12 @@ def refresh_class(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             nowClass = person.get_now_class()
-            if nowClass.get('err'):
-                if nowClass.get('err') == "Connect Timeout":
-                    Warings("更新班级超时","",xh,pswd)
-                else:
-                    return nowClass
+            try:
+                if nowClass.get('err'):
+                    if nowClass.get('err') == "Connect Timeout":
+                        Warings("更新班级超时","",xh,pswd)
+            except:
+                pass
             if stu.className == nowClass:
                 return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(className=nowClass)
@@ -596,8 +597,6 @@ def get_grade(request):
                     HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 elif grade.get("err") == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                else:
-                    return grade
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" else "init")
             endTime = time.time()
             spendTime = endTime - startTime
@@ -807,8 +806,6 @@ def get_schedule(request):
                     Warings("更新课程超时","",xh,pswd)
                 elif schedule.get('err') == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                else:
-                    return schedule
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了%s-%s的课程，耗时%.2fs' % (
