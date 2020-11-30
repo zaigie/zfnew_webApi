@@ -5,14 +5,14 @@ Django==3.0.7
 django-extensions==2.2.6
 django-werkzeug-debugger-runserver==0.3.1
 django-cors-headers==3.3.0
+django-import-export==2.3.0
 simpleui==4.0.2
 pymysql==0.9.3
 openpyxl==2.6.4
 pycrypto==2.6.1
 pyOpenSSL==19.1.0
-requests==2.22.0
 rsa==4.0
 sqlparse==0.3.0
-urllib3==1.19.1
+requests==2.22.0
 pycryptodome==3.9.6
 lxml==4.5.1
