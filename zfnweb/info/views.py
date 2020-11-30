@@ -594,6 +594,10 @@ def get_grade(request):
                     Warings("成绩超时","",xh,pswd)
                 elif grade.get("err") == "No Data":
                     HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                elif grade.get("err") == "Error Term":
+                    return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                else:
+                    return grade
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             endTime = time.time()
             spendTime = endTime - startTime
