@@ -801,6 +801,8 @@ def get_schedule(request):
             if schedule.get('err'):
                 if schedule.get('err') == "Connect Timeout":
                     Warings("更新课程超时","",xh,pswd)
+                elif schedule.get('err') == "Error Term":
+                    return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 else:
                     return schedule
             endTime = time.time()
