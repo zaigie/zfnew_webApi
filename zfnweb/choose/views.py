@@ -154,16 +154,6 @@ def get_choosed(request):
             choosed = person.get_choosed()
             endTime = time.time()
             spendTime = endTime - startTime
-            if choosed.get('err'):
-                ServerChan = config["ServerChan"]
-                text = choosed.get('err')
-                if ServerChan == "none":
-                    return HttpResponse(json.dumps({'err':text}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-                else:
-                    requests.get(ServerChan + 'text=' + text)
-                    return HttpResponse(json.dumps({'err':'已选课程未知错误'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
             if choosed is None:
                 content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -175,6 +165,16 @@ def get_choosed(request):
                 newData(xh, filename, json.dumps(nchoosed, ensure_ascii=False))
 
                 return HttpResponse(json.dumps(nchoosed, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            if choosed.get('err'):
+                ServerChan = config["ServerChan"]
+                text = choosed.get('err')
+                if ServerChan == "none":
+                    return HttpResponse(json.dumps({'err':text}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
+                else:
+                    requests.get(ServerChan + 'text=' + text)
+                    return HttpResponse(json.dumps({'err':'已选课程未知错误'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问了已选课程，耗时%.2fs' % (
