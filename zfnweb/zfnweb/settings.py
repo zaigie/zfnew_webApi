@@ -17,11 +17,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SIMPLEUI_HOME_INFO = False
 SIMPLEUI_DEFAULT_THEME = 'element.css'
-SIMPLEUI_LOGO = 'https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/uploads%2F2020-10-12%2Fxcchelper_logo.png'
+SIMPLEUI_LOGO = 'https://zaigiestatic.oss-cn-chengdu.aliyuncs.com/uploads%2F2020-11-29%2Fxccadminlogo.png'
 SIMPLEUI_ICON = {
 	'学生': 'fas fa-users',
     '教师': 'fas fa-graduation-cap',
-	'Info': 'fas fa-users',
+	'信息管理': 'fas fa-users',
     '内容类型': 'fas fa-sitemap',
 	'管理': 'fas fa-wrench'
 }

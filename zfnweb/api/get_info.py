@@ -137,13 +137,7 @@ class GetInfo(object):
         try:
             res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "个人信息超时"
-            if ServerChan is "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         # print(jres)
         res_dict = {
@@ -176,13 +170,7 @@ class GetInfo(object):
         try:
             res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "个人信息超时"
-            if ServerChan is "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         return jres.get('xjztdm') if jres.get('bh_id') is None else jres.get('bh_id')
 
@@ -199,7 +187,7 @@ class GetInfo(object):
         try:
             return data_list[5]
         except exceptions.Timeout as e:
-            print(str(e))
+            # print(str(e))
             return '未知类别'
 
     def gpa_only(self):
@@ -218,7 +206,7 @@ class GetInfo(object):
             else:
                 return "init"
         except exceptions.Timeout as e:
-            print(str(e))
+            # print(str(e))
             return "init"
 
     def get_study(self, xh):
@@ -231,13 +219,7 @@ class GetInfo(object):
             mainr = sessions.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
                                  timeout=(5, 10), stream=True)
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "学业超时"
-            if ServerChan == "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err': 'Connect Timeout'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -317,7 +299,7 @@ class GetInfo(object):
             'zyn': zy_point_list[2]
         }
         res_main = {
-            'gpa': gpa,  # 平均学分绩点GPA
+            'gpa': gpa if gpa!="" else "init",  # 平均学分绩点GPA
             'ipa': ipa,  # 计划内总课程数
             'ipp': ipp,  # 计划内已过课程数
             'ipf': ipf,  # 计划内未过课程数
@@ -404,13 +386,7 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "消息超时"
-            if ServerChan == "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         res_list = [{'message': i.get('xxnr'), 'ctime': i.get('cjsj')} for i in jres.get('items')]
         return res_list
@@ -442,13 +418,7 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "成绩超时"
-            if ServerChan == "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -546,13 +516,7 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "成绩超时"
-            if ServerChan == "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err':'Connect Timeout'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
@@ -589,9 +553,7 @@ class GetInfo(object):
         elif term == '2':
             term = '12'
         else:
-            term = config["nowterm"]
-            # print('Please enter the correct term value！！！ ("1" or "2")')
-            # return {'err': 'Error Term'}
+            return {'err': 'Error Term'}
         data = {
             'xnm': year,
             'xqm': term
@@ -600,15 +562,8 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "课表超时"
-            if ServerChan == "none":
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': '请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~'}
+            return {'err':'Connect Timeout'}
         jres = res.json()
-
         res_dict = {
             'name': jres['xsxx']['XM'],
             'studentId': jres['xsxx']['XH'],
@@ -626,7 +581,6 @@ class GetInfo(object):
                 'courseTime': self.calTime(re.findall(r"(\d+)", i['jc'])),
                 'courseWeek': i.get('zcd'),
                 'includeWeeks': self.calWeeks(re.findall(r"(\d+)", i['zcd'])),
-                # 'inNowWeek': 1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)", i['zcd'])) else 0,
                 'exam': i.get('khfsmc'),
                 'campus': i.get('xqmc'),
                 'courseRoom': i.get('cdmc'),

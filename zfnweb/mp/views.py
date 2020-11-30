@@ -1,27 +1,71 @@
 from django.shortcuts import render,HttpResponse
+from mp.models import Notices,Config,Navigate
 import json
 import time,datetime
+from pytz import timezone
 import requests
+
+cst_tz = timezone('Asia/Shanghai')
+
+def importantNotice():
+    if Notices.objects.filter(important=True):
+        important = Notices.objects.get(important=True)
+        res = {
+            'title':important.title,
+            'detail':important.detail,
+            'key':important.key
+        }
+        return res
+    else:
+        return 'none'
+
+def mconfig(request):
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/mp/conf")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    res = {
+        'version': myconfig.version,
+        'nChoose': myconfig.nChoose,
+        'nGrade': myconfig.nGrade,
+        'nSchedule': myconfig.nSchedule,
+        'vacation': myconfig.vacation,
+        'nowweek': myconfig.nowweek,
+        'choose': myconfig.choose,
+        'notice': [{
+            'title':i.title,
+            'ltitle':i.ltitle,
+            'image':i.image,
+            'detail':eval(repr(i.detail).replace('\\\\', '\\')),
+            'show':i.show,
+            'date':(i.date).astimezone(cst_tz).strftime("%Y-%m-%d %H:%M")
+        }for i in Notices.objects.filter(important=False,show=True).all().order_by('-date')],
+        'important':importantNotice()
+    }
+    return HttpResponse(json.dumps(res, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+
 
 with open('mpconfig.json', mode='r', encoding='utf-8') as m:
     mpconfig = json.loads(m.read())
 
 def config(request):
-    if mpconfig["apichange"]:
-        res = requests.get(url=mpconfig["otherapi"]+"/mp")
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/mp")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
         config = json.loads(f.read())
         res = {
             'version': config["version"],
-            'nowterm': config["nowterm"], # 待新版本上线废除
             'nGrade': config["nGrade"],
             'nSchedule': config["nSchedule"],
+            'nChoose': config["nChoose"],
             'vacation': config["vacation"],
             'nowweek': config["nowweek"],
             'choose': config["choose"],
-            'nowGrade': config["nowGrade"],
             'notice': config["notice"]
         }
     return HttpResponse(json.dumps(res, ensure_ascii=False),
@@ -37,8 +81,9 @@ def countTime(date):
         return "暂定"
 
 def countdown(request):
-    if mpconfig["apichange"]:
-        res = requests.get(url=mpconfig["otherapi"]+"/mp/countdown")
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/mp/countdown")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:
@@ -52,26 +97,38 @@ def countdown(request):
                         content_type="application/json,charset=utf-8")
 
 def navigate(request):
-    if mpconfig["apichange"]:
-        res = requests.get(url=mpconfig["otherapi"]+"/mp/navigate?type=" + request.GET.get("type"))
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/mp/navigate?type=" + request.GET.get("type"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
-    with open('mpconfig.json', mode='r', encoding='utf-8') as f:
-        content = json.loads(f.read())["navigate"]
     if type == 'school':
-        return HttpResponse(json.dumps(content["school"], ensure_ascii=False),
+        school_res = [{
+            'title':i.title,
+            'ltitle':i.ltitle,
+            'content':eval(repr(i.content).replace('\\\\', '\\')),
+            'image':i.image if i.image != 'none' else False
+        }for i in Navigate.objects.filter(type="school").all().order_by('title')]
+        return HttpResponse(json.dumps(school_res, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     elif type == 'bar':
-        return HttpResponse(json.dumps(content["bar"], ensure_ascii=False),
+        bar_res = [{
+            'title':j.title,
+            'ltitle':j.ltitle,
+            'content':eval(repr(j.content).replace('\\\\', '\\')),
+            'image':j.image if j.image != 'none' else False
+        }for j in Navigate.objects.filter(type="bar").all().order_by('title')]
+        return HttpResponse(json.dumps(bar_res, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse(json.dumps(content, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':"缺少参数type"}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
 def about(request):
-    if mpconfig["apichange"]:
-        res = requests.get(url=mpconfig["otherapi"]+"/mp/about")
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/mp/about")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     with open('mpconfig.json', mode='r', encoding='utf-8') as f:

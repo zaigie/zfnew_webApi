@@ -42,13 +42,7 @@ class Xuanke(object):
                 res = requests.post(choosed_url, data=data, headers=self.headers, cookies=self.cookies,
                                     proxies=self.proxies, timeout=(5, 15))
             except exceptions.Timeout as e:
-                ServerChan = config["ServerChan"]
-                text = "已选超时"
-                if ServerChan == "none":
-                    return {'err': 'Connect Timeout'}
-                else:
-                    requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                    return {'err': 'Connect Timeout'}
+                return {'err': 'Connect Timeout'}
             jres = res.json()
             res_dict = {
                 'courseNumber': len(jres),  # 已选课程数
