@@ -787,6 +787,7 @@ def get_schedule(request):
                 pass
         try:
             startTime = time.time()
+            get_message(request)
             print('【%s】查看了%s-%s的课程' % (stu.name, year, term))
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
