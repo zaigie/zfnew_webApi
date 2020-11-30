@@ -166,7 +166,7 @@ def get_choosed(request):
 
                 return HttpResponse(json.dumps(nchoosed, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
-            if choosed.get('err'):
+            elif choosed.get('err'):
                 ServerChan = config["ServerChan"]
                 text = choosed.get('err')
                 if ServerChan == "none":
