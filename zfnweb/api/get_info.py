@@ -313,11 +313,7 @@ class GetInfo(object):
                     'courseTitle': j.get('KCMC'),
                     'courseId': j.get('KCH'),
                     'courseSituation': j.get('XDZT'),
-<<<<<<< HEAD
-                    'courseTerm': self.term_cn(xh, j['JYXDXNM'], j['JYXDXQMC']),
-=======
                     'courseTerm': self.term_cn(xh, j.get('JYXDXNM'), j.get('JYXDXQMC')),
->>>>>>> xcchelper
                     'courseCategory': '无' if j.get('KCLBMC') is None else j.get('KCLBMC'),
                     'courseAttribution': '无' if j.get('KCXZMC') is None else j.get('KCXZMC'),
                     'maxGrade': ' ' if j.get('MAXCJ') is None else j.get('MAXCJ'),
@@ -331,11 +327,7 @@ class GetInfo(object):
                     'courseTitle': k.get('KCMC'),
                     'courseId': k.get('KCH'),
                     'courseSituation': k.get("XDZT"),
-<<<<<<< HEAD
-                    'courseTerm': self.term_cn(xh, k["JYXDXNM"], k["JYXDXQMC"]),
-=======
                     'courseTerm': self.term_cn(xh, k.get("JYXDXNM"), k.get("JYXDXQMC")),
->>>>>>> xcchelper
                     'courseCategory': '无' if k.get('KCLBMC') is None else k.get('KCLBMC'),
                     'courseAttribution': '无' if k.get('KCXZMC') is None else k.get('KCXZMC'),
                     'maxGrade': ' ' if k.get('MAXCJ') is None else k.get("MAXCJ"),
@@ -349,11 +341,7 @@ class GetInfo(object):
                     'courseTitle': l.get("KCMC"),
                     'courseId': l.get("KCH"),
                     'courseSituation': l.get("XDZT"),
-<<<<<<< HEAD
-                    'courseTerm': self.term_cn(xh, l["JYXDXNM"], l["JYXDXQMC"]),
-=======
                     'courseTerm': self.term_cn(xh, l.get("JYXDXNM"), l.get("JYXDXQMC")),
->>>>>>> xcchelper
                     'courseCategory': '无' if l.get('KCLBMC') is None else l.get('KCLBMC'),
                     'courseAttribution': '无' if l.get('KCXZMC') is None else l.get('KCXZMC'),
                     'maxGrade': ' ' if l.get('MAXCJ') is None else l.get("MAXCJ"),
@@ -593,10 +581,6 @@ class GetInfo(object):
                 'courseTime': self.calTime(re.findall(r"(\d+)", i['jc'])),
                 'courseWeek': i.get('zcd'),
                 'includeWeeks': self.calWeeks(re.findall(r"(\d+)", i['zcd'])),
-<<<<<<< HEAD
-                # 'inNowWeek': 1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)", i['zcd'])) else 0,
-=======
->>>>>>> xcchelper
                 'exam': i.get('khfsmc'),
                 'campus': i.get('xqmc'),
                 'courseRoom': i.get('cdmc'),
