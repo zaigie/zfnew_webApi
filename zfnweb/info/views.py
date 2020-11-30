@@ -22,7 +22,7 @@ base_url = config["base_url"]
 def index(request):
     return HttpResponse('info_index here')
 
-def Warings(text,desp,xh,pswd):
+def mywarn(text,desp,xh,pswd):
     ServerChan = config["ServerChan"]
     text = text
     errData = {'err':text+'，请返回重试'} if "错误" in text else {'err':text+'，建议访问一下“课程通知”以便刷新cookies'}
@@ -45,6 +45,8 @@ def cacheData(xh, filename):
         else:
             with open(fileurl, mode='r', encoding='utf-8') as o:
                 result = json.loads(o.read())
+                if result.get("err"):
+                    return
                 return result
 
 
@@ -120,7 +122,7 @@ def update_cookies(xh, pswd):
             return update_cookies(xh, pswd)
         else:
             traceback.print_exc()
-            Warings("更新cookies未知错误",str(e),xh,pswd)
+            return mywarn("更新cookies未知错误",str(e),xh,pswd)
 
 def writeToExcel(json,saveUrl):
     lastCourses = json["lastCourses"]
@@ -184,7 +186,7 @@ def get_pinfo(request):
                                             content_type="application/json,charset=utf-8")
                     if pinfo.get('err'):
                         if pinfo.get('err') == "Connect Timeout":
-                            Warings("登录超时","",xh,pswd)
+                            return mywarn("登录超时","",xh,pswd)
                         else:
                             return pinfo
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
@@ -220,7 +222,7 @@ def get_pinfo(request):
                     content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
                     traceback.print_exc()
-                    Warings("登录未知错误",str(e),xh,pswd)
+                    return mywarn("登录未知错误",str(e),xh,pswd)
         else:
             try:
                 startTime = time.time()
@@ -235,7 +237,7 @@ def get_pinfo(request):
                                             content_type="application/json,charset=utf-8")
                     if pinfo.get('err'):
                         if pinfo.get('err') == "Connect Timeout":
-                            Warings("登录超时","",xh,pswd)
+                            return mywarn("登录超时","",xh,pswd)
                         else:
                             return pinfo
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
@@ -278,7 +280,7 @@ def get_pinfo(request):
                         return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
                                             content_type="application/json,charset=utf-8")
                     traceback.print_exc()
-                    Warings("登录未知错误",str(e),xh,pswd)
+                    return mywarn("登录未知错误",str(e),xh,pswd)
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -328,7 +330,7 @@ def refresh_class(request):
             try:
                 if nowClass.get('err'):
                     if nowClass.get('err') == "Connect Timeout":
-                        Warings("更新班级超时","",xh,pswd)
+                        return mywarn("更新班级超时","",xh,pswd)
             except:
                 pass
             if stu.className == nowClass:
@@ -349,7 +351,7 @@ def refresh_class(request):
                 return refresh_class(request)
             if 'Expecting value' not in str(e):
                 traceback.print_exc()
-                Warings("更新班级错误",str(e),xh,pswd)
+                return mywarn("更新班级错误",str(e),xh,pswd)
             sta = update_cookies(xh, pswd)
             person = GetInfo(base_url=base_url, cookies=sta)
             nowClass = person.get_now_class()
@@ -419,7 +421,7 @@ def get_message(request):
                                         content_type="application/json,charset=utf-8")
                 if str(e) != 'Expecting value: line 6 column 1 (char 11)':
                     traceback.print_exc()
-                    Warings("消息请求错误",str(e),xh,pswd)
+                    return mywarn("消息请求错误",str(e),xh,pswd)
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 message = person.get_message()
@@ -473,7 +475,6 @@ def get_study(request):
                 pass
         try:
             startTime = time.time()
-            get_message(request)
             print('【%s】查看了学业情况' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
@@ -488,7 +489,7 @@ def get_study(request):
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
-                gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
+                gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
                 Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
                 filename = ('Study')
                 newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -498,7 +499,7 @@ def get_study(request):
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
             writeLog(content)
-            gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
+            gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
             Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
             filename = ('Study')
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -516,11 +517,11 @@ def get_study(request):
                 writeLog(content)
                 if str(e) != 'list index out of range':
                     traceback.print_exc()
-                    Warings("学业请求错误",str(e),xh,pswd)
+                    return mywarn("学业请求错误",str(e),xh,pswd)
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
-                gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
+                gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
                 Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
                 filename = ('Study')
                 newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -578,7 +579,6 @@ def get_grade(request):
                 pass
         try:
             startTime = time.time()
-            get_message(request)
             print('【%s】查看了%s-%s的成绩' % (stu.name, year, term))
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
@@ -592,12 +592,12 @@ def get_grade(request):
             if grade.get("err"):
                 if grade.get("err") == "Connect Timeout":
                     update_cookies(xh, pswd)
-                    Warings("成绩超时","",xh,pswd)
+                    return mywarn("成绩超时","",xh,pswd)
                 elif grade.get("err") == "No Data":
-                    HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                    return HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 elif grade.get("err") == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" else "init")
+            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" or grade.get("gpa") is not None else "init")
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
@@ -621,7 +621,7 @@ def get_grade(request):
                                         content_type="application/json,charset=utf-8")
                 if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     traceback.print_exc()
-                    Warings("成绩请求错误",str(e),xh,pswd)
+                    return mywarn("成绩请求错误",str(e),xh,pswd)
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 grade = person.get_grade(year, term)
@@ -637,110 +637,110 @@ def get_grade(request):
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
-def get_grade2(request):
-    myconfig = Config.objects.all().first()
-    if myconfig.apichange:
-        data = {
-            'xh':request.POST.get("xh"),
-            'pswd':request.POST.get("pswd"),
-            'year':request.POST.get("year"),
-            'term':request.POST.get("term"),
-            'refresh':request.POST.get("refresh")
-        }
-        res = requests.post(url=myconfig.otherapi+"/info/grade",data=data)
-        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
-    # if mpconfig["gradebad"]:
-    #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
-    #                             content_type="application/json,charset=utf-8")
-    if request.method == 'POST':
-        if request.POST:
-            xh = request.POST.get("xh")
-            pswd = request.POST.get("pswd")
-            year = request.POST.get("year")
-            term = request.POST.get("term")
-            refresh = request.POST.get("refresh")
-        else:
-            return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-        if not Students.objects.filter(studentId=int(xh)):
-            content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
-            writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-        else:
-            stu = Students.objects.get(studentId=int(xh))
-        if refresh == "no":
-            filename = ('GradesN-%s%s' % (str(year), str(term)))
-            cache = cacheData(xh, filename)
-            if cache is not None:
-                # print('cache')
-                print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
-                return HttpResponse(json.dumps(cache, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            else:
-                pass
-        try:
-            startTime = time.time()
-            print('【%s】查看了%s-%s的成绩' % (stu.name, year, term))
-            JSESSIONID = str(stu.JSESSIONID)
-            route = str(stu.route)
-            cookies_dict = {
-                'JSESSIONID': JSESSIONID,
-                'route': route
-            }
-            cookies = requests.utils.cookiejar_from_dict(cookies_dict)
-            person = GetInfo(base_url=base_url, cookies=cookies)
-            grade = person.get_grade2(year, term)
-            if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
-                update_cookies(xh, pswd)
-                return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            if grade.get("err") == "看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~":
-                return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
-            endTime = time.time()
-            spendTime = endTime - startTime
-            content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
-                datetime.datetime.now().strftime('%H:%M:%S'), stu.name, year, term, spendTime))
-            writeLog(content)
+# def get_grade2(request):
+#     myconfig = Config.objects.all().first()
+#     if myconfig.apichange:
+#         data = {
+#             'xh':request.POST.get("xh"),
+#             'pswd':request.POST.get("pswd"),
+#             'year':request.POST.get("year"),
+#             'term':request.POST.get("term"),
+#             'refresh':request.POST.get("refresh")
+#         }
+#         res = requests.post(url=myconfig.otherapi+"/info/grade",data=data)
+#         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+#                             content_type="application/json,charset=utf-8")
+#     if myconfig.maintenance:
+#         return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+#                             content_type="application/json,charset=utf-8")
+#     # if mpconfig["gradebad"]:
+#     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
+#     #                             content_type="application/json,charset=utf-8")
+#     if request.method == 'POST':
+#         if request.POST:
+#             xh = request.POST.get("xh")
+#             pswd = request.POST.get("pswd")
+#             year = request.POST.get("year")
+#             term = request.POST.get("term")
+#             refresh = request.POST.get("refresh")
+#         else:
+#             return HttpResponse(json.dumps({'err':'请提交正确的post数据'}, ensure_ascii=False),
+#                                 content_type="application/json,charset=utf-8")
+#         if not Students.objects.filter(studentId=int(xh)):
+#             content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
+#             writeLog(content)
+#             return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+#                                 content_type="application/json,charset=utf-8")
+#         else:
+#             stu = Students.objects.get(studentId=int(xh))
+#         if refresh == "no":
+#             filename = ('GradesN-%s%s' % (str(year), str(term)))
+#             cache = cacheData(xh, filename)
+#             if cache is not None:
+#                 # print('cache')
+#                 print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
+#                 return HttpResponse(json.dumps(cache, ensure_ascii=False),
+#                                     content_type="application/json,charset=utf-8")
+#             else:
+#                 pass
+#         try:
+#             startTime = time.time()
+#             print('【%s】查看了%s-%s的成绩' % (stu.name, year, term))
+#             JSESSIONID = str(stu.JSESSIONID)
+#             route = str(stu.route)
+#             cookies_dict = {
+#                 'JSESSIONID': JSESSIONID,
+#                 'route': route
+#             }
+#             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
+#             person = GetInfo(base_url=base_url, cookies=cookies)
+#             grade = person.get_grade2(year, term)
+#             if grade.get("err") == "请求超时，鉴于教务系统特色，已帮你尝试重新登录，重试几次，还不行请麻烦你自行重新登录，或者在关于里面反馈！当然，也可能是教务系统挂了~":
+#                 update_cookies(xh, pswd)
+#                 return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+#             if grade.get("err") == "看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~":
+#                 return HttpResponse(json.dumps({'err':grade.get("err")}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+#             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+#             endTime = time.time()
+#             spendTime = endTime - startTime
+#             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (
+#                 datetime.datetime.now().strftime('%H:%M:%S'), stu.name, year, term, spendTime))
+#             writeLog(content)
             
-            filename = ('GradesN-%s%s' % (str(year), str(term)))
-            newData(xh, filename, json.dumps(grade, ensure_ascii=False))
-            # print('write')
+#             filename = ('GradesN-%s%s' % (str(year), str(term)))
+#             newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+#             # print('write')
 
-            return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
-        except Exception as e:
-            # print(e)
-            if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                # return get_grade2(request)
-                return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
-            else:
-                content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-                writeLog(content)
-                if str(e) == 'Expecting value: line 1 column 1 (char 0)':
-                    return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-                if str(e) != 'Expecting value: line 3 column 1 (char 4)':
-                    traceback.print_exc()
-                    Warings("成绩请求错误",str(e),xh,pswd)
-                sta = update_cookies(xh, pswd)
-                person = GetInfo(base_url=base_url, cookies=sta)
-                grade = person.get_grade2(year, term)
-                if grade.get("gpa") == "" or grade.get("gpa") is None:
-                    return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
-                                        content_type="application/json,charset=utf-8")
-                Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
-                filename = ('GradesN-%s%s' % (str(year), str(term)))
-                newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+#             return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
+#         except Exception as e:
+#             # print(e)
+#             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
+#                 # return get_grade2(request)
+#                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
+#                                     content_type="application/json,charset=utf-8")
+#             else:
+#                 content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
+#                 writeLog(content)
+#                 if str(e) == 'Expecting value: line 1 column 1 (char 0)':
+#                     return HttpResponse(json.dumps({'err':'教务系统挂掉了，请等待修复后重试~'}, ensure_ascii=False),
+#                                         content_type="application/json,charset=utf-8")
+#                 if str(e) != 'Expecting value: line 3 column 1 (char 4)':
+#                     traceback.print_exc()
+#                     return mywarn("成绩请求错误",str(e),xh,pswd)
+#                 sta = update_cookies(xh, pswd)
+#                 person = GetInfo(base_url=base_url, cookies=sta)
+#                 grade = person.get_grade2(year, term)
+#                 if grade.get("gpa") == "" or grade.get("gpa") is None:
+#                     return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
+#                                         content_type="application/json,charset=utf-8")
+#                 Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+#                 filename = ('GradesN-%s%s' % (str(year), str(term)))
+#                 newData(xh, filename, json.dumps(grade, ensure_ascii=False))
 
-                return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
-    else:
-        return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
+#                 return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
+#     else:
+#         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
+#                             content_type="application/json,charset=utf-8")
 
 def get_schedule(request):
     myconfig = Config.objects.all().first()
@@ -790,7 +790,6 @@ def get_schedule(request):
                 pass
         try:
             startTime = time.time()
-            get_message(request)
             print('【%s】查看了%s-%s的课程' % (stu.name, year, term))
             JSESSIONID = str(stu.JSESSIONID)
             route = str(stu.route)
@@ -803,7 +802,7 @@ def get_schedule(request):
             schedule = person.get_schedule(year, term)
             if schedule.get('err'):
                 if schedule.get('err') == "Connect Timeout":
-                    Warings("更新课程超时","",xh,pswd)
+                    return mywarn("更新课程超时","",xh,pswd)
                 elif schedule.get('err') == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             endTime = time.time()
@@ -828,7 +827,7 @@ def get_schedule(request):
                                         content_type="application/json,charset=utf-8")
                 if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     traceback.print_exc()
-                    Warings("课程请求错误",str(e),xh,pswd)
+                    return mywarn("课程请求错误",str(e),xh,pswd)
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 schedule = person.get_schedule(year, term)
@@ -1267,6 +1266,7 @@ def get_maps(request):
         'graduationSchool': graduationSchool,
         'classGraduationSchool': classGraduationSchool,
         'domicile': domicile,
+        'places':thisStu.domicile,
         'classDomicile': classDomicile
     }
     return HttpResponse(json.dumps(res, ensure_ascii=False),

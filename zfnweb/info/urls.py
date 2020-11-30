@@ -7,7 +7,7 @@ urlpatterns = [
     path('message', views.get_message),
     path('study', views.get_study),
     path('grade', views.get_grade),
-    path('grade2', views.get_grade2),
+    # path('grade2', views.get_grade2),
     path('schedule', views.get_schedule),
     path('joindetail', views.joinDetail),
     path('position', views.get_position),
