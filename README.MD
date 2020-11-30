@@ -109,7 +109,7 @@ refresh | 否 | 填入'no'则读取缓存 |
 -|-|-
 type | 是 | college-二级学院,major-专业,class-班级 |
 
-**查询GPA在专业与班级的排名：/info/position（未实验）**
+**查询GPA在专业与班级的排名：/info/position**
 **方法：GET**
 参数名 | 必选 |  说明  
 -|-|-

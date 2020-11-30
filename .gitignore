@@ -5,6 +5,7 @@
 # IntelliJ project files
 .idea
 mylogs
+.vscode
 
 # python
 */__pycache__

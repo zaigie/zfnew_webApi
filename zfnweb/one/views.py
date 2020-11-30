@@ -7,8 +7,14 @@ import requests
 import re
 import datetime
 
+with open('mpconfig.json', mode='r', encoding='utf-8') as m:
+    mpconfig = json.loads(m.read())
 
 def get_one(request):
+    if mpconfig["apichange"]:
+        res = requests.get(url=mpconfig["otherapi"]+"/one")
+        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     with open('one.txt', mode='r', encoding='utf-8') as f:
         if os.path.exists('one.txt'):
             lines = f.readlines()
@@ -17,7 +23,12 @@ def get_one(request):
             if datetime.datetime.now().strftime('%Y-%m-%d') in last_line:
                 # print('读取模式')
                 content = last_line[12:]
+<<<<<<< HEAD
                 return HttpResponse(content)
+=======
+                return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+>>>>>>> xcchelper
             elif int(datetime.datetime.now().strftime('%H')) < 8:
                 content = last_line[12:]
                 return HttpResponse(json.dumps({'msg':'success','content':content}, ensure_ascii=False),
@@ -33,6 +44,8 @@ def get_one(request):
                     one = oneall.a.string
                     if int(datetime.datetime.now().strftime('%H')) > 8:  # 每天九点后one肯定更新了
                         n.write('\n【%s】%s' % (datetime.datetime.now().strftime('%Y-%m-%d'), one))
-                    return HttpResponse(one)
+                    return HttpResponse(json.dumps({'msg':'success','content':one}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
         else:
-            return HttpResponse('没有one.txt文件')
+            return HttpResponse(json.dumps({'msg':'error','content':"提醒管理员配置每日一言"}, ensure_ascii=False),
+                                content_type="application/json,charset=utf-8")

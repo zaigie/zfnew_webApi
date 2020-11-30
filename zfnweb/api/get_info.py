@@ -15,10 +15,9 @@ with open('config.json', mode='r', encoding='utf-8') as f:
 class GetInfo(object):
     def __init__(self, base_url, cookies):
         self.base_url = base_url
-        self.headers = {
-            'Referer': base_url,
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
-        }
+        self.headers = requests.utils.default_headers()
+        self.headers["Referer"] = base_url
+        self.headers["User-Agent"] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
         self.cookies = cookies
         if config["proxy"] == "none":
             self.proxies = None
@@ -26,6 +25,17 @@ class GetInfo(object):
             self.proxies = {
                 'http': config["proxy"]
             }
+
+    @staticmethod
+    def calPoint(xmcj):
+        """计算绩点"""
+        if xmcj is None:
+            return 'null'
+        else:
+            if xmcj.isdigit() is False:
+                return 'null'
+            else:
+                return format(float( (int(xmcj)-60) // 5 * 0.5 + 1 ),'.1f')
 
     @staticmethod
     def calTime(args):
@@ -57,6 +67,8 @@ class GetInfo(object):
     @staticmethod
     def term_cn(xh, year, term):
         """计算培养方案具体学期"""
+        if year is None or term is None:
+            return "未知"
         grade = "None"
         nj = int(xh[0:2])
         xnm = int(year[2:4])
@@ -125,13 +137,7 @@ class GetInfo(object):
         try:
             res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "个人信息超时"
-            if ServerChan is "none":
-                return {'err': 'Connect Timeout'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         # print(jres)
         res_dict = {
@@ -158,6 +164,51 @@ class GetInfo(object):
         }
         return res_dict
 
+    def get_now_class(self):
+        """获取当前班级"""
+        url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
+        try:
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+        except exceptions.Timeout as e:
+            return {'err': 'Connect Timeout'}
+        jres = res.json()
+        return jres.get('xjztdm') if jres.get('bh_id') is None else jres.get('bh_id')
+
+    def cat_by_courseid(self, courseid):
+        """根据课程号获取类别"""
+        url = parse.urljoin(self.base_url, '/jxjhgl/common_cxKcJbxx.html?id='+ courseid)
+        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+        soup = BeautifulSoup(res.text, 'html.parser')
+        th_list = soup.find_all('th')
+        data_list = []
+        for content in th_list:
+            if (content.text).strip() != "":
+                data_list.append((content.text).strip())
+        try:
+            return data_list[5]
+        except exceptions.Timeout as e:
+            # print(str(e))
+            return '未知类别'
+
+    def gpa_only(self):
+        url_main = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
+        mainr = requests.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
+                            timeout=(5, 10))
+        mainr.encoding = mainr.apparent_encoding
+        soup = BeautifulSoup(mainr.text, 'html.parser')
+        allc_str = []
+        for allc in soup.find_all('font', size=re.compile('2px')):
+            allc_str.append(allc.get_text())
+        gpa = float(allc_str[2])
+        try:
+            if gpa != "":
+                return gpa
+            else:
+                return "init"
+        except exceptions.Timeout as e:
+            # print(str(e))
+            return "init"
+
     def get_study(self, xh):
         """获取学业情况"""
         sessions = requests.Session()
@@ -166,15 +217,9 @@ class GetInfo(object):
         url_info = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
         try:
             mainr = sessions.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
-                                 timeout=(5, 10))
+                                 timeout=(5, 10), stream=True)
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "学业超时"
-            if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+            return {'err': 'Connect Timeout'}
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
 
@@ -196,7 +241,9 @@ class GetInfo(object):
         opf = int(allc_num4[0])
 
         id_find = re.findall(r"xfyqjd_id='(.*)' jdkcsx='1' leaf=''", str(soup))
+        id_find2 = re.findall(r"xfyqjd_id='(.*)' jdkcsx='2' leaf=''", str(soup))
         idList = list({}.fromkeys(id_find).keys())
+        idList2 = list({}.fromkeys(id_find2).keys())
         tsid = "None"
         tzid = "None"
         zyid = "None"
@@ -216,16 +263,16 @@ class GetInfo(object):
             tsid = idList[0]
             tzid = idList[2]
             zyid = idList[1]
-            qtid = idList[3]
+            qtid = idList2[0]
 
         res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
         res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10))
+                               proxies=self.proxies, timeout=(5, 10), stream=True)
 
         ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
                                    str(soup))
@@ -252,7 +299,7 @@ class GetInfo(object):
             'zyn': zy_point_list[2]
         }
         res_main = {
-            'gpa': gpa,  # 平均学分绩点GPA
+            'gpa': gpa if gpa!="" else "init",  # 平均学分绩点GPA
             'ipa': ipa,  # 计划内总课程数
             'ipp': ipp,  # 计划内已过课程数
             'ipf': ipf,  # 计划内未过课程数
@@ -266,7 +313,11 @@ class GetInfo(object):
                     'courseTitle': j.get('KCMC'),
                     'courseId': j.get('KCH'),
                     'courseSituation': j.get('XDZT'),
+<<<<<<< HEAD
                     'courseTerm': self.term_cn(xh, j['JYXDXNM'], j['JYXDXQMC']),
+=======
+                    'courseTerm': self.term_cn(xh, j.get('JYXDXNM'), j.get('JYXDXQMC')),
+>>>>>>> xcchelper
                     'courseCategory': '无' if j.get('KCLBMC') is None else j.get('KCLBMC'),
                     'courseAttribution': '无' if j.get('KCXZMC') is None else j.get('KCXZMC'),
                     'maxGrade': ' ' if j.get('MAXCJ') is None else j.get('MAXCJ'),
@@ -280,7 +331,11 @@ class GetInfo(object):
                     'courseTitle': k.get('KCMC'),
                     'courseId': k.get('KCH'),
                     'courseSituation': k.get("XDZT"),
+<<<<<<< HEAD
                     'courseTerm': self.term_cn(xh, k["JYXDXNM"], k["JYXDXQMC"]),
+=======
+                    'courseTerm': self.term_cn(xh, k.get("JYXDXNM"), k.get("JYXDXQMC")),
+>>>>>>> xcchelper
                     'courseCategory': '无' if k.get('KCLBMC') is None else k.get('KCLBMC'),
                     'courseAttribution': '无' if k.get('KCXZMC') is None else k.get('KCXZMC'),
                     'maxGrade': ' ' if k.get('MAXCJ') is None else k.get("MAXCJ"),
@@ -294,7 +349,11 @@ class GetInfo(object):
                     'courseTitle': l.get("KCMC"),
                     'courseId': l.get("KCH"),
                     'courseSituation': l.get("XDZT"),
+<<<<<<< HEAD
                     'courseTerm': self.term_cn(xh, l["JYXDXNM"], l["JYXDXQMC"]),
+=======
+                    'courseTerm': self.term_cn(xh, l.get("JYXDXNM"), l.get("JYXDXQMC")),
+>>>>>>> xcchelper
                     'courseCategory': '无' if l.get('KCLBMC') is None else l.get('KCLBMC'),
                     'courseAttribution': '无' if l.get('KCXZMC') is None else l.get('KCXZMC'),
                     'maxGrade': ' ' if l.get('MAXCJ') is None else l.get("MAXCJ"),
@@ -309,7 +368,8 @@ class GetInfo(object):
                     'courseId': m.get("KCH"),
                     'courseSituation': m.get("XDZT"),
                     'courseTerm': self.term_cn(xh, m["XNM"], m["XQMMC"]),
-                    'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
+                    # 'courseCategory': ' ' if m.get('KCLBMC') is None else m.get('KCLBMC'),
+                    'courseCategory': self.cat_by_courseid(m.get("KCH")),
                     'courseAttribution': ' ' if m.get('KCXZMC') is None else m.get('KCXZMC'),
                     'maxGrade': ' ' if m.get('MAXCJ') is None else m.get("MAXCJ"),
                     'credit': ' ' if m.get('XF') is None else format(float(m.get("XF")),'.1f'),
@@ -338,20 +398,14 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "消息超时"
-            if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+            return {'err': 'Connect Timeout'}
         jres = res.json()
         res_list = [{'message': i.get('xxnr'), 'ctime': i.get('cjsj')} for i in jres.get('items')]
         return res_list
 
-    def get_grade(self, year, term):
-        """获取成绩"""
-        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005')
+    def get_grade2(self, year, term):
+        """获取成绩接口2"""
+        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxXsKccjList.html?gnmkdm=N305007')
         if term == '1':  # 修改检测学期
             term = '3'
         elif term == '2':
@@ -359,8 +413,8 @@ class GetInfo(object):
         elif term == '0':
             term = ''
         else:
-            print('Please enter the correct term value！！！ ("0" or "1" or "2")')
-            return {'err': 'Error Term'}
+            term = config["nowterm"]
+            #return {'err': 'Error Term'}
         data = {
             'xnm': year,  # 学年数
             'xqm': term,  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
@@ -376,17 +430,110 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "成绩超时"
-            if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+            return {'err': 'Connect Timeout'}
+        jres = res.json()
+        if jres.get('items'):  # 防止数据出错items为空
+            res_dict = {
+                'name': '接口2',
+                'gpa': self.gpa_only(),
+                'studentId': jres['items'][0]['xh_id'],
+                'schoolYear': jres['items'][0]['xnm'],
+                'schoolTerm': jres['items'][0]['xqmmc'],
+                'err': 'ok',
+                'course': [{
+                    'courseTitle': i.get('kcmc'),
+                    'teacher': '无',
+                    'courseId': i.get('kch_id'),
+                    'className': '无' if i.get('jxbmc') is None else i.get('jxbmc'),
+                    'courseNature': 'N',
+                    'credit': '无' if i.get('xf') is None else format(float(i.get('xf')),'.1f'),
+                    'grade': ' ' if i.get('xmcj') is None else i.get('xmcj'),
+                    'gradePoint': self.calPoint(i.get('xmcj')),
+                    'gradeNature': 'N',
+                    'gradeDetail': i.get('xmblmc'),
+                    'startCollege': '无' if i.get('kkbmmc') is None else i.get('kkbmmc'),
+                    'courseMark': '无',
+                    'courseCategory': '无',
+                    'courseAttribution': '无'
+                } for i in jres.get('items')]}
+            new_dict = []
+            alreadyId = []
+            for items in  res_dict["course"]:
+                if items["courseId"] in alreadyId:
+                    continue
+                newc = {
+                    "courseTitle": items["courseTitle"],
+                    "courseId": items["courseId"],
+                    "courseNature": items["courseNature"],
+                    "credit": items["credit"],
+                    "grade": items["grade"],
+                    "gradePoint": items["gradePoint"],
+                    "gradeNature": items["gradeNature"],
+                    "courseMark": 'N',
+                    "courseCategory": 'N',
+                    "courseAttribution": 'N',
+                    "nor": 'N',
+                    "exam": 'N'
+                }
+                for index in range(0,len(res_dict["course"])):
+                    if items["courseId"] == res_dict["course"][index]["courseId"]:
+                        #print(res_dict["course"][index]["courseTitle"])
+                        if "总评" in res_dict["course"][index]["gradeDetail"]:
+                            newc["grade"] = res_dict["course"][index]["grade"]
+                            if newc["grade"] is None:
+                                pass
+                            if newc["grade"].isdigit():
+                                newc["gradePoint"] = format(float( (int(newc["grade"])-60) // 5 * 0.5 + 1 ),'.1f')
+                                if float(newc["gradePoint"]) < 0:
+                                    newc["gradePoint"] = "0.0"
+                            else:
+                                newc["gradePoint"] = 'null'
+                        elif "平时" in res_dict["course"][index]["gradeDetail"]:
+                            newc["nor"] = res_dict["course"][index]["gradeDetail"] + ":" + res_dict["course"][index]["grade"]
+                        elif "期末" in res_dict["course"][index]["gradeDetail"]:
+                            newc["exam"] = res_dict["course"][index]["gradeDetail"] + ":" + res_dict["course"][index]["grade"]
+                    else:
+                        pass
+                alreadyId.append(items["courseId"])
+                new_dict.append(newc)
+            res_dict["course"] = new_dict
+            return res_dict
+        else:
+            return {'err': 'No Data'}
+
+    def get_grade(self, year, term):
+        """获取成绩"""
+        url = parse.urljoin(self.base_url, '/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005')
+        if term == '1':  # 修改检测学期
+            term = '3'
+        elif term == '2':
+            term = '12'
+        elif term == '0':
+            term = ''
+        else:
+            term = config["nowterm"]
+            #return {'err': 'Error Term'}
+        data = {
+            'xnm': year,  # 学年数
+            'xqm': term,  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
+            '_search': 'false',
+            'nd': int(time.time() * 1000),
+            'queryModel.showCount': '100',  # 每页最多条数
+            'queryModel.currentPage': '1',
+            'queryModel.sortName': '',
+            'queryModel.sortOrder': 'asc',
+            'time': '0'  # 查询次数
+        }
+        try:
+            res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
+                                timeout=(5, 10))
+        except exceptions.Timeout as e:
+            return {'err':'Connect Timeout'}
         jres = res.json()
         if jres.get('items'):  # 防止数据出错items为空
             res_dict = {
                 'name': jres['items'][0]['xm'],
+                'gpa': self.gpa_only(),
                 'studentId': jres['items'][0]['xh'],
                 'schoolYear': jres['items'][0]['xnm'],
                 'schoolTerm': jres['items'][0]['xqmmc'],
@@ -408,7 +555,7 @@ class GetInfo(object):
                 } for i in jres.get('items')]}
             return res_dict
         else:
-            return {'err': 'You Get Nothing'}
+            return {'err': 'No Data'}
 
     def get_schedule(self, year, term):
         """获取课程表信息"""
@@ -418,7 +565,6 @@ class GetInfo(object):
         elif term == '2':
             term = '12'
         else:
-            print('Please enter the correct term value！！！ ("1" or "2")')
             return {'err': 'Error Term'}
         data = {
             'xnm': year,
@@ -428,15 +574,8 @@ class GetInfo(object):
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
                                 timeout=(5, 10))
         except exceptions.Timeout as e:
-            ServerChan = config["ServerChan"]
-            text = "课表超时"
-            if ServerChan == "none":
-                return {'err': 'Connect Timeout'}
-            else:
-                requests.get(ServerChan + 'text=' + text + '&desp=' + str(e))
-                return {'err': 'Connect Timeout'}
+            return {'err':'Connect Timeout'}
         jres = res.json()
-
         res_dict = {
             'name': jres['xsxx']['XM'],
             'studentId': jres['xsxx']['XH'],
@@ -454,7 +593,10 @@ class GetInfo(object):
                 'courseTime': self.calTime(re.findall(r"(\d+)", i['jc'])),
                 'courseWeek': i.get('zcd'),
                 'includeWeeks': self.calWeeks(re.findall(r"(\d+)", i['zcd'])),
+<<<<<<< HEAD
                 # 'inNowWeek': 1 if int(config["nowWeekI"]) in self.calWeeks(re.findall(r"(\d+)", i['zcd'])) else 0,
+=======
+>>>>>>> xcchelper
                 'exam': i.get('khfsmc'),
                 'campus': i.get('xqmc'),
                 'courseRoom': i.get('cdmc'),
@@ -466,6 +608,38 @@ class GetInfo(object):
             } for i in jres['kbList']],
             # 'otherCourses': [i['qtkcgs'] for i in jres['sjkList']]
         }
+        """处理同周同天同课程不同时段合并显示的问题"""
+        repetIndex = []
+        count = 0
+        for items in res_dict["normalCourse"]:
+            for index in range(0,len(res_dict["normalCourse"])):
+                if (res_dict["normalCourse"]).index(items) == count:    #如果对比到自己就忽略
+                    pass
+                elif items["courseTitle"] == res_dict["normalCourse"][index]["courseTitle"] and items["courseWeekday"] == res_dict["normalCourse"][index]["courseWeekday"] and items["courseWeek"] == res_dict["normalCourse"][index]["courseWeek"]:
+                    repetIndex.append(index)    # 满足条件记录索引
+                    # print(res_dict["normalCourse"][index]["courseTitle"])
+                else:
+                    pass
+            count = count + 1   # 记录当前对比课程的索引
+        if len(repetIndex) % 2 != 0:    # 暂时考虑一天两个时段上同一门课，不满足条件不进行修改
+            return res_dict
+        for r in range(0,len(repetIndex),2):    # 索引数组两两成对，故步进2循环
+            fir = repetIndex[r]
+            sec = repetIndex[r+1]
+            if len(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])) == 4:
+                res_dict["normalCourse"][fir]["courseSection"] = re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])[0] + "-" + re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"])[1] + "节"
+                res_dict["normalCourse"][fir]["includeSection"] = self.listTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+                res_dict["normalCourse"][fir]["upTime"] = self.upTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+                res_dict["normalCourse"][fir]["courseTime"] = self.calTime(re.findall(r"(\d+)", res_dict["normalCourse"][fir]["courseSection"]))
+
+                res_dict["normalCourse"][sec]["courseSection"] = re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"])[2] + "-" + re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"])[3] + "节"
+                res_dict["normalCourse"][sec]["includeSection"] = self.listTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                res_dict["normalCourse"][sec]["upTime"] = self.upTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                res_dict["normalCourse"][sec]["courseTime"] = self.calTime(re.findall(r"(\d+)", res_dict["normalCourse"][sec]["courseSection"]))
+                # print(res_dict["normalCourse"][fir])
+                # print(res_dict["normalCourse"][sec])
+            else:
+                pass
         return res_dict
 
     # def get_notice(self):
