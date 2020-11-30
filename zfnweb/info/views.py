@@ -588,9 +588,12 @@ def get_grade(request):
             cookies = requests.utils.cookiejar_from_dict(cookies_dict)
             person = GetInfo(base_url=base_url, cookies=cookies)
             grade = person.get_grade(year, term)
-            if grade.get("err") == "Connect Timeout":
-                update_cookies(xh, pswd)
-                Warings("成绩超时","",xh,pswd)
+            if grade.get("err"):
+                if grade.get("err") == "Connect Timeout":
+                    update_cookies(xh, pswd)
+                    Warings("成绩超时","",xh,pswd)
+                elif grade.get("err") == "No Data":
+                    HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
             endTime = time.time()
             spendTime = endTime - startTime

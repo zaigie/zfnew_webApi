@@ -487,7 +487,7 @@ class GetInfo(object):
             res_dict["course"] = new_dict
             return res_dict
         else:
-            return {'err': '看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~'}
+            return {'err': 'No Data'}
 
     def get_grade(self, year, term):
         """获取成绩"""
@@ -543,7 +543,7 @@ class GetInfo(object):
                 } for i in jres.get('items')]}
             return res_dict
         else:
-            return {'err': '看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~'}
+            return {'err': 'No Data'}
 
     def get_schedule(self, year, term):
         """获取课程表信息"""
