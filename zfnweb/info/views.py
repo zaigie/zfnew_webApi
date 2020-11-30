@@ -487,7 +487,7 @@ def get_study(request):
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
-                gpa = str(study["gpa"])
+                gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
                 Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
                 filename = ('Study')
                 newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -497,7 +497,7 @@ def get_study(request):
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
             writeLog(content)
-            gpa = str(study["gpa"])
+            gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
             Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
             filename = ('Study')
             newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -519,7 +519,7 @@ def get_study(request):
                 sta = update_cookies(xh, pswd)
                 person = GetInfo(base_url=base_url, cookies=sta)
                 study = person.get_study(xh)
-                gpa = str(study["gpa"])
+                gpa = str(study["gpa"]) if str(study["gpa"]) !="" else "init"
                 Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
                 filename = ('Study')
                 newData(xh, filename, json.dumps(study, ensure_ascii=False))
@@ -598,7 +598,7 @@ def get_grade(request):
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 else:
                     return grade
-            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+            Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" else "init")
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了%s-%s的成绩，耗时%.2fs' % (

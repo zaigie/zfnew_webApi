@@ -7,6 +7,9 @@ import requests
 
 cst_tz = timezone('Asia/Shanghai')
 
+def index(request):
+    return HttpResponse('mp_index here')
+
 def importantNotice():
     if Notices.objects.filter(important=True):
         important = Notices.objects.get(important=True)
@@ -43,31 +46,6 @@ def mconfig(request):
         }for i in Notices.objects.filter(important=False,show=True).all().order_by('-date')],
         'important':importantNotice()
     }
-    return HttpResponse(json.dumps(res, ensure_ascii=False),
-                        content_type="application/json,charset=utf-8")
-
-
-with open('mpconfig.json', mode='r', encoding='utf-8') as m:
-    mpconfig = json.loads(m.read())
-
-def config(request):
-    myconfig = Config.objects.all().first()
-    if myconfig.apichange:
-        res = requests.get(url=myconfig.otherapi+"/mp")
-        return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
-    with open('mpconfig.json', mode='r', encoding='utf-8') as f:
-        config = json.loads(f.read())
-        res = {
-            'version': config["version"],
-            'nGrade': config["nGrade"],
-            'nSchedule': config["nSchedule"],
-            'nChoose': config["nChoose"],
-            'vacation': config["vacation"],
-            'nowweek': config["nowweek"],
-            'choose': config["choose"],
-            'notice': config["notice"]
-        }
     return HttpResponse(json.dumps(res, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
 

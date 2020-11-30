@@ -2,7 +2,6 @@
     "proxy":"none",
     "base_url":"https://jwxt.xcc.edu.cn",
     "ServerChan":"none",
-    "nowterm":"12",
     "TimesUp":{
         "1":"8:00",
         "2":"8:45",

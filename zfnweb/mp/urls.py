@@ -2,7 +2,7 @@ from django.urls import path,re_path
 from mp import views
 
 urlpatterns = [
-    path('', views.config),
+    path('', views.index),
     path('conf',views.mconfig),
     path('countdown', views.countdown),
     path('navigate', views.navigate),
