@@ -1086,20 +1086,20 @@ def classGrades(request):
     lastCourses = []
     try:
         lastStu = Students.objects.filter(className=className).order_by("-updateTime")[0].studentId
-        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/GradesN-' + yt + '.json') as l:
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
             lastReq = json.loads(l.read())
             for course in lastReq.get("course"):
                 if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
                     lastCourses.append(course.get("courseTitle"))
     except:
         lastStu = Students.objects.filter(className=className).order_by("-updateTime")[1].studentId
-        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/GradesN-' + yt + '.json') as l:
+        with open('data/' + str(lastStu)[0:2] + '/' + str(lastStu) + '/Grades-' + yt + '.json') as l:
             lastReq = json.loads(l.read())
             for course in lastReq.get("course"):
                 if course.get("courseNature") != "通识教育任选" and course.get("courseNature") != "无" and course.get("gradeNature") == "正常考试":
                     lastCourses.append(course.get("courseTitle"))
     for stu in studentIdList:
-        nowUrl = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/GradesN-' + yt + '.json'
+        nowUrl = 'data/' + str(stu)[0:2] + '/' + str(stu) + '/Grades-' + yt + '.json'
         try:
             with open(nowUrl,mode='r',encoding='UTF-8') as f:
                 stuReq = json.loads(f.read())
