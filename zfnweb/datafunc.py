@@ -77,7 +77,6 @@ if __name__ == '__main__':
             saved = 0
             for stu in initList:
                 filename = 'data/' + str(stu.studentId)[0:2] + '/' + str(stu.studentId) + '/' + "Pinfo.json"
-                print(filename)
                 thisStu = Students.objects.filter(studentId=str(stu.studentId))
                 try:
                     if os.path.exists(filename):
