@@ -7,7 +7,7 @@ class Students(models.Model):
     collegeName = models.CharField(verbose_name="学院",max_length=40)
     majorName = models.CharField(verbose_name="专业",max_length=40)
     className = models.CharField(verbose_name="班级",max_length=40)
-    classMonitor = models.IntegerField(verbose_name="是否班委",choices=(('0',"不是"),('1',"是")),default=0)
+    classMonitor = models.IntegerField(verbose_name="是否班委",choices=((0,"不是"),(1,"是")),default=0)
     gpa = models.CharField(verbose_name="GPA",max_length=10,default="init")
     phoneNumber = models.CharField(verbose_name="手机号",max_length=20)
     birthDay = models.CharField(verbose_name="生日",max_length=20)

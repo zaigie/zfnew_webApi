@@ -1,5 +1,5 @@
 from django.shortcuts import render,HttpResponse
-from mp.models import Notices,Config,Navigate
+from mp.models import Notices,Config,Navigate,About,Countdown
 import json
 import time,datetime
 from pytz import timezone
@@ -64,13 +64,11 @@ def countdown(request):
         res = requests.get(url=myconfig.otherapi+"/mp/countdown")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
-    with open('mpconfig.json', mode='r', encoding='utf-8') as f:
-        countdown = json.loads(f.read())["countdown"]
-        res = [{
-            'name': item["name"],
-            'shortname': item["shortname"],
-            'date': countTime(item["date"])
-        } for item in countdown]
+    res = [{
+        'name': i.name,
+        'shortname': eval(repr(i.shortname).replace('\\\\', '\\')),
+        'date': countTime(i.date)
+    }for i in Countdown.objects.all()]
     return HttpResponse(json.dumps(res, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
 
@@ -109,8 +107,26 @@ def about(request):
         res = requests.get(url=myconfig.otherapi+"/mp/about")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
-    with open('mpconfig.json', mode='r', encoding='utf-8') as f:
-        about = json.loads(f.read())["about"]
+    about = {
+        "qa":[{
+            "question": i.title,
+            "answer": eval(repr(i.content).replace('\\\\', '\\'))
+        }for i in About.objects.filter(type=1).all().order_by('dates')],
+        "license":[{
+            "title": j.title,
+            "content": eval(repr(j.content).replace('\\\\', '\\'))
+        }for j in About.objects.filter(type=2).all().order_by('dates')],
+        "money":[ k.title + "-" + k.content for k in About.objects.filter(type=3).all().order_by('dates')],
+        "aboutus":{
+            "title": About.objects.filter(type=4).first().title,
+            "content": eval(repr(About.objects.filter(type=4).first().content).replace('\\\\', '\\'))
+        },
+        "contact":{
+            "wechat":"RiotJS",
+            "email":"jokerwho@yeah.net",
+            "qq": "709662329"
+        }
+    }
     return HttpResponse(json.dumps(about, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 

@@ -23,7 +23,9 @@ SIMPLEUI_ICON = {
     '教师': 'fas fa-graduation-cap',
 	'信息管理': 'fas fa-users',
     '内容类型': 'fas fa-sitemap',
-	'管理': 'fas fa-wrench'
+	'管理': 'fas fa-wrench',
+    '倒计时': 'fas fa-calendar',
+    '关于': 'fas fa-id-card'
 }
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -109,6 +111,7 @@ DATABASES = {
         'PASSWORD': '#',  # 密码
         'HOST': '127.0.0.1',  # HOST
         'POST': 3306,  # 端口
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
 
