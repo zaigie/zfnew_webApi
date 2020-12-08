@@ -1272,6 +1272,17 @@ def get_maps(request):
     return HttpResponse(json.dumps(res, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
 
+def isMonitor(request):
+    xh = request.GET.get("xh")
+    if Students.objects.filter(studentId=int(xh)):
+        thisStu = Students.objects.get(studentId=int(xh))
+        res = {"code":200,"monitor":True if thisStu.classMonitor == 1 else False}
+        return HttpResponse(json.dumps(res, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+    else:
+        return HttpResponse(json.dumps({"err":"没有这个同学"}, ensure_ascii=False),
+                        content_type="application/json,charset=utf-8")
+
 # def freetime(request):
 #     xh = request.GET.get("xh")
 #     term = request.GET.get("term")

@@ -71,7 +71,7 @@ class Notices(models.Model):
     key = models.CharField(verbose_name="标识Key",max_length=10,default=str(''.join(random.sample(string.ascii_letters + string.digits, 8))))
     show = models.BooleanField(verbose_name="展示",default=True)
     important = models.BooleanField(verbose_name="紧急通知",default=False)
-    date = models.DateTimeField(verbose_name="通知时间")
+    date = models.DateTimeField(verbose_name="通知时间",default=timezone.now)
     def __str__(self):
         return smart_str('%s-%s' % (self.title, self.ltitle))
     class Meta:

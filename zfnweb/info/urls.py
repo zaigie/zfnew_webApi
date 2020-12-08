@@ -25,6 +25,7 @@ urlpatterns = [
     path('schoolcard',views.school_card),
     path('financial',views.financial),
     path('award',views.award),
-    path('maps',views.get_maps)
+    path('maps',views.get_maps),
+    path('monitor',views.isMonitor)
     # path('update',views.update_cookies)
 ]
