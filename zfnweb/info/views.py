@@ -311,7 +311,7 @@ def refresh_class(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录更新班级信息' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -389,7 +389,7 @@ def get_message(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问消息' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -459,7 +459,7 @@ def get_study(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问学业情况' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -563,7 +563,7 @@ def get_grade(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -672,7 +672,7 @@ def get_grade(request):
 #         if not Students.objects.filter(studentId=int(xh)):
 #             content = ('【%s】[%s]未登录访问成绩' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
 #             writeLog(content)
-#             return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+#             return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
 #                                 content_type="application/json,charset=utf-8")
 #         else:
 #             stu = Students.objects.get(studentId=int(xh))
@@ -777,7 +777,7 @@ def get_schedule(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问课程' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -905,7 +905,7 @@ def get_position(request):
         return HttpResponse(json.dumps({'err':'参数不全'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if not Students.objects.filter(studentId=int(xh)):
-        return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     else:
         stu = Students.objects.get(studentId=int(xh))
@@ -971,7 +971,7 @@ def searchTeacher(request):
                             content_type="application/json,charset=utf-8")
     else:
         if not Students.objects.filter(studentId=int(xh)):
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             date = datetime.datetime.now().strftime('%Y-%m-%d')

@@ -126,7 +126,7 @@ def get_choosed(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问已选课程' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -225,7 +225,7 @@ def get_bkk_list(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录访问板块课' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -299,7 +299,7 @@ def choose(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录选课' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
@@ -344,7 +344,7 @@ def cancel(request):
         if not Students.objects.filter(studentId=int(xh)):
             content = ('【%s】[%s]未登录选课' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
             writeLog(content)
-            return HttpResponse(json.dumps({'err':'还未登录'}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'err':'还未登录，请重新登录！'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             stu = Students.objects.get(studentId=int(xh))
