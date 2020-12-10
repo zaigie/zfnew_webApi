@@ -509,8 +509,8 @@ def get_study(request):
                 # return get_study(request)
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
-            elif "list index out of range" in str(e):
-                return HttpResponse(json.dumps({'err':'暂无学业信息或临时请求失败'}, ensure_ascii=False),
+            elif "list index out of range" in str(e) and int(xh[0:2]) > int(myconfig.nGrade[2:4]):
+                return HttpResponse(json.dumps({'err':'暂无学业信息'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
@@ -594,7 +594,10 @@ def get_grade(request):
                     update_cookies(xh, pswd)
                     return mywarn("成绩超时","",xh,pswd)
                 elif grade.get("err") == "No Data":
-                    return HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                    if int(xh[0:2]) > int(myconfig.nGrade[2:4]):
+                        return HttpResponse(json.dumps({'err':"当前你还没有任何成绩信息"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                    else:
+                        return HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 elif grade.get("err") == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" or grade.get("gpa") is not None else "init")
