@@ -849,9 +849,6 @@ def joinDetail(request):
         res = requests.get(url=myconfig.otherapi+"/info/joindetail?type=" + request.GET.get("type"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
     allUsers = Students.objects.filter().all().count()
     if type == 'college':
@@ -941,9 +938,6 @@ def get_position(request):
 
 def searchTeacher(request):
     myconfig = Config.objects.all().first()
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
     if request.method == "GET":
         xh = request.GET.get("xh")
         tname = request.GET.get("tname")
@@ -1049,9 +1043,6 @@ def searchExcept(request):
         res = requests.post(url=myconfig.otherapi+"/info/scallback",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
     xh = request.POST.get("xh")
     tname = request.POST.get("tname")
     collegeName = request.POST.get("college")
@@ -1071,9 +1062,6 @@ def classGrades(request):
     if myconfig.apichange:
         res = requests.get(url=myconfig.otherapi+"/info/classgrades?className=" + request.GET.get("className") + "&yt=" + request.GET.get("yt"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     className = request.GET.get("className")
     yt = request.GET.get("yt")
