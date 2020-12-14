@@ -115,6 +115,9 @@ def get_choosed(request):
         res = requests.post(url=myconfig.otherapi+"/choose/choosed",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if myconfig.maintenance:
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -214,6 +217,9 @@ def get_bkk_list(request):
         res = requests.post(url=myconfig.otherapi+"/choose/bkk",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if myconfig.maintenance:
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -283,6 +289,9 @@ def choose(request):
         res = requests.post(url=myconfig.otherapi+"/choose/choose",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
+    if myconfig.maintenance:
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
             xh = request.POST.get("xh")
@@ -330,6 +339,9 @@ def cancel(request):
         }
         res = requests.post(url=myconfig.otherapi+"/choose/cancel",data=data)
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    if myconfig.maintenance:
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if request.method == 'POST':
         if request.POST:
