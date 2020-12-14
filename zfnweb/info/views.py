@@ -158,7 +158,7 @@ def get_pinfo(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["loginbad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
@@ -296,7 +296,7 @@ def refresh_class(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["loginbad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求登录，请待学校修复！'}, ensure_ascii=False),
@@ -374,7 +374,7 @@ def get_message(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["jwxtbad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法访问（可能是学校机房断电或断网所致），小程序暂时无法登录和更新，请待学校修复！'}, ensure_ascii=False),
@@ -443,7 +443,7 @@ def get_study(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["studybad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求学业，请待学校修复！'}, ensure_ascii=False),
@@ -545,7 +545,7 @@ def get_grade(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["gradebad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
@@ -654,7 +654,7 @@ def get_grade(request):
 #         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
 #                             content_type="application/json,charset=utf-8")
 #     if myconfig.maintenance:
-#         return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+#         return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
 #                             content_type="application/json,charset=utf-8")
 #     # if mpconfig["gradebad"]:
 #     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求成绩，请待学校修复！'}, ensure_ascii=False),
@@ -759,7 +759,7 @@ def get_schedule(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     # if mpconfig["schedulebad"]:
     #     return HttpResponse(json.dumps({'err':'当前教务系统无法请求课表，请待学校修复！'}, ensure_ascii=False),
@@ -850,7 +850,7 @@ def joinDetail(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     type = request.GET.get("type")
     allUsers = Students.objects.filter().all().count()
@@ -895,9 +895,6 @@ def get_position(request):
     if myconfig.apichange:
         res = requests.get(url=myconfig.otherapi+"/info/position?xh=" + request.GET.get("xh"))
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
-                            content_type="application/json,charset=utf-8")
-    if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     #print(request)
     xh = request.GET.get("xh")
@@ -945,7 +942,7 @@ def get_position(request):
 def searchTeacher(request):
     myconfig = Config.objects.all().first()
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if request.method == "GET":
         xh = request.GET.get("xh")
@@ -1053,7 +1050,7 @@ def searchExcept(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     xh = request.POST.get("xh")
     tname = request.POST.get("tname")
@@ -1076,7 +1073,7 @@ def classGrades(request):
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     if myconfig.maintenance:
-        return HttpResponse(json.dumps({'err':'系统维护升级中，预计持续10分钟！'}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'err':'教务系统出错维护中，请静待教务系统恢复正常！'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     className = request.GET.get("className")
     yt = request.GET.get("yt")
