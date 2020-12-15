@@ -1,7 +1,9 @@
+from datetime import time
 from django.db import models
 from django.utils.encoding import smart_str
 import random,string
 import django.utils.timezone as timezone
+import datetime
 
 class About(models.Model):
     id = models.AutoField(verbose_name="ID",primary_key=True)
@@ -25,6 +27,8 @@ class Config(models.Model):
     nGrade = models.CharField(verbose_name="成绩学期",max_length=20,null=False)
     nSchedule = models.CharField(verbose_name="课程学期",max_length=20,null=False)
     maintenance = models.BooleanField(verbose_name="调试模式")
+    autoCalWeeks = models.BooleanField(verbose_name="自动计算周数",default=True)
+    startDate = models.DateField(verbose_name="学期开始日期",default=datetime.date.today)
     # jwxtbad = models.BooleanField(verbose_name="教务系统")
     # gradebad = models.BooleanField(verbose_name="成绩接口")
     # studybad = models.BooleanField(verbose_name="学业接口")

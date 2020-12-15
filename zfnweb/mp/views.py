@@ -22,6 +22,15 @@ def importantNotice():
     else:
         return 'none'
 
+def autoCalWeeks(date1):
+    date1=time.strptime(date1,"%Y-%m-%d")  
+    date2 = datetime.datetime.now().timetuple()
+    date1=datetime.datetime(date1[0],date1[1],date1[2])  
+    date2=datetime.datetime(date2[0],date2[1],date2[2])
+    differ=date2-date1
+    weekth=differ//datetime.timedelta(days=7)+1
+    return weekth
+
 def mconfig(request):
     myconfig = Config.objects.all().first()
     if myconfig.apichange:
@@ -34,7 +43,7 @@ def mconfig(request):
         'nGrade': myconfig.nGrade,
         'nSchedule': myconfig.nSchedule,
         'vacation': myconfig.vacation,
-        'nowweek': myconfig.nowweek,
+        'nowweek': autoCalWeeks((myconfig.startDate).strftime('%Y-%m-%d')) if myconfig.autoCalWeeks else myconfig.nowweek,
         'choose': myconfig.choose,
         'notice': [{
             'title':i.title,

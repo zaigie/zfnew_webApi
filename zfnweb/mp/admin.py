@@ -48,11 +48,11 @@ class AboutAdmin(admin.ModelAdmin):
 
 class ConfigAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("学期/周", {'fields': ['nChoose', 'nGrade','nSchedule','nowweek']}),
-        ("开关", {'fields':['maintenance','choose','vacation']}),
+        ("学期/周", {'fields': ['nChoose', 'nGrade','nSchedule','nowweek','startDate']}),
+        ("开关", {'fields':['maintenance','autoCalWeeks','choose','vacation']}),
         ("信息设置", {'fields':['version']}),
     )
-    list_display = ('version','nowweek','vacation','choose','nChoose','nGrade','nSchedule','maintenance')
+    list_display = ('version','nowweek','startDate','vacation','choose','nChoose','nGrade','nSchedule','autoCalWeeks','maintenance')
     def has_add_permission(self, request):
         return False
     def has_delete_permission(self, request, obj=None):
