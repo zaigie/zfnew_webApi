@@ -16,6 +16,13 @@ if __name__ == '__main__':
     from info.models import Students, Teachers
 
     # 脚本的代码逻辑
+    def calSex(id):
+        sexNum = id[16:17]
+        if int(sexNum)%2==0:
+            return 2
+        else:
+            return 1
+
     if sys.argv[1] == "repair":
         if sys.argv[2] == "email":
             datafile = 'data/'
@@ -68,6 +75,16 @@ if __name__ == '__main__':
                     print(str(stu2.studentId) + "有问题")
                     traceback.print_exc()
             print("修复了%s个信息"%saved+saved2)
+        elif sys.argv[2] == "sex":
+            sex_needList = Students.objects.all()   #数据库中所有学生列表
+            for stu in sex_needList:
+                if stu.idNumber == "init" or stu.idNumber == "无":
+                    print("%s没有信息" % stu.studentId)
+                    continue
+                else:
+                    thisStu = Students.objects.filter(studentId=stu.studentId)
+                    thisStu.update(sex=calSex(stu.idNumber))
+                    print("%s done!" % stu.studentId)
         elif sys.argv[2] == "all":
             datafile = 'data/'
             initList = Students.objects.filter(domicile="init").all()
