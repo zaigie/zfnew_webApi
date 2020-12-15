@@ -4,6 +4,7 @@ from django.utils.encoding import smart_str
 class Students(models.Model):
     studentId = models.IntegerField(verbose_name="学号",primary_key=True)
     name = models.CharField(verbose_name="姓名",max_length=30)
+    sex = models.IntegerField(verbose_name="性别",max_length=1,choices=((1,"男"),(2,"女")),default=1)
     collegeName = models.CharField(verbose_name="学院",max_length=40)
     majorName = models.CharField(verbose_name="专业",max_length=40)
     className = models.CharField(verbose_name="班级",max_length=40)
@@ -24,8 +25,8 @@ class Students(models.Model):
     def __str__(self):
         return smart_str('%s-%s' % (self.studentId, self.name))
     @classmethod
-    def create(cls,studentId,name,collegeName,majorName,className,phoneNumber,birthDay,graduationSchool,domicile,email,national,idNumber,JSESSIONID,route,updateTime):
-        return cls(studentId=studentId, name=name, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, graduationSchool=graduationSchool, domicile=domicile, email=email, national=national, idNumber=idNumber, JSESSIONID=JSESSIONID, route=route, updateTime=updateTime)
+    def create(cls,studentId,name,sex,collegeName,majorName,className,phoneNumber,birthDay,graduationSchool,domicile,email,national,idNumber,JSESSIONID,route,updateTime):
+        return cls(studentId=studentId, name=name, sex=sex, collegeName=collegeName, majorName=majorName, className=className, phoneNumber=phoneNumber, birthDay=birthDay, graduationSchool=graduationSchool, domicile=domicile, email=email, national=national, idNumber=idNumber, JSESSIONID=JSESSIONID, route=route, updateTime=updateTime)
     class Meta:
         db_table = "students"
         verbose_name = '学生'

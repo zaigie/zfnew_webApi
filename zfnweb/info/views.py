@@ -22,6 +22,13 @@ base_url = config["base_url"]
 def index(request):
     return HttpResponse('info_index here')
 
+def calSex(id):
+    sexNum = id[16:17]
+    if int(sexNum)%2==0:
+        return 2
+    else:
+        return 1
+
 def mywarn(text,desp,xh,pswd):
     ServerChan = config["ServerChan"]
     text = text
@@ -243,7 +250,7 @@ def get_pinfo(request):
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
                     route = requests.utils.dict_from_cookiejar(cookies)["route"]
                     updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], pinfo["collegeName"],
+                    newstu = Students.create(int(pinfo["studentId"]), pinfo["name"], calSex(pinfo["idNumber"]), pinfo["collegeName"],
                                              pinfo["majorName"], pinfo["className"], pinfo["phoneNumber"],
                                              pinfo["birthDay"], pinfo["graduationSchool"], pinfo["domicile"],
                                              pinfo["email"], pinfo["national"], pinfo["idNumber"],

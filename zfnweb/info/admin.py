@@ -12,19 +12,19 @@ admin.site.index_title="欢迎来到西院助手后台管理"
 class StuResource(resources.ModelResource):
     class Meta:
         model = Students
-        fields = ('studentId','name','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
-        export_order = ('studentId','name','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
+        fields = ('studentId','name','sex','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
+        export_order = ('studentId','name','sex','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
 
 class StuAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     ordering = ('-updateTime',)
     fieldsets = (
-        ("基本信息", {'fields': ['studentId', 'name', 'gpa', 'classMonitor','national']}),
+        ("基本信息", {'fields': ['studentId', 'name', 'sex', 'gpa', 'classMonitor','national']}),
         ("院系班级", {'fields':['collegeName', 'majorName', 'className']}),
         ("额外信息", {'fields':['phoneNumber', 'birthDay', 'searchTimes','graduationSchool','domicile','email','idNumber']}),
         ("登录相关", {'fields':['updateTime', 'refreshTimes']}),
         ("Cookies", {'fields':['JSESSIONID', 'route']}),
     )
-    list_display = ('studentId','name','collegeName','className','gpa','email','birthDay','domicile','refreshTimes','updateTime')
+    list_display = ('studentId','name','sex','collegeName','className','gpa','email','birthDay','domicile','refreshTimes','updateTime')
     search_fields = ('studentId','name','email','phoneNumber','birthDay','graduationSchool')
     list_filter = ('majorName','className','domicile')
     list_per_page = 20
