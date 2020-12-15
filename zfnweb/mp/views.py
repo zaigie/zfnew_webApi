@@ -125,7 +125,7 @@ def about(request):
             "title": j.title,
             "content": eval(repr(j.content).replace('\\\\', '\\'))
         }for j in About.objects.filter(type=2).all().order_by('dates')],
-        "money":[ k.title + "-" + k.content for k in About.objects.filter(type=3).all().order_by('dates')],
+        "money":[ k.title + "-" + k.content + "："+ (k.dates).astimezone(cst_tz).strftime("%Y-%m-%d") for k in About.objects.filter(type=3).all().order_by('dates')],
         "aboutus":{
             "title": About.objects.filter(type=4).first().title,
             "content": eval(repr(About.objects.filter(type=4).first().content).replace('\\\\', '\\'))
