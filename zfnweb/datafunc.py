@@ -74,7 +74,7 @@ if __name__ == '__main__':
                 except:
                     print(str(stu2.studentId) + "有问题")
                     traceback.print_exc()
-            print("修复了%s个信息"%saved+saved2)
+            print("修复了%s个信息"%(saved+saved2))
         elif sys.argv[2] == "sex":
             sex_needList = Students.objects.all()   #数据库中所有学生列表
             for stu in sex_needList:
@@ -114,6 +114,23 @@ if __name__ == '__main__':
     elif sys.argv[1] == "data":
         allList = Students.objects.values_list('studentId',flat=True)
         print("当前共" + str(len(allList)) + "个学生数据")
+        print("----------------------------------")
+        print("性别统计：")
+        boys = 0
+        girls = 0
+        fail = 0
+        for s in Students.objects.all():
+            if s.idNumber == "init" or s.idNumber == "无":
+                fail+=1
+                continue
+            else:
+                if s.sex==1:
+                    boys+=1
+                else:
+                    girls+=1
+        print("男：%s人" % (boys-fail))
+        print("女：%s人" % girls)
+        print("无信息：%s人" % fail)
         print("----------------------------------")
         print("民族统计：")
         national = [{
