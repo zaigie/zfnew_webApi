@@ -29,6 +29,9 @@ def calSex(id):
     else:
         return 1
 
+def diffList(list1,list2):
+    return [x for x in list1 if x not in list2]
+
 def mywarn(text,desp,xh,pswd):
     ServerChan = config["ServerChan"]
     text = text
@@ -1278,14 +1281,39 @@ def isMonitor(request):
         return HttpResponse(json.dumps({"err":"没有这个同学"}, ensure_ascii=False),
                         content_type="application/json,charset=utf-8")
 
-# def freetime(request):
-#     xh = request.GET.get("xh")
-#     term = request.GET.get("term")
-#     datafile = '/data/' + xh[0:2] + "/" + xh + "/" + "Schedules-" + term + ".json"
-#     if os.path.exists(datafile):
-#         with open(datafile,mode='r',encoding='UTF-8') as f:
-#             schedule_data = json.loads(f.read())
-#         res = {"Mon":{},"Tue":{},"Wed":{},"Thu":{},"Fri":{},"Sat":{},"Sun":{}}
-#         for item in schedule_data["normalCourse"]:
-#             if item["courseWeekday"] == "1":
-                
+def freetime(request):
+    myconfig = Config.objects.all().first()
+    xh = request.GET.get("xh")
+    term = request.GET.get("term") if request.GET.get("term") is not None else myconfig.nSchedule
+    weeks = request.GET.get("weeks") if request.GET.get("weeks") is not None else myconfig.nowweek
+    mode = request.GET.get("mode") if request.GET.get("mode") is not None else "1"
+    datafile = 'data/' + xh[0:2] + "/" + xh + "/" + "Schedules-" + term + ".json"
+    fullSections = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    if os.path.exists(datafile):
+        with open(datafile,mode='r',encoding='UTF-8') as f:
+            schedule_data = json.loads(f.read())
+        res = {"Mon":[],"Tue":[],"Wed":[],"Thu":[],"Fri":[]}
+        for item in schedule_data["normalCourse"]:
+            if item["courseWeekday"] == "1" and int(weeks) in item["includeWeeks"]:
+                res["Mon"].extend(item["includeSection"])
+            elif item["courseWeekday"] == "2" and int(weeks) in item["includeWeeks"]:
+                res["Tue"].extend(item["includeSection"])
+            elif item["courseWeekday"] == "3" and int(weeks) in item["includeWeeks"]:
+                res["Wed"].extend(item["includeSection"])
+            elif item["courseWeekday"] == "4" and int(weeks) in item["includeWeeks"]:
+                res["Thu"].extend(item["includeSection"])
+            elif item["courseWeekday"] == "5" and int(weeks) in item["includeWeeks"]:
+                res["Fri"].extend(item["includeSection"])
+            else:
+                pass
+        if mode == "1":
+            res["Mon"] = diffList(fullSections,res["Mon"])
+            res["Tue"] = diffList(fullSections,res["Tue"])
+            res["Wed"] = diffList(fullSections,res["Wed"])
+            res["Thu"] = diffList(fullSections,res["Thu"])
+            res["Fri"] = diffList(fullSections,res["Fri"])
+        return HttpResponse(json.dumps(res, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")
+    else:
+        return HttpResponse(json.dumps({"err":"这位同学暂时没有在小程序查看过该学期课表"}, ensure_ascii=False),
+                            content_type="application/json,charset=utf-8")

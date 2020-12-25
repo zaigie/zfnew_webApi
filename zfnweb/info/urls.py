@@ -26,6 +26,7 @@ urlpatterns = [
     path('financial',views.financial),
     path('award',views.award),
     path('maps',views.get_maps),
-    path('monitor',views.isMonitor)
+    path('monitor',views.isMonitor),
+    path('freetime',views.freetime)
     # path('update',views.update_cookies)
 ]
