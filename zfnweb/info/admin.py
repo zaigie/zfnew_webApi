@@ -26,7 +26,7 @@ class StuAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     )
     list_display = ('studentId','name','sex','collegeName','className','gpa','email','birthDay','domicile','refreshTimes','updateTime')
     search_fields = ('studentId','name','email','phoneNumber','birthDay','graduationSchool')
-    list_filter = ('majorName','className','domicile')
+    list_filter = ('collegeName','className','domicile')
     list_per_page = 20
     resource_class = StuResource
 
