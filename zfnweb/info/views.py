@@ -607,7 +607,7 @@ def get_grade(request):
                     if int(xh[0:2]) > int(myconfig.nGrade[2:4]):
                         return HttpResponse(json.dumps({'err':"当前你还没有任何成绩信息"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                     else:
-                        return HttpResponse(json.dumps({'err':"看起来你这学期好像还没有出成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                        return HttpResponse(json.dumps({'err':"还没有" + year+"-"+term + "学期的成绩，点击顶栏也看看以前的吧~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
                 elif grade.get("err") == "Error Term":
                     return HttpResponse(json.dumps({'err':"网络问题，请重新访问请求课程"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
             Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa") if grade.get("gpa")!="" or grade.get("gpa") is not None else "init")
@@ -1288,7 +1288,7 @@ def freetime(request):
     weeks = request.GET.get("weeks") if request.GET.get("weeks") is not None else myconfig.nowweek
     mode = request.GET.get("mode") if request.GET.get("mode") is not None else "1"
     datafile = 'data/' + xh[0:2] + "/" + xh + "/" + "Schedules-" + term + ".json"
-    fullSections = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    fullSections = [1,2,3,4,5,6,7,8,9,10,11,12]
     if os.path.exists(datafile):
         with open(datafile,mode='r',encoding='UTF-8') as f:
             schedule_data = json.loads(f.read())
@@ -1315,5 +1315,5 @@ def freetime(request):
         return HttpResponse(json.dumps(res, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     else:
-        return HttpResponse(json.dumps({"err":"这位同学暂时没有在小程序查看过该学期课表"}, ensure_ascii=False),
+        return HttpResponse(json.dumps({"err":"原因：1.该同学没有使用“西院助手”小程序。2.没有在小程序请求过该学期课程信息。3.还未到该学期"}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
