@@ -924,9 +924,11 @@ def get_position(request):
         stu = Students.objects.get(studentId=int(xh))
         majorName = stu.majorName
         className = stu.className
+        majorNum = Students.objects.filter(majorName=majorName,studentId__startswith=int(xh[0:2])).all().count()
+        classNum = Students.objects.filter(className=className).all().count()
         if stu.gpa == "init":
             gpa = "init"
-            return HttpResponse(json.dumps({'gpa': gpa,'majorCount':0,'classCount':0}, ensure_ascii=False),
+            return HttpResponse(json.dumps({'gpa': gpa,'majorCount':0,'classCount':0,'majorNum':majorNum,'classNum':classNum,'nMajorCount':"init",'nClassCount':"init"}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
         else:
             gpa = float(stu.gpa)
@@ -950,8 +952,6 @@ def get_position(request):
                 break
             else:
                 classCount += 1
-        majorNum = Students.objects.filter(majorName=majorName,studentId__startswith=int(xh[0:2])).all().count()
-        classNum = Students.objects.filter(className=className).all().count()
         return HttpResponse(json.dumps({'gpa': gpa,'majorCount':majorCount,'nMajorCount':nMajorCount,'nClassCount':nClassCount,'classCount':classCount,'majorNum':majorNum,'classNum':classNum}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
