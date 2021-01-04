@@ -519,7 +519,7 @@ def get_study(request):
                 # return get_study(request)
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
-            elif "list index out of range" in str(e) and int(xh[0:2]) > int(myconfig.nGrade[2:4]):
+            elif "list index out of range" in str(e) and int(xh[0:2]) >= int(myconfig.nGrade[2:4]):
                 return HttpResponse(json.dumps({'err':'暂无学业信息'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
@@ -582,9 +582,18 @@ def get_grade(request):
             cache = cacheData(xh, filename)
             if cache is not None:
                 # print('cache')
-                print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
-                return HttpResponse(json.dumps(cache, ensure_ascii=False),
-                                    content_type="application/json,charset=utf-8")
+                def isLast(ny,nt,y,t):
+                    ny = (myconfig.nGrade)[0:4]
+                    nt = (myconfig.nGrade)[4:5]
+                    if str(year) == ny:
+                        pass
+                    else:
+                        if int(nt)-1 == 0 and int(term)==2:
+                            pass
+                        else:
+                            print('【%s】查看了%s-%s的成绩缓存' % (stu.name, year, term))
+                            return HttpResponse(json.dumps(cache, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
             else:
                 pass
         try:

@@ -12,14 +12,6 @@ from mp.models import Config
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
 base_url = config["base_url"]
-myconfig = Config.objects.all().first()
-year = (myconfig.nChoose)[0:4]
-term = (myconfig.nChoose)[4:]
-if term == "1":
-    term = "3"
-elif term == "2":
-    term = "12"
-
 
 def index():
     return HttpResponse('choose_index here')
@@ -106,6 +98,12 @@ def update_cookies(xh, pswd):
 def get_choosed(request):
     """已选课程"""
     myconfig = Config.objects.all().first()
+    year = (myconfig.nChoose)[0:4]
+    term = (myconfig.nChoose)[4:]
+    if term == "1":
+        term = "3"
+    elif term == "2":
+        term = "12"
     if myconfig.apichange:
         data = {
             'xh':request.POST.get("xh"),
@@ -208,6 +206,12 @@ def get_choosed(request):
 def get_bkk_list(request):
     """板块课（通识选修课）"""
     myconfig = Config.objects.all().first()
+    year = (myconfig.nChoose)[0:4]
+    term = (myconfig.nChoose)[4:]
+    if term == "1":
+        term = "3"
+    elif term == "2":
+        term = "12"
     if myconfig.apichange:
         data = {
             'xh':request.POST.get("xh"),
@@ -278,6 +282,12 @@ def get_bkk_list(request):
 def choose(request):
     """选课"""
     myconfig = Config.objects.all().first()
+    year = (myconfig.nChoose)[0:4]
+    term = (myconfig.nChoose)[4:]
+    if term == "1":
+        term = "3"
+    elif term == "2":
+        term = "12"
     if myconfig.apichange:
         data = {
             'xh':request.POST.get("xh"),
@@ -330,6 +340,12 @@ def choose(request):
 def cancel(request):
     """取消选课"""
     myconfig = Config.objects.all().first()
+    year = (myconfig.nChoose)[0:4]
+    term = (myconfig.nChoose)[4:]
+    if term == "1":
+        term = "3"
+    elif term == "2":
+        term = "12"
     if myconfig.apichange:
         data = {
             'xh':request.POST.get("xh"),

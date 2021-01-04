@@ -199,7 +199,11 @@ class GetInfo(object):
         allc_str = []
         for allc in soup.find_all('font', size=re.compile('2px')):
             allc_str.append(allc.get_text())
-        gpa = float(allc_str[2])
+        try:
+            gpa = float(allc_str[2])
+        except Exception as e:
+            if "list index" in str(e):
+                return "init"
         try:
             if gpa != "":
                 return gpa
