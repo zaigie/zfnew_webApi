@@ -6,6 +6,7 @@ django-extensions==2.2.6
 django-werkzeug-debugger-runserver==0.3.1
 django-cors-headers==3.3.0
 django-import-export==2.3.0
+django-simpleui==2021.1.1
 simpleui==4.0.2
 pymysql==0.9.3
 openpyxl==2.6.4
