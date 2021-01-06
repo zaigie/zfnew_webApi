@@ -41,7 +41,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'simplepro',
     'simpleui',
     'import_export',
     'django.contrib.admin',
@@ -58,7 +57,6 @@ INSTALLED_APPS = [
     'werkzeug_debugger_runserver',
     'django_extensions',
     'corsheaders',
-    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -69,8 +67,7 @@ MIDDLEWARE = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simplepro.middlewares.SimpleMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'zfnweb.urls'
