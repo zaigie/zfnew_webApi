@@ -6,13 +6,12 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import datetime
-
-with open('mpconfig.json', mode='r', encoding='utf-8') as m:
-    mpconfig = json.loads(m.read())
+from mp.models import Config
 
 def get_one(request):
-    if mpconfig["apichange"]:
-        res = requests.get(url=mpconfig["otherapi"]+"/one")
+    myconfig = Config.objects.all().first()
+    if myconfig.apichange:
+        res = requests.get(url=myconfig.otherapi+"/one")
         return HttpResponse(json.dumps(json.loads(res.text), ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
     with open('one.txt', mode='r', encoding='utf-8') as f:
