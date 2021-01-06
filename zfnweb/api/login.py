@@ -53,12 +53,12 @@ class Login(object):
         """登陆"""
         try:
             # print("开始...")
-            req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=(5, 20))
+            req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=3)
             # print('加载登录页面...')
             soup = BeautifulSoup(req.text, 'lxml')
             tokens = soup.find(id='csrftoken').get("value")
             # print('获取token...')
-            res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=(5, 20)).json()
+            res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=3).json()
             # print('获取公钥...')
             n = res['modulus']
             e = res['exponent']
@@ -69,7 +69,7 @@ class Login(object):
                           'yhm': sid,
                           'mm': hmm}
             self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data, proxies=self.proxies,
-                                      timeout=(5, 20))
+                                      timeout=3)
             # print('登录请求...')
             ppot = r'用户名或密码不正确'
             if re.findall(ppot, self.req.text):

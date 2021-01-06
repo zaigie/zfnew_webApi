@@ -135,7 +135,7 @@ class GetInfo(object):
         """获取个人信息"""
         url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
         try:
-            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=3)
         except exceptions.Timeout as e:
             return {'err': 'Connect Timeout'}
         jres = res.json()
@@ -168,7 +168,7 @@ class GetInfo(object):
         """获取当前班级"""
         url = parse.urljoin(self.base_url, '/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801')
         try:
-            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+            res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=3)
         except exceptions.Timeout as e:
             return {'err': 'Connect Timeout'}
         jres = res.json()
@@ -177,7 +177,7 @@ class GetInfo(object):
     def cat_by_courseid(self, courseid):
         """根据课程号获取类别"""
         url = parse.urljoin(self.base_url, '/jxjhgl/common_cxKcJbxx.html?id='+ courseid)
-        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=(5, 10))
+        res = requests.get(url, headers=self.headers, cookies=self.cookies, proxies=self.proxies, timeout=3)
         soup = BeautifulSoup(res.text, 'html.parser')
         th_list = soup.find_all('th')
         data_list = []
@@ -193,7 +193,7 @@ class GetInfo(object):
     def gpa_only(self):
         url_main = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default')
         mainr = requests.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
-                            timeout=(5, 10))
+                            timeout=3)
         mainr.encoding = mainr.apparent_encoding
         soup = BeautifulSoup(mainr.text, 'html.parser')
         allc_str = []
@@ -221,7 +221,7 @@ class GetInfo(object):
         url_info = parse.urljoin(self.base_url, '/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515')
         try:
             mainr = sessions.get(url_main, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
-                                 timeout=(5, 10), stream=True)
+                                 timeout=3, stream=True)
         except exceptions.Timeout as e:
             return {'err': 'Connect Timeout'}
         mainr.encoding = mainr.apparent_encoding
@@ -270,13 +270,13 @@ class GetInfo(object):
             qtid = idList2[0]
 
         res_ts = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tsid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10), stream=True)
+                               proxies=self.proxies, timeout=3, stream=True)
         res_tz = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': tzid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10), stream=True)
+                               proxies=self.proxies, timeout=3, stream=True)
         res_zy = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': zyid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10), stream=True)
+                               proxies=self.proxies, timeout=3, stream=True)
         res_qt = sessions.post(url_info, headers=self.headers, data={'xfyqjd_id': qtid}, cookies=self.cookies,
-                               proxies=self.proxies, timeout=(5, 10), stream=True)
+                               proxies=self.proxies, timeout=3, stream=True)
 
         ts_point_find = re.findall(r"通识教育&nbsp;要求学分:(\d+\.\d+)&nbsp;获得学分:(\d+\.\d+)&nbsp;&nbsp;未获得学分:(\d+\.\d+)&nbsp",
                                    str(soup))
@@ -388,7 +388,7 @@ class GetInfo(object):
         }
         try:
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
-                                timeout=(5, 10))
+                                timeout=3)
         except exceptions.Timeout as e:
             return {'err': 'Connect Timeout'}
         jres = res.json()
@@ -419,7 +419,7 @@ class GetInfo(object):
         }
         try:
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
-                                timeout=(5, 10))
+                                timeout=3)
         except exceptions.Timeout as e:
             return {'err': 'Connect Timeout'}
         jres = res.json()
@@ -516,7 +516,7 @@ class GetInfo(object):
         }
         try:
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
-                                timeout=(5, 10))
+                                timeout=3)
         except exceptions.Timeout as e:
             return {'err':'Connect Timeout'}
         jres = res.json()
@@ -562,7 +562,7 @@ class GetInfo(object):
         }
         try:
             res = requests.post(url, headers=self.headers, data=data, cookies=self.cookies, proxies=self.proxies,
-                                timeout=(5, 10))
+                                timeout=3)
         except exceptions.Timeout as e:
             return {'err':'Connect Timeout'}
         jres = res.json()

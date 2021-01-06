@@ -40,7 +40,7 @@ class Xuanke(object):
             }
             try:
                 res = requests.post(choosed_url, data=data, headers=self.headers, cookies=self.cookies,
-                                    proxies=self.proxies, timeout=(5, 15))
+                                    proxies=self.proxies, timeout=3)
             except exceptions.Timeout as e:
                 return {'err': 'Connect Timeout'}
             jres = res.json()
@@ -75,7 +75,7 @@ class Xuanke(object):
             sessions = requests.Session()
             url_data1 = parse.urljoin(self.base_url, '/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default')
             data1 = sessions.get(url_data1, headers=self.headers, cookies=self.cookies, proxies=self.proxies,
-                                 timeout=(5, 15))
+                                 timeout=3)
             data1.encoding = data1.apparent_encoding
             soup = BeautifulSoup(data1.text, 'html.parser')
 
@@ -112,7 +112,7 @@ class Xuanke(object):
                 'kspage': '0'
             }
             data2 = sessions.post(url_data2, headers=self.headers, data=data2_data, cookies=self.cookies,
-                                  proxies=self.proxies, timeout=(5, 15))
+                                  proxies=self.proxies, timeout=3)
             data2.encoding = data2.apparent_encoding
             soup2 = BeautifulSoup(data2.text, 'html.parser')
             data2_list = []
@@ -147,7 +147,7 @@ class Xuanke(object):
                 'jspage': '10'
             }
             kch_res = sessions.post(url_kch, headers=self.headers, data=kch_data, cookies=self.cookies,
-                                    proxies=self.proxies, timeout=(5, 15))
+                                    proxies=self.proxies, timeout=3)
             jkch_res = kch_res.json()
             bkk_data = {
                 'bklx_id': head_data["bklx_id"],
@@ -169,7 +169,7 @@ class Xuanke(object):
                 'zyh_id': head_data["zyh_id"]
             }
             bkk_res = sessions.post(url_bkk, headers=self.headers, data=bkk_data, cookies=self.cookies,
-                                    proxies=self.proxies, timeout=(5, 15))
+                                    proxies=self.proxies, timeout=3)
             jbkk_res = bkk_res.json()
             if bkk != '3' and (len(jkch_res["tmpList"]) != len(jbkk_res)):
                 res_dict = {'err': 'Error Length'}
@@ -224,7 +224,7 @@ class Xuanke(object):
             # 'xklc': '1',
         }
         isOk = sess.post(url_choose, headers=self.headers, data=choose_data, cookies=self.cookies, proxies=self.proxies,
-                         timeout=(5, 15))
+                         timeout=3)
         result = isOk.json()
         return result
 
@@ -238,6 +238,6 @@ class Xuanke(object):
             'xkxqm': self.nowterm,
         }
         isOk = sess.post(url_cancel, headers=self.headers, data=cancel_data, cookies=self.cookies, proxies=self.proxies,
-                         timeout=(5, 15))
+                         timeout=3)
         result = re.findall(r"(\d+)", isOk.text)[0]
         return result
