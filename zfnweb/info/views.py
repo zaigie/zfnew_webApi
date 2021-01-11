@@ -227,7 +227,9 @@ def get_pinfo(request):
                                         content_type="application/json,charset=utf-8")
             except Exception as e:
                 if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                    return get_pinfo(request)
+                    # return get_pinfo(request)
+                    return HttpResponse(json.dumps({'err':"请重新刷新一下"}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
                 else:
                     content = ('【%s】[%s]登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
@@ -282,7 +284,9 @@ def get_pinfo(request):
             except Exception as e:
                 # print(e)
                 if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                    return get_pinfo(request)
+                    # return get_pinfo(request)
+                    return HttpResponse(json.dumps({'err':"请重新刷新一下"}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
                 else:
                     content = ('【%s】[%s]第一次登录时出错' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
                     writeLog(content)
@@ -422,7 +426,9 @@ def get_message(request):
             return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                return get_message(request)
+                # return get_message(request)
+                return HttpResponse(json.dumps({'err':"请重新刷新一下"}, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问消息出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -634,7 +640,9 @@ def get_grade(request):
         except Exception as e:
             # print(e)
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                return get_grade(request)
+                # return get_grade(request)
+                return HttpResponse(json.dumps({'err':"请重新刷新一下"}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问成绩出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
@@ -840,7 +848,9 @@ def get_schedule(request):
             return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
         except Exception as e:
             if "Connection broken" in str(e) or 'ECONNRESET' in str(e):
-                return get_schedule(request)
+                # return get_schedule(request)
+                return HttpResponse(json.dumps({'err':"请重新刷新一下"}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
