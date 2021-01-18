@@ -155,6 +155,10 @@ def writeToExcel(json,saveUrl):
                         sheet1.cell(row=items+2,column=cs+3,value=int(res[items]["grades"][n]["g"])).alignment = Alignment(horizontal='center', vertical='center')
                     except:
                         sheet1.cell(row=items+2,column=cs+3,value=res[items]["grades"][n]["g"]).alignment = Alignment(horizontal='center', vertical='center')
+    sheet1.merge_cells(start_row=len(res)+2, start_column=1, end_row=len(res)+5, end_column=6)
+    sheet1.cell(row=len(res)+2,column=1,value="1.表中数据来源须该班同学使用“西院助手”小程序访问并刷新该学期成绩\n2.留空为该同学还未刷新到最新，未使用小程序不会显示该同学行\n3.该表成绩为教务系统获取成绩，真实有效").alignment = Alignment(horizontal='center', vertical='center')
+    sheet1.merge_cells(start_row=len(res)+2, start_column=7, end_row=len(res)+5, end_column=10)
+    sheet1.cell(row=len(res)+2,column=7,value="生成时间：%s" % time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))).alignment = Alignment(horizontal='center', vertical='center')
     excel.save(saveUrl)
 
 def get_pinfo(request):
