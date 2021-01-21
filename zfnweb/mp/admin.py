@@ -52,6 +52,7 @@ class ConfigAdmin(admin.ModelAdmin):
         ("开关", {'fields':['maintenance','autoCalWeeks','choose','vacation','apichange']}),
         ("信息设置", {'fields':['otherapi','version']}),
     )
+    list_editable = ('version','nowweek','startDate','vacation','choose','nChoose','nGrade','nSchedule','autoCalWeeks','maintenance')
     list_display = ('version','nowweek','startDate','vacation','choose','nChoose','nGrade','nSchedule','autoCalWeeks','maintenance')
     def has_add_permission(self, request):
         return False

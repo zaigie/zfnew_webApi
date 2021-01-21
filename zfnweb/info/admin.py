@@ -15,6 +15,12 @@ class StuResource(resources.ModelResource):
         fields = ('studentId','name','sex','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
         export_order = ('studentId','name','sex','collegeName','majorName','className','email','phoneNumber','idNumber','graduationSchool')
 
+class TeaResource(resources.ModelResource):
+    class Meta:
+        model = Teachers
+        # fields = ('name','sex','collegeName','title','phoneNumber','QQ','wechat')
+        export_order = ('id','name','sex','collegeName','title','phoneNumber','QQ','wechat')
+
 class StuAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     ordering = ('-updateTime',)
     fieldsets = (
@@ -30,7 +36,7 @@ class StuAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     list_per_page = 20
     resource_class = StuResource
 
-class TeaAdmin(admin.ModelAdmin):
+class TeaAdmin(ImportExportModelAdmin,ImportExportActionModelAdmin):
     fieldsets = (
         ("基本信息", {'fields': ['name', 'sex', 'collegeName', 'title']}),
         ("联系方式", {'fields':['phoneNumber', 'QQ', 'wechat']}),
@@ -39,6 +45,7 @@ class TeaAdmin(admin.ModelAdmin):
     search_fields = ('name', 'collegeName', 'phoneNumber')
     list_filter = ('name', 'collegeName', 'phoneNumber')
     list_per_page = 20
+    resource_class = TeaResource
 
 admin.site.register(Students, StuAdmin)
 admin.site.register(Teachers, TeaAdmin)
