@@ -240,6 +240,7 @@ def get_bkk_list(request):
         else:
             stu = Students.objects.get(studentId=int(xh))
         try:
+            bkk = "1" if bkk=="2" else "2"
             startTime = time.time()
             print('【%s】查看了板块课' % stu.name)
             JSESSIONID = str(stu.JSESSIONID)
