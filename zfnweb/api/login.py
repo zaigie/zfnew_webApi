@@ -33,6 +33,7 @@ class Login(object):
         self.base_url = base_url
         self.key_url = parse.urljoin(base_url, '/xtgl/login_getPublicKey.html')
         self.login_url = parse.urljoin(base_url, '/xtgl/login_slogin.html')
+        self.kaptcha_url = parse.urljoin(base_url, '/kaptcha')
         self.headers = requests.utils.default_headers()
         self.headers["Referer"] = self.login_url
         self.headers["User-Agent"] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
@@ -49,26 +50,43 @@ class Login(object):
                 'http': config["proxy"]
             }
 
-    def login(self, sid, password):
+    def login_page(self):
+        """登陆网页"""
+        # print("开始...")
+        req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=3)
+        # print('加载登录页面...')
+        soup = BeautifulSoup(req.text, 'lxml')
+        tokens = soup.find(id='csrftoken').get("value")
+        nowCookies = self.sess.cookies.get_dict()
+        kaptcha = self.sess.get(self.kaptcha_url,headers=self.headers,timeout=3)
+        kaptcha_pic = base64.b64encode(kaptcha.content).decode()
+        res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=3).json()
+        # print('获取公钥...')
+        n = res['modulus']
+        e = res['exponent']
+        return {'tokens':tokens,'cookies':nowCookies,'n':n,'e':e,'kaptcha':kaptcha_pic}
+
+    def login(self,cookies, sid, password,tokens,n,e,yzm):
         """登陆"""
         try:
-            # print("开始...")
-            req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=3)
-            # print('加载登录页面...')
-            soup = BeautifulSoup(req.text, 'lxml')
-            tokens = soup.find(id='csrftoken').get("value")
-            # print('获取token...')
-            res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=3).json()
-            # print('获取公钥...')
-            n = res['modulus']
-            e = res['exponent']
+            # # print("开始...")
+            # req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=3)
+            # # print('加载登录页面...')
+            # soup = BeautifulSoup(req.text, 'lxml')
+            # tokens = soup.find(id='csrftoken').get("value")
+            # # print('获取token...')
+            # res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=3).json()
+            # # print('获取公钥...')
+            # n = res['modulus']
+            # e = res['exponent']
             hmm = self.get_rsa(password, n, e)
             # print('解密编码...')
 
             login_data = {'csrftoken': tokens,
                           'yhm': sid,
-                          'mm': hmm}
-            self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data, proxies=self.proxies,
+                          'mm': hmm,
+                          'yzm': yzm}
+            self.req = self.sess.post(self.login_url, headers=self.headers, cookies=cookies, data=login_data, proxies=self.proxies,
                                       timeout=3)
             # print('登录请求...')
             ppot = r'用户名或密码不正确'
@@ -78,10 +96,15 @@ class Login(object):
             self.cookies = self.sess.cookies
             self.cookies_str = '; '.join([item.name + '=' + item.value for item in self.cookies])
             self.runcode = 1
+            # 当验证码错误时
+            try:
+                requests.utils.dict_from_cookiejar(self.cookies)["JSESSIONID"]
+            except Exception as e:
+                if "JSESSIONID" in str(e):
+                    self.runcode = 4
+                    return {'err': 'Kaptcha Error'}
         except exceptions.Timeout:
             # requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录超时&desp=' + str(e))
-            content = ('【%s】[%s]登录超时！' % (datetime.datetime.now().strftime('%H:%M:%S'), sid))
-            writeLog(content)
             self.runcode = 3
             return {'err': 'Connect Timeout'}
 

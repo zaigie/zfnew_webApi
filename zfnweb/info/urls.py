@@ -27,6 +27,7 @@ urlpatterns = [
     path('award',views.award),
     path('maps',views.get_maps),
     path('monitor',views.isMonitor),
-    path('freetime',views.freetime)
-    # path('update',views.update_cookies)
+    path('freetime',views.freetime),
+    path('kaptcha',views.get_kaptcha_net),
+    path('update',views.update_cookies)
 ]
