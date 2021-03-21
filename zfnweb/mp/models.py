@@ -29,6 +29,7 @@ class Config(models.Model):
     maintenance = models.BooleanField(verbose_name="调试模式")
     autoCalWeeks = models.BooleanField(verbose_name="自动计算周数",default=True)
     startDate = models.DateField(verbose_name="学期开始日期",default=datetime.date.today)
+    isKaptcha = models.BooleanField(verbose_name="开启验证码",default=False)
     # jwxtbad = models.BooleanField(verbose_name="教务系统")
     # gradebad = models.BooleanField(verbose_name="成绩接口")
     # studybad = models.BooleanField(verbose_name="学业接口")

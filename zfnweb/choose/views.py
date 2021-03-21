@@ -8,6 +8,7 @@ from api import Xuanke, Login
 from django.http import HttpResponse
 from info.models import Students
 from mp.models import Config
+from info.views import update_cookies
 
 with open('config.json', mode='r', encoding='utf-8') as f:
     config = json.loads(f.read())
@@ -69,54 +70,6 @@ def get_kaptcha(xh):
     kaptcha = storage["kaptcha"]
     return HttpResponse(json.dumps({'kaptcha':kaptcha}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
-
-def update_cookies(xh, pswd, kaptcha):
-    try:
-        stu = Students.objects.get(studentId=int(xh))
-        startTime = time.time()
-        content = ('【%s】[%s]更新cookies' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
-        writeLog(content)
-        # print('原cookies：')
-        # print('{JSESSIONID:%s,route:%s}' % (stu.JSESSIONID,stu.route))
-        lgn = Login(base_url=base_url)
-        storage = login_pages_get(xh)
-        if storage is None:
-            return get_kaptcha(xh)
-        lgn.login(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
-        if lgn.runcode == 1:
-            cookies = lgn.cookies
-            # person = Xuanke(base_url=base_url, cookies=cookies)
-            NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
-            nroute = storage["cookies"]["route"]
-            updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            Students.objects.filter(studentId=int(xh)).update(JSESSIONID=NJSESSIONID, route=nroute,
-                                                              updateTime=updateTime)
-            endTime = time.time()
-            spendTime = endTime - startTime
-            # print('新cookies:')
-            content = ('【%s】更新cookies成功，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), spendTime))
-            writeLog(content)
-            # print(requests.utils.dict_from_cookiejar(cookies))
-            return cookies
-        elif lgn.runcode == 4:
-            return HttpResponse(json.dumps({'err':'验证码错误'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-        else:
-            content = ('【%s】[%s]更新cookies时网络或其他错误！' % (datetime.datetime.now().strftime('%H:%M:%S'), xh))
-            writeLog(content)
-            return HttpResponse(json.dumps({'err':'网络或token问题'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-    except Exception as e:
-        ServerChan = config["ServerChan"]
-        text = "更新cookies未知错误"
-        if ServerChan == "none":
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-        else:
-            requests.get(ServerChan + 'text=' + text + '&desp=' + str(e) + '\n' + str(xh) + '\n' + str(pswd))
-            return HttpResponse(json.dumps({'err':'更新cookies未知错误'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
-
 
 def get_choosed(request):
     """已选课程"""
@@ -181,16 +134,18 @@ def get_choosed(request):
             if choosed is None:
                 content = ('【%s】[%s]访问已选课程出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
                 writeLog(content)
-                # sta = update_cookies(xh, pswd)
-                # person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
-                # nchoosed = person.get_choosed()
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
+                    nchoosed = person.get_choosed()
 
-                # filename = ('Choosed')
-                # newData(xh, filename, json.dumps(nchoosed, ensure_ascii=False))
+                    filename = ('Choosed')
+                    newData(xh, filename, json.dumps(nchoosed, ensure_ascii=False))
 
-                # return HttpResponse(json.dumps(nchoosed, ensure_ascii=False),
-                #                     content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                    return HttpResponse(json.dumps(nchoosed, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             elif choosed.get('err'):
                 ServerChan = config["ServerChan"]
                 text = choosed.get('err')
@@ -295,11 +250,13 @@ def get_bkk_list(request):
             print(e)
             content = ('【%s】[%s]访问板块课出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
             writeLog(content)
-            # sta = update_cookies(xh, pswd)
-            # person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
-            # bkk_list = person.get_bkk_list(bkk)
-            # return HttpResponse(json.dumps(bkk_list, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            return get_kaptcha(xh)
+            if myconfig.isKaptcha:
+                return get_kaptcha(xh)
+            else:
+                sta = update_cookies(request)
+                person = Xuanke(base_url=base_url, cookies=sta, year=year, term=term)
+                bkk_list = person.get_bkk_list(bkk)
+                return HttpResponse(json.dumps(bkk_list, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")

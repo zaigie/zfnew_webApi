@@ -50,6 +50,42 @@ class Login(object):
                 'http': config["proxy"]
             }
 
+    def login(self, sid, password):
+        """登陆"""
+        try:
+            # print("开始...")
+            req = self.sess.get(self.login_url, headers=self.headers, proxies=self.proxies, timeout=3)
+            # print('加载登录页面...')
+            soup = BeautifulSoup(req.text, 'lxml')
+            tokens = soup.find(id='csrftoken').get("value")
+            # print('获取token...')
+            res = self.sess.get(self.key_url, headers=self.headers, proxies=self.proxies, timeout=3).json()
+            # print('获取公钥...')
+            n = res['modulus']
+            e = res['exponent']
+            hmm = self.get_rsa(password, n, e)
+            # print('解密编码...')
+
+            login_data = {'csrftoken': tokens,
+                          'yhm': sid,
+                          'mm': hmm}
+            self.req = self.sess.post(self.login_url, headers=self.headers, data=login_data, proxies=self.proxies,
+                                      timeout=3)
+            # print('登录请求...')
+            ppot = r'用户名或密码不正确'
+            if re.findall(ppot, self.req.text):
+                self.runcode = 2
+                return self.runcode
+            self.cookies = self.sess.cookies
+            self.cookies_str = '; '.join([item.name + '=' + item.value for item in self.cookies])
+            self.runcode = 1
+        except exceptions.Timeout:
+            # requests.get('https://sc.ftqq.com/SCU48704T2fe1a554a1d0472f34720486b88fc76e5cb0a8960e8be.send?text=登录超时&desp=' + str(e))
+            content = ('【%s】[%s]登录超时！' % (datetime.datetime.now().strftime('%H:%M:%S'), sid))
+            writeLog(content)
+            self.runcode = 3
+            return {'err': 'Connect Timeout'}
+
     def login_page(self):
         """登陆网页"""
         # print("开始...")
@@ -66,7 +102,7 @@ class Login(object):
         e = res['exponent']
         return {'tokens':tokens,'cookies':nowCookies,'n':n,'e':e,'kaptcha':kaptcha_pic}
 
-    def login(self,cookies, sid, password,tokens,n,e,yzm):
+    def login_kaptcha(self,cookies, sid, password,tokens,n,e,yzm):
         """登陆"""
         try:
             # # print("开始...")

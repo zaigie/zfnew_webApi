@@ -49,7 +49,7 @@ class AboutAdmin(admin.ModelAdmin):
 class ConfigAdmin(admin.ModelAdmin):
     fieldsets = (
         ("学期/周", {'fields': ['nChoose', 'nGrade','nSchedule','nowweek','startDate']}),
-        ("开关", {'fields':['maintenance','autoCalWeeks','choose','vacation','apichange']}),
+        ("开关", {'fields':['maintenance','isKaptcha','autoCalWeeks','choose','vacation','apichange']}),
         ("信息设置", {'fields':['otherapi','version']}),
     )
     list_editable = ('vacation','choose','autoCalWeeks','maintenance','nChoose', 'nGrade','nSchedule')

@@ -131,16 +131,21 @@ def update_cookies(request):
         # print('原cookies：')
         # print('{JSESSIONID:%s,route:%s}' % (stu.JSESSIONID,stu.route))
         lgn = Login(base_url=base_url)
-        storage = login_pages_get(xh)
-        if storage is None:
-            return get_kaptcha(xh)
-        lgn.login(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+        if myconfig.isKaptcha:
+            storage = login_pages_get(xh)
+            if storage is None:
+                return get_kaptcha(xh)
+            lgn.login_kaptcha(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+        else:
+            lgn.login(xh, pswd)
         if lgn.runcode == 1:
             cookies = lgn.cookies
             # person = GetInfo(base_url=base_url, cookies=cookies)
             NJSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
-            # nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
-            nroute = storage["cookies"]["route"]
+            if myconfig.isKaptcha:
+                nroute = storage["cookies"]["route"]
+            else:
+                nroute = requests.utils.dict_from_cookiejar(cookies)["route"]
             ncookies = requests.utils.cookiejar_from_dict({"JSESSIONID":NJSESSIONID,"route":nroute})
             updateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             refreshTimes += 1
@@ -159,9 +164,11 @@ def update_cookies(request):
             filename = ('Pinfo')
             newData(xh, filename, json.dumps(pinfo, ensure_ascii=False))
             # print(requests.utils.dict_from_cookiejar(cookies))
-            # return cookies
-            return HttpResponse(json.dumps({'success':'更新cookies成功'}, ensure_ascii=False),
-                                content_type="application/json,charset=utf-8")
+            if myconfig.isKaptcha:
+                return HttpResponse(json.dumps({'success':'更新cookies成功'}, ensure_ascii=False),
+                                    content_type="application/json,charset=utf-8")
+            else:
+                return cookies
         elif lgn.runcode == 4:
             return HttpResponse(json.dumps({'err':'验证码错误'}, ensure_ascii=False),
                                 content_type="application/json,charset=utf-8")
@@ -238,14 +245,20 @@ def get_pinfo(request):
             try:
                 startTime = time.time()
                 lgn = Login(base_url=base_url)
-                storage = login_pages_get(xh)
-                if storage is None:     #如果没有pages数据，则重新请求，且返回验证码
-                    return get_kaptcha(xh)
-                lgn.login(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+                if myconfig.isKaptcha:
+                    storage = login_pages_get(xh)
+                    if storage is None:
+                        return get_kaptcha(xh)
+                    lgn.login_kaptcha(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+                else:
+                    lgn.login(xh, pswd)
                 if lgn.runcode == 1:
                     cookies = lgn.cookies
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
-                    route = storage["cookies"]["route"]
+                    if myconfig.isKaptcha:
+                        route = storage["cookies"]["route"]
+                    else:
+                        route  = requests.utils.dict_from_cookiejar(cookies)["route"]
                     ncookies = requests.utils.cookiejar_from_dict({"JSESSIONID":JSESSIONID,"route":route})
                     person = GetInfo(base_url=base_url, cookies=ncookies)
                     pinfo = person.get_pinfo()
@@ -298,14 +311,20 @@ def get_pinfo(request):
             try:
                 startTime = time.time()
                 lgn = Login(base_url=base_url)
-                storage = login_pages_get(xh)
-                if storage is None:     #如果没有pages数据，则重新请求，且返回验证码
-                    return get_kaptcha(xh)
-                lgn.login(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+                if myconfig.isKaptcha:
+                    storage = login_pages_get(xh)
+                    if storage is None:
+                        return get_kaptcha(xh)
+                    lgn.login_kaptcha(storage["cookies"],xh, pswd,storage["tokens"],storage["n"],storage["e"],kaptcha)
+                else:
+                    lgn.login(xh, pswd)
                 if lgn.runcode == 1:
                     cookies = lgn.cookies
                     JSESSIONID = requests.utils.dict_from_cookiejar(cookies)["JSESSIONID"]
-                    route = storage["cookies"]["route"]
+                    if myconfig.isKaptcha:
+                        route = storage["cookies"]["route"]
+                    else:
+                        route = requests.utils.dict_from_cookiejar(cookies)["route"]
                     ncookies = requests.utils.cookiejar_from_dict({"JSESSIONID":JSESSIONID,"route":route})
                     person = GetInfo(base_url=base_url, cookies=ncookies)
                     pinfo = person.get_pinfo()
@@ -432,14 +451,16 @@ def refresh_class(request):
             if 'Expecting value' not in str(e):
                 traceback.print_exc()
                 return mywarn("更新班级错误",str(e),xh,pswd)
-            # sta = update_cookies(xh, pswd)
-            # person = GetInfo(base_url=base_url, cookies=sta)
-            # nowClass = person.get_now_class()
-            # if stu.className == nowClass:
-            #     return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            # Students.objects.filter(studentId=int(xh)).update(className=nowClass)
-            # return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
-            return get_kaptcha(xh)
+            if myconfig.isKaptcha:
+                return get_kaptcha(xh)
+            else:
+                sta = update_cookies(request)
+                person = GetInfo(base_url=base_url, cookies=sta)
+                nowClass = person.get_now_class()
+                if stu.className == nowClass:
+                    return HttpResponse(json.dumps({'err':"你的班级并未发生变化~"}, ensure_ascii=False), content_type="application/json,charset=utf-8")
+                Students.objects.filter(studentId=int(xh)).update(className=nowClass)
+                return HttpResponse(json.dumps({'success':"你已成功变更到【"+ nowClass + "】!",'class':nowClass}, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -505,11 +526,13 @@ def get_message(request):
                 if str(e) != 'Expecting value: line 6 column 1 (char 11)':
                     traceback.print_exc()
                     return mywarn("消息请求错误",str(e),xh,pswd)
-                # sta = update_cookies(xh, pswd)
-                # person = GetInfo(base_url=base_url, cookies=sta)
-                # message = person.get_message()
-                # return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = GetInfo(base_url=base_url, cookies=sta)
+                    message = person.get_message()
+                    return HttpResponse(json.dumps(message, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -570,16 +593,18 @@ def get_study(request):
             person = GetInfo(base_url=base_url, cookies=cookies)
             study = person.get_study(xh)
             if study.get("err") == 'Connect Timeout':
-                # sta = update_cookies(xh, pswd)
-                # person = GetInfo(base_url=base_url, cookies=sta)
-                # study = person.get_study(xh)
-                # gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
-                # Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
-                # filename = ('Study')
-                # newData(xh, filename, json.dumps(study, ensure_ascii=False))
-                # return HttpResponse(json.dumps(study, ensure_ascii=False),
-                #                     content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = GetInfo(base_url=base_url, cookies=sta)
+                    study = person.get_study(xh)
+                    gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
+                    Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
+                    filename = ('Study')
+                    newData(xh, filename, json.dumps(study, ensure_ascii=False))
+                    return HttpResponse(json.dumps(study, ensure_ascii=False),
+                                        content_type="application/json,charset=utf-8")
             endTime = time.time()
             spendTime = endTime - startTime
             content = ('【%s】[%s]访问了学业情况，耗时%.2fs' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name, spendTime))
@@ -603,15 +628,17 @@ def get_study(request):
                 if str(e) != 'list index out of range':
                     traceback.print_exc()
                     return mywarn("学业请求错误",str(e),xh,pswd)
-                # sta = update_cookies(xh, pswd)
-                # person = GetInfo(base_url=base_url, cookies=sta)
-                # study = person.get_study(xh)
-                # gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
-                # Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
-                # filename = ('Study')
-                # newData(xh, filename, json.dumps(study, ensure_ascii=False))
-                # return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = GetInfo(base_url=base_url, cookies=sta)
+                    study = person.get_study(xh)
+                    gpa = str(study["gpa"]) if str(study["gpa"]) !="" or str(study["gpa"]) is not None else "init"
+                    Students.objects.filter(studentId=int(xh)).update(gpa=gpa)
+                    filename = ('Study')
+                    newData(xh, filename, json.dumps(study, ensure_ascii=False))
+                    return HttpResponse(json.dumps(study, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -723,18 +750,20 @@ def get_grade(request):
                 if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     traceback.print_exc()
                     return mywarn("成绩请求错误",str(e),xh,pswd)
-                # sta = update_cookies(xh, pswd)
-                # person = GetInfo(base_url=base_url, cookies=sta)
-                # grade = person.get_grade(year, term)
-                # if grade.get("gpa") == "" or grade.get("gpa") is None:
-                #     return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
-                #                         content_type="application/json,charset=utf-8")
-                # Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
-                # filename = ('Grades-%s%s' % (str(year), str(term)))
-                # newData(xh, filename, json.dumps(grade, ensure_ascii=False))
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = GetInfo(base_url=base_url, cookies=sta)
+                    grade = person.get_grade(year, term)
+                    if grade.get("gpa") == "" or grade.get("gpa") is None:
+                        return HttpResponse(json.dumps({'err':'平均学分绩点获取失败，请重试~'}, ensure_ascii=False),
+                                            content_type="application/json,charset=utf-8")
+                    Students.objects.filter(studentId=int(xh)).update(gpa = grade.get("gpa"))
+                    filename = ('Grades-%s%s' % (str(year), str(term)))
+                    newData(xh, filename, json.dumps(grade, ensure_ascii=False))
 
-                # return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                    return HttpResponse(json.dumps(grade, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
@@ -932,15 +961,16 @@ def get_schedule(request):
                 if str(e) != 'Expecting value: line 3 column 1 (char 4)':
                     traceback.print_exc()
                     return mywarn("课程请求错误",str(e),xh,pswd)
-                # sta = update_cookies(xh, pswd)
-                # person = GetInfo(base_url=base_url, cookies=sta)
-                # schedule = person.get_schedule(year, term)
-                
-                # filename = ('Schedules-%s%s' % (str(year), str(term)))
-                # newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
-
-                # return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
-                return get_kaptcha(xh)
+                if myconfig.isKaptcha:
+                    return get_kaptcha(xh)
+                else:
+                    sta = update_cookies(request)
+                    person = GetInfo(base_url=base_url, cookies=sta)
+                    schedule = person.get_schedule(year, term)
+                    
+                    filename = ('Schedules-%s%s' % (str(year), str(term)))
+                    newData(xh, filename, json.dumps(schedule, ensure_ascii=False))
+                    return HttpResponse(json.dumps(schedule, ensure_ascii=False), content_type="application/json,charset=utf-8")
     else:
         return HttpResponse(json.dumps({'err':'请使用post并提交正确数据'}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
