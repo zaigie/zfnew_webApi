@@ -13,7 +13,7 @@ if __name__ == '__main__':
     django.setup()
 
     # 导入需要使用的 django 中的模块
-    from info.models import Students, Teachers
+    from info.models import Students, Teachers, Grades, Courses
 
     # 脚本的代码逻辑
     def calSex(id):
@@ -167,3 +167,6 @@ if __name__ == '__main__':
             if count2 > 20:
                 break
         print("----------------------------------")
+    elif sys.argv[1] == "import":
+        allList = Students.objects.values_list('studentId',flat=True)
+        

@@ -620,7 +620,7 @@ def get_study(request):
                 return HttpResponse(json.dumps({'err':'更新出现问题，请待教务系统修复'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             elif "list index out of range" in str(e) and int(xh[0:2]) >= int(myconfig.nGrade[2:4]):
-                return HttpResponse(json.dumps({'err':'暂无学业信息'}, ensure_ascii=False),
+                return HttpResponse(json.dumps({'err':'暂无学业信息或请先刷新“我的成绩”后访问'}, ensure_ascii=False),
                                     content_type="application/json,charset=utf-8")
             else:
                 content = ('【%s】[%s]访问学业情况出错' % (datetime.datetime.now().strftime('%H:%M:%S'), stu.name))
@@ -1065,7 +1065,7 @@ def get_position(request):
                 break
             else:
                 classCount += 1
-        return HttpResponse(json.dumps({'gpa': gpa,'majorCount':majorCount,'nMajorCount':nMajorCount,'nClassCount':nClassCount,'classCount':classCount,'majorNum':majorNum,'classNum':classNum}, ensure_ascii=False),
+        return HttpResponse(json.dumps({'gpa': str(gpa),'majorCount':majorCount,'nMajorCount':nMajorCount,'nClassCount':nClassCount,'classCount':classCount,'majorNum':majorNum,'classNum':classNum}, ensure_ascii=False),
                             content_type="application/json,charset=utf-8")
 
 def searchTeacher(request):
